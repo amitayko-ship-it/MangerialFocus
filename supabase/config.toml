@@ -1,0 +1,4 @@
+project_id = "hwnbuepoehnawdlshwmx"
+
+[functions.vision-interview]
+verify_jwt = false

@@ -160,7 +160,7 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
           // Generate the opening message using the full system prompt
           const systemPrompt = getVisionSystemPrompt(parsed.name, parsed.gender);
           const response = await callAI(
-            [{ role: 'user', content: `שמי ${parsed.name} ואני מעדיפ${parsed.gender === 'female' ? 'ה' : ''} פנייה ב${parsed.gender === 'female' ? 'נקבה' : 'זכר'}` }],
+            [{ role: 'user', content: `שמי ${parsed.name} ואני מעדיפ${parsed.gender === 'female' ? 'ה' : ''} פנייה ב${parsed.gender === 'female' ? 'נקבה' : 'זכר'}`, timestamp: new Date() }],
             systemPrompt
           );
 

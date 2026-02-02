@@ -33,7 +33,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, isDemo } = useAuth();
 
   if (loading) {
     return (
@@ -43,6 +43,8 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     );
   }
 
+  // In demo mode, redirect to questionnaire (start of onboarding flow)
+  if (user && isDemo) return <Navigate to="/questionnaire" replace />;
   if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };

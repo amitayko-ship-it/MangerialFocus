@@ -1,7 +1,7 @@
-// Card Game data - 5 big stones with forced choice
+// Card Game data - 5 big stones, sort all cards into describes/doesn't describe
 export interface CardGameSelection {
-  most: string;      // 🟩 הכי הרבה
-  least: string;     // 🟥 הכי פחות
+  describes: string[];      // קלפים שמאפיינים אותי
+  doesNotDescribe: string[]; // קלפים שלא מאפיינים אותי
 }
 
 export interface CardGameData {
@@ -13,8 +13,8 @@ export interface CardGameData {
 }
 
 export const initialCardGameSelection: CardGameSelection = {
-  most: '',
-  least: '',
+  describes: [],
+  doesNotDescribe: [],
 };
 
 export const initialCardGameData: CardGameData = {

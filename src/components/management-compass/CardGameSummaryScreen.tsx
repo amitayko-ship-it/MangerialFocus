@@ -65,7 +65,6 @@ const CardGameSummaryScreen: React.FC<CardGameSummaryScreenProps> = ({ cardGameD
 
         {/* Continue Button */}
         <Button
-          variant="hero"
           size="lg"
           onClick={onNext}
           className="gap-2"

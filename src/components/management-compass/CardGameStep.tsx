@@ -213,7 +213,7 @@ const bigStones: BigStone[] = [
   }
 ];
 
-type DropZone = 'most' | 'least';
+type DropZone = 'describes' | 'doesNotDescribe';
 
 const CardGameStep: React.FC<CardGameStepProps> = ({
   cardGameData,
@@ -256,17 +256,17 @@ const CardGameStep: React.FC<CardGameStepProps> = ({
     
     if (!cardId) return;
 
-    const newSelection = { ...selection };
+    const newSelection = { 
+      describes: [...selection.describes],
+      doesNotDescribe: [...selection.doesNotDescribe]
+    };
     
     // Remove from other zone if exists
-    if (zone === 'most' && newSelection.least === cardId) {
-      newSelection.least = '';
-    } else if (zone === 'least' && newSelection.most === cardId) {
-      newSelection.most = '';
-    }
+    newSelection.describes = newSelection.describes.filter(id => id !== cardId);
+    newSelection.doesNotDescribe = newSelection.doesNotDescribe.filter(id => id !== cardId);
     
-    // Set to new zone
-    newSelection[zone] = cardId;
+    // Add to new zone
+    newSelection[zone].push(cardId);
 
     onCardGameDataChange({
       ...cardGameData,
@@ -277,13 +277,42 @@ const CardGameStep: React.FC<CardGameStepProps> = ({
     setActiveDropZone(null);
   };
 
-  const removeFromZone = (zone: DropZone) => {
+  const handleCardClick = (cardId: string) => {
+    const newSelection = { 
+      describes: [...selection.describes],
+      doesNotDescribe: [...selection.doesNotDescribe]
+    };
+    
+    // If card is in describes, move to doesNotDescribe
+    if (newSelection.describes.includes(cardId)) {
+      newSelection.describes = newSelection.describes.filter(id => id !== cardId);
+      newSelection.doesNotDescribe.push(cardId);
+    }
+    // If card is in doesNotDescribe, remove it (back to unsorted)
+    else if (newSelection.doesNotDescribe.includes(cardId)) {
+      newSelection.doesNotDescribe = newSelection.doesNotDescribe.filter(id => id !== cardId);
+    }
+    // If card is unsorted, add to describes
+    else {
+      newSelection.describes.push(cardId);
+    }
+
     onCardGameDataChange({
       ...cardGameData,
-      [stone.id]: {
-        ...selection,
-        [zone]: ''
-      }
+      [stone.id]: newSelection
+    });
+  };
+
+  const removeFromZone = (cardId: string, zone: DropZone) => {
+    const newSelection = { 
+      describes: [...selection.describes],
+      doesNotDescribe: [...selection.doesNotDescribe]
+    };
+    newSelection[zone] = newSelection[zone].filter(id => id !== cardId);
+    
+    onCardGameDataChange({
+      ...cardGameData,
+      [stone.id]: newSelection
     });
   };
 
@@ -291,11 +320,13 @@ const CardGameStep: React.FC<CardGameStepProps> = ({
     return stone.cards.find(c => c.id === cardId);
   };
 
-  const isCardInDropZone = (cardId: string): boolean => {
-    return selection.most === cardId || selection.least === cardId;
+  const isCardSorted = (cardId: string): boolean => {
+    return selection.describes.includes(cardId) || selection.doesNotDescribe.includes(cardId);
   };
 
-  const canProceed = selection.most !== '' && selection.least !== '';
+  const totalCards = stone.cards.length;
+  const sortedCards = selection.describes.length + selection.doesNotDescribe.length;
+  const canProceed = sortedCards === totalCards;
 
   const handleNext = () => {
     if (currentStone < totalStones - 1) {
@@ -322,14 +353,15 @@ const CardGameStep: React.FC<CardGameStepProps> = ({
         draggable
         onDragStart={(e) => handleDragStart(e, card.id)}
         onDragEnd={handleDragEnd}
+        onClick={() => !inDropZone && handleCardClick(card.id)}
         className={`
           p-4 rounded-xl transition-all duration-200 text-right
           border-2 cursor-grab active:cursor-grabbing select-none
           ${isBeingDragged ? 'opacity-50 scale-95' : 'opacity-100'}
           ${inDropZone 
-            ? zone === 'most' 
+            ? zone === 'describes' 
               ? 'border-green-500 bg-green-50 dark:bg-green-950/30' 
-              : 'border-red-500 bg-red-50 dark:bg-red-950/30'
+              : 'border-orange-500 bg-orange-50 dark:bg-orange-950/30'
             : 'border-border bg-card hover:border-primary/50 hover:bg-muted/50 hover:shadow-md'
           }
         `}
@@ -347,6 +379,17 @@ const CardGameStep: React.FC<CardGameStepProps> = ({
               </p>
             )}
           </div>
+          {inDropZone && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                removeFromZone(card.id, zone!);
+              }}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              ↩
+            </button>
+          )}
         </div>
       </div>
     );
@@ -354,9 +397,9 @@ const CardGameStep: React.FC<CardGameStepProps> = ({
 
   const renderDropZone = (zone: DropZone) => {
     const isActive = activeDropZone === zone;
-    const selectedCardId = selection[zone];
-    const selectedCard = selectedCardId ? getCardById(selectedCardId) : null;
-    const isMost = zone === 'most';
+    const selectedCardIds = selection[zone];
+    const selectedCards = selectedCardIds.map(id => getCardById(id)).filter(Boolean) as CardOption[];
+    const isDescribes = zone === 'describes';
     
     return (
       <div
@@ -364,45 +407,42 @@ const CardGameStep: React.FC<CardGameStepProps> = ({
         onDragLeave={handleDragLeave}
         onDrop={(e) => handleDrop(e, zone)}
         className={`
-          min-h-[120px] rounded-xl border-2 border-dashed p-4 transition-all duration-300
+          min-h-[150px] rounded-xl border-2 border-dashed p-4 transition-all duration-300
           ${isActive 
-            ? isMost 
+            ? isDescribes 
               ? 'border-green-500 bg-green-100/50 dark:bg-green-900/30 shadow-[0_0_20px_rgba(34,197,94,0.3)]' 
-              : 'border-red-500 bg-red-100/50 dark:bg-red-900/30 shadow-[0_0_20px_rgba(239,68,68,0.3)]'
-            : selectedCard
-              ? isMost
+              : 'border-orange-500 bg-orange-100/50 dark:bg-orange-900/30 shadow-[0_0_20px_rgba(249,115,22,0.3)]'
+            : selectedCards.length > 0
+              ? isDescribes
                 ? 'border-green-500 bg-green-50 dark:bg-green-950/20'
-                : 'border-red-500 bg-red-50 dark:bg-red-950/20'
+                : 'border-orange-500 bg-orange-50 dark:bg-orange-950/20'
               : 'border-muted-foreground/30 bg-muted/30'
           }
         `}
       >
-        <div className="flex items-center justify-between mb-2">
-          <span className={`text-sm font-bold ${isMost ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-            {isMost ? '🟩 מתאר אותי הכי הרבה' : '🟥 מתאר אותי הכי פחות'}
+        <div className="flex items-center justify-between mb-3">
+          <span className={`text-sm font-bold ${isDescribes ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
+            {isDescribes ? '✓ מאפיין אותי' : '✗ לא מאפיין אותי'}
           </span>
-          {selectedCard && (
-            <button
-              onClick={() => removeFromZone(zone)}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              הסר ↩
-            </button>
-          )}
+          <span className="text-xs text-muted-foreground">
+            {selectedCards.length} קלפים
+          </span>
         </div>
         
-        {selectedCard ? (
-          renderDraggableCard(selectedCard, true, zone)
+        {selectedCards.length > 0 ? (
+          <div className="space-y-2">
+            {selectedCards.map((card) => renderDraggableCard(card, true, zone))}
+          </div>
         ) : (
           <div className="flex items-center justify-center h-20 text-muted-foreground text-sm">
-            {isActive ? '🎯 שחרר כאן' : 'גרור קלף לכאן'}
+            {isActive ? '🎯 שחרר כאן' : 'גרור קלפים לכאן'}
           </div>
         )}
       </div>
     );
   };
 
-  const availableCards = stone.cards.filter(card => !isCardInDropZone(card.id));
+  const availableCards = stone.cards.filter(card => !isCardSorted(card.id));
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -412,7 +452,7 @@ const CardGameStep: React.FC<CardGameStepProps> = ({
         <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
           🎴 משחק הקלפים
         </h2>
-        <p className="text-muted-foreground">תפיסת תפקיד ניהולית – Forced Choice</p>
+        <p className="text-muted-foreground">מיין את הקלפים לפי מה שמאפיין אותך</p>
       </div>
 
       <div className="bg-card rounded-2xl p-6 md:p-8 shadow-soft border border-border">
@@ -423,28 +463,31 @@ const CardGameStep: React.FC<CardGameStepProps> = ({
           <p className="text-muted-foreground mb-4">{stone.subtitle}</p>
         </div>
 
-        {/* Micro-copy instructions */}
         <div className="text-center mb-6 p-3 rounded-lg bg-muted/50 border border-border">
           <p className="text-sm text-muted-foreground">
-            גרור קלף אחד לכל תיבה.<br />
-            חשוב על דפוסים שחזרו על עצמם ברוב החודש האחרון – לא על מקרה חריג.
+            גרור או לחץ על כל קלף כדי למיין אותו.<br />
+            חשוב על דפוסים שחזרו על עצמם ברוב החודש האחרון.
           </p>
         </div>
 
-        {/* Available cards */}
-        <div className="space-y-3 mb-6">
-          {availableCards.map((card) => renderDraggableCard(card))}
-        </div>
+        {availableCards.length > 0 && (
+          <>
+            <div className="text-sm text-muted-foreground mb-2 text-center">
+              קלפים לא ממוינים ({availableCards.length})
+            </div>
+            <div className="space-y-3 mb-6">
+              {availableCards.map((card) => renderDraggableCard(card))}
+            </div>
+          </>
+        )}
 
-        {/* Drop zones */}
         <div className="grid md:grid-cols-2 gap-4 mt-6">
-          {renderDropZone('most')}
-          {renderDropZone('least')}
+          {renderDropZone('describes')}
+          {renderDropZone('doesNotDescribe')}
         </div>
 
-        {/* Status indicator */}
         <div className="mt-4 text-center text-sm text-muted-foreground">
-          בחרת {(selection.most ? 1 : 0) + (selection.least ? 1 : 0)}/2
+          מיינת {sortedCards}/{totalCards} קלפים
         </div>
       </div>
 

@@ -30,39 +30,43 @@ const FOCUS_LIGHT_TRIGGERS = ['clear_direction', 'routines_advance'];
 
 /**
  * Determines module depth based on card game selections
- * Uses the 🟥 (least) selection to identify dominant patterns
+ * Uses the "describes" selections to identify patterns that describe the manager
  */
 export function calculateModuleSelection(
   cardGameData: CardGameData,
   teamHealthData?: TeamHealthData
 ): ModuleSelection {
-  // Get the "least" selections from relevant categories
-  const coachingLeast = cardGameData.coachingDelegation.least;
-  const interfacesLeast = cardGameData.influenceLeadership.least;
-  const focusLeast = cardGameData.focusPrioritization.least;
-  const timeLeast = cardGameData.timeRoutines.least;
+  // Get the "describes" selections from relevant categories
+  const coachingDescribes = cardGameData.coachingDelegation.describes || [];
+  const interfacesDescribes = cardGameData.influenceLeadership.describes || [];
+  const focusDescribes = cardGameData.focusPrioritization.describes || [];
+  const timeDescribes = cardGameData.timeRoutines.describes || [];
   
-  // Coaching/Delegation Module
+  // Helper to check if any selection matches triggers
+  const hasMatch = (selections: string[], triggers: string[]) => 
+    selections.some(s => triggers.includes(s));
+  
+  // Coaching/Delegation Module - if selected "full triggers" as describing them, needs work
   let coaching: ModuleDepth = 'light';
-  if (COACHING_FULL_TRIGGERS.includes(coachingLeast)) {
+  if (hasMatch(coachingDescribes, COACHING_FULL_TRIGGERS)) {
     coaching = 'full';
-  } else if (COACHING_LIGHT_TRIGGERS.includes(coachingLeast)) {
+  } else if (hasMatch(coachingDescribes, COACHING_LIGHT_TRIGGERS)) {
     coaching = 'light';
   }
   
   // Interfaces Module
   let interfaces: ModuleDepth = 'light';
-  if (INTERFACES_FULL_TRIGGERS.includes(interfacesLeast)) {
+  if (hasMatch(interfacesDescribes, INTERFACES_FULL_TRIGGERS)) {
     interfaces = 'full';
-  } else if (INTERFACES_LIGHT_TRIGGERS.includes(interfacesLeast)) {
+  } else if (hasMatch(interfacesDescribes, INTERFACES_LIGHT_TRIGGERS)) {
     interfaces = 'light';
   }
   
   // Focus/Time Module (checks both focus and time categories)
   let focus: ModuleDepth = 'light';
-  if (FOCUS_FULL_TRIGGERS.includes(focusLeast) || FOCUS_FULL_TRIGGERS.includes(timeLeast)) {
+  if (hasMatch(focusDescribes, FOCUS_FULL_TRIGGERS) || hasMatch(timeDescribes, FOCUS_FULL_TRIGGERS)) {
     focus = 'full';
-  } else if (FOCUS_LIGHT_TRIGGERS.includes(focusLeast) || FOCUS_LIGHT_TRIGGERS.includes(timeLeast)) {
+  } else if (hasMatch(focusDescribes, FOCUS_LIGHT_TRIGGERS) || hasMatch(timeDescribes, FOCUS_LIGHT_TRIGGERS)) {
     focus = 'light';
   }
   

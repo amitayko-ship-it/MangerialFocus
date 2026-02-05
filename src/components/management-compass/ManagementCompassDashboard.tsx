@@ -67,15 +67,15 @@ const moduleDeepDive: Record<string, { description: string; impact: string[]; qu
 
 // Observation suggestions based on patterns
 const getObservation = (cardGameData: CardGameData): string => {
-  const coachingMost = cardGameData.coachingDelegation.most;
+  const coachingDescribes = cardGameData.coachingDelegation.describes || [];
   
-  if (coachingMost === 'do_alone' || coachingMost === 'delegate_close') {
+  if (coachingDescribes.includes('do_alone') || coachingDescribes.includes('delegate_close')) {
     return 'שים לב מתי אתה נכנס לפתור משהו שיכול היה להיות הזדמנות למישהו אחר להתמודד.';
   }
-  if (cardGameData.focusPrioritization.most === 'day_fills_itself') {
+  if ((cardGameData.focusPrioritization.describes || []).includes('day_fills_itself')) {
     return 'שים לב מתי אתה אומר "כן" למשהו שלא באמת משרת את הכיוון שלך.';
   }
-  if (cardGameData.influenceLeadership.most === 'need_presence') {
+  if ((cardGameData.influenceLeadership.describes || []).includes('need_presence')) {
     return 'שים לב לרגעים שבהם אתה מרגיש שחייבים אותך - ושאל אם באמת חייבים.';
   }
   return 'שים לב לרגעים שבהם דפוס מוכר חוזר על עצמו - ונסה לתפוס אותו בזמן אמת.';
@@ -100,17 +100,19 @@ const ManagementCompassDashboard: React.FC<ManagementCompassDashboardProps> = ({
       { key: 'influenceLeadership', name: 'השפעה והובלה' },
       { key: 'focusPrioritization', name: 'מיקוד ותיעדוף' },
       { key: 'timeRoutines', name: 'זמן ושגרות' },
-      { key: 'controlReactivity', name: 'שליטה ותגובתיות' }
+      { key: 'teamLearning', name: 'צוות ולמידה' }
     ];
 
     return categories.map(cat => {
       const catData = data.cardGameData[cat.key as keyof CardGameData];
+      const describes = catData?.describes || [];
+      const doesNotDescribe = catData?.doesNotDescribe || [];
       return {
         name: cat.name,
-        most: catData.most,
-        least: catData.least,
-        mostLabel: getCardLabel(catData.most),
-        leastLabel: getCardLabel(catData.least)
+        describes,
+        doesNotDescribe,
+        describesLabels: describes.map(id => getCardLabel(id)),
+        doesNotDescribeLabels: doesNotDescribe.map(id => getCardLabel(id))
       };
     });
   };
@@ -141,14 +143,19 @@ const ManagementCompassDashboard: React.FC<ManagementCompassDashboardProps> = ({
           </div>
           
           <p className="text-muted-foreground mb-4 text-right leading-relaxed">
-            זה הדפוס שמוביל את הניהול שלך עכשיו:
+            הנה הדפוסים שמאפיינים את הניהול שלך עכשיו:
           </p>
 
           <div className="bg-accent/30 rounded-xl p-4 text-right mb-4">
             <p className="text-foreground leading-relaxed">
-              אתה נוטה לפעול מתוך <span className="font-bold text-primary">"{patterns[0]?.mostLabel}"</span>,
-              <br />
-              ובפועל כמעט ולא משתמש ב־<span className="font-bold text-secondary">"{patterns[0]?.leastLabel}"</span>.
+              {patterns[0]?.describesLabels.length > 0 && (
+                <>
+                  מה שמאפיין אותך: <span className="font-bold text-primary">"{patterns[0]?.describesLabels[0]}"</span>
+                  {patterns[0]?.describesLabels.length > 1 && (
+                    <>, "{patterns[0]?.describesLabels[1]}"</>
+                  )}
+                </>
+              )}
             </p>
           </div>
 
@@ -186,12 +193,20 @@ const ManagementCompassDashboard: React.FC<ManagementCompassDashboardProps> = ({
                 
                 <div className="space-y-2 text-right text-sm">
                   <div className="flex items-start gap-2">
-                    <span className="text-green-500 font-bold">מה מוביל:</span>
-                    <span className="text-muted-foreground">{pattern.mostLabel}</span>
+                    <span className="text-green-500 font-bold">מאפיין:</span>
+                    <span className="text-muted-foreground">
+                      {pattern.describesLabels.length > 0 
+                        ? pattern.describesLabels.slice(0, 2).join(', ') 
+                        : 'לא נבחר'}
+                    </span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-red-500 font-bold">מה חסר:</span>
-                    <span className="text-muted-foreground">{pattern.leastLabel}</span>
+                    <span className="text-orange-500 font-bold">לא מאפיין:</span>
+                    <span className="text-muted-foreground">
+                      {pattern.doesNotDescribeLabels.length > 0 
+                        ? pattern.doesNotDescribeLabels.slice(0, 2).join(', ') 
+                        : 'לא נבחר'}
+                    </span>
                   </div>
                 </div>
 

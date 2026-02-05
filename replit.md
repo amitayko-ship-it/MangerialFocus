@@ -92,7 +92,7 @@ Without these, the app runs in demo mode with a mock user.
 ### Management Compass Steps (מצפן הניהול)
 The Management Compass is a 10-step assessment that runs without email/password:
 1. Welcome Screen
-2. Card Game (forced-choice selection across 5 categories)
+2. Card Game (sort ALL 5 cards into "describes me" vs "doesn't describe me" - 5 categories)
 3. Card Game Summary
 4. Focus Control (anchor score + time drain)
 5. Time & Energy (4 quadrants + breathing space)

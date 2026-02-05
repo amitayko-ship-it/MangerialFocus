@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const isDemo = !SUPABASE_CONFIGURED;
 
   useEffect(() => {
-    if (!SUPABASE_CONFIGURED) return;
+    if (!SUPABASE_CONFIGURED || !supabase) return;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    if (isDemo) {
+    if (isDemo || !supabase) {
       setUser(DEMO_USER);
       return { error: null };
     }
@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const signIn = async (email: string, password: string) => {
-    if (isDemo) {
+    if (isDemo || !supabase) {
       setUser(DEMO_USER);
       return { error: null };
     }
@@ -79,7 +79,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const signOut = async () => {
-    if (isDemo) {
+    if (isDemo || !supabase) {
       setUser(DEMO_USER); // stay logged in for demo
       return;
     }

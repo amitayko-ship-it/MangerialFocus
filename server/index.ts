@@ -84,6 +84,82 @@ app.post('/api/coach/clarify-rock', async (req, res) => {
   }
 });
 
+app.post('/api/coach/extract-rocks', async (req, res) => {
+  try {
+    const { messages, userName, userGender } = req.body;
+
+    const g = userGender === 'female'
+      ? { you: 'את', your: 'שלך', want: 'רוצה', ready: 'מוכנה' }
+      : { you: 'אתה', your: 'שלך', want: 'רוצה', ready: 'מוכן' };
+
+    const isFirstTurn = !messages || messages.length <= 1;
+
+    const systemPrompt = `תפקיד: מנחה אסטרטגי לזיקוק אבנים גדולות
+
+${userName ? `פנה למשתמש בשם "${userName}" ` : ''}בפנייה ${userGender === 'female' ? 'נקבית' : 'זכרית'} בעברית.
+כל התקשורת בעברית בלבד. אין להשתמש במילים באנגלית בשום מקרה.
+
+## עקרונות
+- התייחס לקלט כתמונת עתיד / חזון עתידי
+- חפש תחומי תוצאה, לא פעולות
+- אל תדבר על "מתודולוגיה"
+- אל תסביר את התהליך
+
+## תהליך פנימי (כשהמשתמש שולח טקסט חזון)
+1. קבל טקסט חופשי (חזון)
+2. קבץ לתמות מרכזיות
+3. נסח כל אבן כ: מהלך מתמשך + תוצאה רצויה
+4. מחק משימות טקטיות
+5. צמצם ל-3–5 אבנים מקסימום
+6. הצג אותן כרשימה קצרה וברורה
+7. שאל: "איזו מהן ${g.want} לבחור כדי לעבוד עליה עכשיו?"
+
+## כשהמשתמש בוחר אבנים - סיום
+כשהמשתמש אישר או בחר אבנים, החזר תגובה שמכילה בלוק JSON בפורמט הבא בסוף התגובה:
+
+\`\`\`json
+{"rocks": ["אבן גדולה 1", "אבן גדולה 2", "אבן גדולה 3"]}
+\`\`\`
+
+## אסור
+- לא לייצר פרקטיקות
+- לא להציע פעולות
+- לא לעבור לפתרונות
+- לא לדבר על מתודולוגיה
+- לא להשתמש באנגלית
+- תפקיד הסוכן מסתיים בבחירת 3-5 אבנים גדולות`;
+
+    if (isFirstTurn) {
+      const openingText = `אבנים גדולות – בחירה אסטרטגית
+
+גם כשיש תמונת עתיד ברורה, בלי בחירה מודעת במה להתמקד – האנרגיה מתפזרת על משימות קטנות ועומס יומיומי.
+
+אבנים גדולות הן מעט מוקדים משמעותיים, שאם הם זזים – החיים זזים.
+
+אבן גדולה היא לא משימה ולא פרויקט קצר.
+זו יוזמה מתמשכת או תחום תוצאה רחב, עם אימפקט גבוה, שדורש השקעה לאורך זמן.
+
+כש${g.ready}, הדבק כאן את תמונת העתיד ${g.your} או תאר אותה בחופשיות, ואעזור לך לזקק ממנה את האבנים הגדולות.`;
+      return res.json({ response: openingText });
+    }
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-5-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages
+      ],
+      max_completion_tokens: 1500,
+    });
+
+    const content = response.choices[0]?.message?.content || '';
+    res.json({ response: content });
+  } catch (error) {
+    console.error('Extract rocks error:', error);
+    res.status(500).json({ error: 'Failed to extract rocks' });
+  }
+});
+
 app.post('/api/vision/chat', async (req, res) => {
   try {
     const { messages, userName, userGender } = req.body;

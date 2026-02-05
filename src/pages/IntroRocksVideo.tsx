@@ -12,11 +12,11 @@ const IntroRocksVideo: React.FC = () => {
   const navigate = useNavigate();
 
   const handleContinue = () => {
-    navigate('/setup/focus-area');
+    navigate('/setup/big-rocks-agent');
   };
 
   const handleSkip = () => {
-    navigate('/setup/focus-area');
+    navigate('/setup/big-rocks-agent');
   };
 
   return (

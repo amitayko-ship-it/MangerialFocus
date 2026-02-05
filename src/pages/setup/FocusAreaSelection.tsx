@@ -53,7 +53,7 @@ export default function FocusAreaSelection() {
   };
 
   const handleBack = () => {
-    navigate('/intro-rocks-video');
+    navigate('/setup/big-rocks-agent');
   };
 
   return (

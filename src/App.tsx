@@ -9,6 +9,7 @@ import AuthPage from '@/pages/AuthPage';
 import Questionnaire from '@/pages/Questionnaire';
 import IntroVideo from '@/pages/IntroVideo';
 import IntroRocksVideo from '@/pages/IntroRocksVideo';
+import BigRocksAgent from '@/pages/BigRocksAgent';
 import ManagementCompass from '@/pages/ManagementCompass';
 import FutureVision from '@/pages/setup/FutureVision';
 import FocusAreaSelection from '@/pages/setup/FocusAreaSelection';
@@ -64,6 +65,7 @@ function AppRoutes() {
       <Route path="/intro-video" element={<ProtectedRoute><IntroVideo /></ProtectedRoute>} />
       <Route path="/setup/vision" element={<ProtectedRoute><FutureVision /></ProtectedRoute>} />
       <Route path="/intro-rocks-video" element={<ProtectedRoute><IntroRocksVideo /></ProtectedRoute>} />
+      <Route path="/setup/big-rocks-agent" element={<ProtectedRoute><BigRocksAgent /></ProtectedRoute>} />
       <Route path="/setup/focus-area" element={<ProtectedRoute><FocusAreaSelection /></ProtectedRoute>} />
       <Route path="/setup/tasks-energy" element={<ProtectedRoute><TasksEnergySetup /></ProtectedRoute>} />
       <Route path="/setup/stakeholders" element={<ProtectedRoute><StakeholdersSetup /></ProtectedRoute>} />

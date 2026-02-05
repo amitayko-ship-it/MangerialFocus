@@ -9,7 +9,8 @@ This is a focus tracking web application built with:
 - **Styling**: Tailwind CSS with custom theming
 - **UI Components**: Radix UI primitives with shadcn/ui patterns
 - **Animations**: Framer Motion
-- **Backend**: Supabase (optional - app has demo mode)
+- **Backend**: Express + PostgreSQL (Replit DB)
+- **Authentication**: Email/password with session management (no email verification)
 - **AI Coach**: OpenAI via Replit AI Integrations (gpt-5-mini)
 - **Coach API**: Express server (port 3001)
 - **Routing**: React Router DOM
@@ -38,7 +39,9 @@ src/
 └── types/             # TypeScript type definitions
 
 server/
-└── index.ts           # Express API for AI coach endpoints
+├── index.ts           # Express API for AI coach + auth endpoints
+├── db.ts              # PostgreSQL database connection
+└── auth.ts            # Authentication routes (register, login, logout, forgot password)
 ```
 
 ## Development
@@ -59,12 +62,13 @@ Output is generated in the `dist/` directory.
 
 ## Configuration
 
-### Supabase (Optional)
-If you want to use real authentication and data persistence, set these environment variables:
-- `VITE_SUPABASE_URL` - Your Supabase project URL
-- `VITE_SUPABASE_ANON_KEY` - Your Supabase anonymous key
+### Database
+The app uses Replit's built-in PostgreSQL database. Environment variables are automatically configured:
+- `DATABASE_URL` - PostgreSQL connection string
+- `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`
 
-Without these, the app runs in demo mode with a mock user.
+### Session Management
+- `SESSION_SECRET` - (Optional) Custom session secret for production. Defaults to a development secret.
 
 ## Features
 
@@ -87,42 +91,65 @@ Without these, the app runs in demo mode with a mock user.
 
 ## Onboarding Flow
 
-1. Login/Signup → 2. **Management Compass** (10-step assessment) → 3. **Intro Video** → 4. Future Vision (with AI interview) → 5. **Intro Rocks Video** → 6. Focus Area (Big Rocks with AI check) → 7. Tasks Energy → 8. Stakeholders → 9. Summary → Dashboard
+1. Login/Register → 2. **Management Compass** (9-step assessment) → 3. **Intro Video** → 4. Future Vision (with AI interview) → 5. **Intro Rocks Video** → 6. Focus Area (Big Rocks with AI check) → 7. Tasks Energy → 8. Stakeholders → 9. Summary → Dashboard
 
 ### Management Compass Steps (מצפן הניהול)
 The Management Compass is a 10-step assessment that runs without email/password:
 1. Welcome Screen
-2. Card Game (sort ALL 5 cards into "describes me" vs "doesn't describe me" - 5 categories)
-3. Card Game Summary
-4. Focus Control (anchor score + time drain)
-5. Time & Energy (4 quadrants + breathing space)
-6. Decisions Price (immediate/long-term)
-7. Interfaces Map (9-step journey)
-8. Coaching (7 layers)
-9. Team Health (Lencioni 5 dysfunctions)
-10. Module Selection + Dashboard
+2. Introduction (name + gender preference)
+3. Questionnaire Intro
+4. Card Game (sort ALL 5 cards into "describes me" vs "doesn't describe me" - 5 categories)
+5. Card Game Summary
+6. Focus Control (anchor score + time drain)
+7. Decisions Price (immediate/long-term)
+8. Interfaces Map (9-step journey)
+9. Coaching (7 layers)
+10. Team Health (Lencioni 5 dysfunctions)
+11. Module Selection + Dashboard
 
 Data persists in localStorage with 7-day expiry.
 
 ## Recent Changes
 
+- **Added Email/Password Authentication**:
+  - PostgreSQL database for user storage
+  - Registration with email, password, name, and gender preference
+  - Login with email/password
+  - Session-based authentication (30-day sessions)
+  - Forgot password with reset token (no email verification - token shown directly)
+  - Hebrew RTL auth page
+  
+- **Updated Management Compass Flow**:
+  - Added Introduction step (name + gender collection)
+  - Added Questionnaire Intro step explaining the assessment
+  - Removed Time & Energy step (4 quadrants)
+  - All steps now work with mobile-friendly tap buttons
+
 - **Integrated Management Compass** (מצפן הניהול):
-  - 10-step management assessment imported from leadtheway project
-  - Runs as first step in onboarding (no email/password required)
-  - Card games, focus control, time/energy analysis, decision pricing
+  - 11-step management assessment imported from leadtheway project
+  - Runs as first step after authentication
+  - Card games, focus control, decision pricing
   - Interface mapping, coaching evaluation, team health assessment
   - Module selection with full/light depth calculation
   - localStorage persistence with 7-day expiry
   - Hebrew RTL interface with Milestone branding
+
 - Added AI coach features using Replit AI Integrations (OpenAI):
-  - IntroVideo page with YouTube embed between Questionnaire and FutureVision
+  - IntroVideo page with YouTube embed between Compass and FutureVision
   - AI reflection feature after completing Future Vision
   - AI rock clarifier for Big Rocks wording validation
+  
 - Created Express backend server for coach API endpoints:
+  - `/api/auth/register` - User registration
+  - `/api/auth/login` - User login
+  - `/api/auth/logout` - User logout
+  - `/api/auth/user` - Get current user
+  - `/api/auth/forgot-password` - Request password reset
+  - `/api/auth/reset-password` - Reset password with token
   - `/api/coach/reflect` - Vision reflection
   - `/api/coach/clarify-rock` - Big Rocks validation
-  - `/api/vision/chat` - Interactive vision interview with multi-phase system prompt
-- Added useCoachAgent hook for frontend AI calls
+  - `/api/vision/chat` - Interactive vision interview
+
 - Configured Vite proxy for API requests
 - Configured Vite for Replit environment (port 5000, allowedHosts: true)
 - Set up dual workflow: Frontend (port 5000) + Coach API (port 3001)

@@ -1,93 +1,150 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+
+interface AuthUser {
+  id: number;
+  email: string;
+  full_name: string | null;
+  gender: string | null;
+}
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  user: AuthUser | null;
+  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, fullName: string, gender?: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<{ error: string | null; resetToken?: string }>;
+  resetPassword: (token: string, newPassword: string) => Promise<{ error: string | null }>;
   loading: boolean;
-  isDemo: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Check if Supabase is configured
-const SUPABASE_CONFIGURED = Boolean(
-  import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY
-);
-
-// Mock user for demo mode
-const DEMO_USER = {
-  id: 'demo-user-001',
-  email: 'demo@focustracker.app',
-  user_metadata: { full_name: 'Demo User' },
-  app_metadata: {},
-  aud: 'authenticated',
-  created_at: new Date().toISOString(),
-} as unknown as User;
+const API_BASE = '/api/auth';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(SUPABASE_CONFIGURED ? null : DEMO_USER);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(SUPABASE_CONFIGURED);
-  const isDemo = !SUPABASE_CONFIGURED;
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!SUPABASE_CONFIGURED || !supabase) return;
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    checkAuth();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
-    if (isDemo || !supabase) {
-      setUser(DEMO_USER);
-      return { error: null };
+  const checkAuth = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/user`, {
+        credentials: 'include',
+      });
+      if (res.ok) {
+        const userData = await res.json();
+        setUser(userData);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
-    const { error } = await supabase.auth.signUp({
-      email, password,
-      options: { emailRedirectTo: window.location.origin, data: { full_name: fullName } },
-    });
-    return { error: error as Error | null };
+  };
+
+  const signUp = async (email: string, password: string, fullName: string, gender?: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password, fullName, gender }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { error: data.error || 'שגיאה בהרשמה' };
+      }
+
+      setUser(data);
+      return { error: null };
+    } catch (error) {
+      return { error: 'שגיאה בהרשמה' };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    if (isDemo || !supabase) {
-      setUser(DEMO_USER);
+    try {
+      const res = await fetch(`${API_BASE}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { error: data.error || 'שגיאה בהתחברות' };
+      }
+
+      setUser(data);
       return { error: null };
+    } catch (error) {
+      return { error: 'שגיאה בהתחברות' };
     }
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error as Error | null };
   };
 
   const signOut = async () => {
-    if (isDemo || !supabase) {
-      setUser(DEMO_USER); // stay logged in for demo
-      return;
+    try {
+      await fetch(`${API_BASE}/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
     }
-    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  const forgotPassword = async (email: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { error: data.error || 'שגיאה באיפוס סיסמא' };
+      }
+
+      return { error: null, resetToken: data.resetToken };
+    } catch (error) {
+      return { error: 'שגיאה באיפוס סיסמא' };
+    }
+  };
+
+  const resetPassword = async (token: string, newPassword: string) => {
+    try {
+      const res = await fetch(`${API_BASE}/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, newPassword }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { error: data.error || 'שגיאה באיפוס סיסמא' };
+      }
+
+      return { error: null };
+    } catch (error) {
+      return { error: 'שגיאה באיפוס סיסמא' };
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, signIn, signUp, signOut, loading, isDemo }}>
+    <AuthContext.Provider value={{ user, signIn, signUp, signOut, forgotPassword, resetPassword, loading }}>
       {children}
     </AuthContext.Provider>
   );

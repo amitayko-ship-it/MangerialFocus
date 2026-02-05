@@ -5,8 +5,7 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { Toaster } from 'sonner';
 
 // Pages
-import Login from '@/pages/Login';
-import Signup from '@/pages/Signup';
+import AuthPage from '@/pages/AuthPage';
 import Questionnaire from '@/pages/Questionnaire';
 import IntroVideo from '@/pages/IntroVideo';
 import IntroRocksVideo from '@/pages/IntroRocksVideo';
@@ -36,7 +35,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading, isDemo } = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -46,9 +45,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     );
   }
 
-  // In demo mode, redirect to management compass (start of onboarding flow)
-  if (user && isDemo) return <Navigate to="/management-compass" replace />;
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) return <Navigate to="/management-compass" replace />;
   return <>{children}</>;
 };
 
@@ -56,8 +53,7 @@ function AppRoutes() {
   return (
     <Routes>
       {/* Public auth routes */}
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+      <Route path="/login" element={<PublicRoute><AuthPage /></PublicRoute>} />
 
       {/* Public feedback form (no auth required) */}
       <Route path="/feedback/:token" element={<FeedbackPage />} />

@@ -51,7 +51,7 @@ export default function BigRockStack({
   const [isAdding, setIsAdding] = useState(false);
   const [newRockTitle, setNewRockTitle] = useState('');
   const [clarification, setClarification] = useState<{ isRock: boolean; feedback: string; suggestion?: string } | null>(null);
-  const { clarifyRock, loading: clarifyLoading } = useCoachAgent();
+  const { clarifyRock, clarifyLoading } = useCoachAgent();
 
   const sensors = useSensors(
     useSensor(PointerSensor),

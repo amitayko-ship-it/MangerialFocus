@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { toast } from 'sonner';
 
 interface ReflectionResult {
   themes: string[];
@@ -14,12 +15,11 @@ interface ClarifyRockResult {
 
 export function useCoachAgent() {
   const { language } = useLanguage();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [reflectLoading, setReflectLoading] = useState(false);
+  const [clarifyLoading, setClarifyLoading] = useState(false);
 
   const reflectVision = useCallback(async (visionText: string): Promise<ReflectionResult | null> => {
-    setLoading(true);
-    setError(null);
+    setReflectLoading(true);
     
     try {
       const response = await fetch('/api/coach/reflect', {
@@ -35,16 +35,16 @@ export function useCoachAgent() {
       const result = await response.json();
       return result as ReflectionResult;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      const errorMsg = language === 'he' ? 'לא הצלחנו לקבל שיקוף' : 'Failed to get reflection';
+      toast.error(errorMsg);
       return null;
     } finally {
-      setLoading(false);
+      setReflectLoading(false);
     }
   }, [language]);
 
   const clarifyRock = useCallback(async (rockText: string): Promise<ClarifyRockResult | null> => {
-    setLoading(true);
-    setError(null);
+    setClarifyLoading(true);
     
     try {
       const response = await fetch('/api/coach/clarify-rock', {
@@ -60,16 +60,17 @@ export function useCoachAgent() {
       const result = await response.json();
       return result as ClarifyRockResult;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      const errorMsg = language === 'he' ? 'לא הצלחנו לבדוק את הניסוח' : 'Failed to check wording';
+      toast.error(errorMsg);
       return null;
     } finally {
-      setLoading(false);
+      setClarifyLoading(false);
     }
   }, [language]);
 
   return {
-    loading,
-    error,
+    reflectLoading,
+    clarifyLoading,
     reflectVision,
     clarifyRock,
   };

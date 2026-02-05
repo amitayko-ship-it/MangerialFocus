@@ -31,7 +31,7 @@ const FutureVision: React.FC = () => {
   const [reflection, setReflection] = useState<{ themes: string[]; summary: string } | null>(null);
   const [showReflection, setShowReflection] = useState(false);
 
-  const { reflectVision, loading: reflectionLoading } = useCoachAgent();
+  const { reflectVision, reflectLoading } = useCoachAgent();
   const vt = t.vision;
 
   // Never Ask Twice: show choice if user already has a completed vision
@@ -261,10 +261,11 @@ const FutureVision: React.FC = () => {
               <div className="flex flex-col gap-3 mt-6">
                 <Button
                   onClick={handleGetReflection}
-                  disabled={reflectionLoading}
+                  disabled={reflectLoading || !narrative}
                   className="w-full gap-2"
+                  title={!narrative ? (isRTL ? 'צריך לכתוב תמונת הצלחה קודם' : 'Need to write a vision first') : undefined}
                 >
-                  {reflectionLoading ? (
+                  {reflectLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
                       {isRTL ? 'מעבד...' : 'Processing...'}

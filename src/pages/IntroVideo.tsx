@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { loadWithExpiry, saveWithExpiry } from '@/lib/storageUtils';
 
-const YOUTUBE_VIDEO_ID = 'YOUR_VIDEO_ID';
+const YOUTUBE_VIDEO_ID = 'KeVBfS1Ho6M';
 
 const IntroVideo: React.FC = () => {
   const { t, isRTL } = useLanguage();

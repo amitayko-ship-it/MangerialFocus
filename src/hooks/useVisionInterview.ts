@@ -114,25 +114,27 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
     return { name, gender };
   };
 
-  const callAI = async (conversationHistory: Message[], systemPrompt?: string): Promise<string> => {
-    const aiMessages = [];
+  const callAI = async (conversationHistory: Message[], _systemPrompt?: string): Promise<string> => {
+    const aiMessages = conversationHistory.map(msg => ({
+      role: msg.role,
+      content: msg.content,
+    }));
 
-    if (systemPrompt) {
-      aiMessages.push({ role: 'system', content: systemPrompt });
-    }
-
-    for (const msg of conversationHistory) {
-      aiMessages.push({ role: msg.role, content: msg.content });
-    }
-
-    const { data, error } = await supabase.functions.invoke('vision-interview', {
-      body: {
-        userId,
+    const response = await fetch('/api/vision/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         messages: aiMessages,
-      },
+        userName,
+        userGender,
+      }),
     });
 
-    if (error) throw error;
+    if (!response.ok) {
+      throw new Error('Failed to get AI response');
+    }
+
+    const data = await response.json();
     return data.response || '';
   };
 

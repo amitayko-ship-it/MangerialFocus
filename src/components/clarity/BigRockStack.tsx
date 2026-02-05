@@ -14,11 +14,12 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { Plus, Sparkles } from 'lucide-react';
+import { Plus, Sparkles, MessageSquare, Loader2, Check, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { SortableRock } from './SortableRock';
 import { BigRock } from '@/types/focus';
+import { useCoachAgent } from '@/hooks/useCoachAgent';
 
 interface BigRockStackProps {
   rocks: BigRock[];
@@ -49,6 +50,8 @@ export default function BigRockStack({
 }: BigRockStackProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [newRockTitle, setNewRockTitle] = useState('');
+  const [clarification, setClarification] = useState<{ isRock: boolean; feedback: string; suggestion?: string } | null>(null);
+  const { clarifyRock, loading: clarifyLoading } = useCoachAgent();
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -70,6 +73,15 @@ export default function BigRockStack({
     }
   };
 
+  const handleCheckRock = async () => {
+    if (newRockTitle.trim()) {
+      const result = await clarifyRock(newRockTitle);
+      if (result) {
+        setClarification(result);
+      }
+    }
+  };
+
   const handleAddRock = () => {
     if (newRockTitle.trim() && rocks.length < maxRocks) {
       const newRock: BigRock = {
@@ -80,7 +92,15 @@ export default function BigRockStack({
       };
       onRocksChange([...rocks, newRock]);
       setNewRockTitle('');
+      setClarification(null);
       setIsAdding(false);
+    }
+  };
+
+  const handleUseSuggestion = () => {
+    if (clarification?.suggestion) {
+      setNewRockTitle(clarification.suggestion);
+      setClarification(null);
     }
   };
 
@@ -152,15 +172,55 @@ export default function BigRockStack({
         <div className="bg-white rounded-lg border p-4 space-y-3">
           <Textarea
             value={newRockTitle}
-            onChange={(e) => setNewRockTitle(e.target.value)}
+            onChange={(e) => { setNewRockTitle(e.target.value); setClarification(null); }}
             placeholder={rockPlaceholder}
             className="min-h-[60px]"
             dir={isRTL ? 'rtl' : 'ltr'}
             autoFocus
           />
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => setIsAdding(false)}>
+
+          {clarification && (
+            <div className={`p-3 rounded-lg border ${clarification.isRock ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+              <div className="flex items-start gap-2">
+                {clarification.isRock ? (
+                  <Check className="w-4 h-4 text-green-600 mt-0.5" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5" />
+                )}
+                <div className="flex-1">
+                  <p className="text-sm">{clarification.feedback}</p>
+                  {clarification.suggestion && !clarification.isRock && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      onClick={handleUseSuggestion}
+                      className="p-0 h-auto text-primary"
+                    >
+                      {isRTL ? 'השתמש בהצעה: ' : 'Use suggestion: '}{clarification.suggestion}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2 justify-end flex-wrap">
+            <Button variant="outline" onClick={() => { setIsAdding(false); setClarification(null); }}>
               {isRTL ? 'ביטול' : 'Cancel'}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={handleCheckRock}
+              disabled={!newRockTitle.trim() || clarifyLoading}
+            >
+              {clarifyLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <MessageSquare className="w-4 h-4 mr-1" />
+                  {isRTL ? 'בדוק עם המנחה' : 'Check with coach'}
+                </>
+              )}
             </Button>
             <Button onClick={handleAddRock} disabled={!newRockTitle.trim()}>
               {isRTL ? 'הוסף' : 'Add'}

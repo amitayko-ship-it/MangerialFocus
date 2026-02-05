@@ -49,32 +49,47 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
     if (!userId) return;
 
     const loadExisting = async () => {
-      const { data } = await supabase
-        .from('future_visions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      try {
+        const { data, error } = await supabase
+          .from('future_visions')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-      if (data) {
-        setVisionId(data.id);
-        setHasExistingVision(true);
-
-        const history = (data.conversation_history as unknown as Message[]) || [];
-        setMessages(history);
-        setNarrative(data.narrative || '');
-
-        const savedGoals = (data.goals as string[]) || [];
-        if (savedGoals.length > 0) {
-          setPhase('complete');
+        if (error) {
+          // Demo mode or Supabase not configured - start fresh
+          console.log('Starting fresh (demo mode or no Supabase)');
+          setHasExistingVision(false);
+          startPersonalization();
+          return;
         }
 
-        // Restore user info from vision data
-        if (data.user_name) setUserName(data.user_name);
-        if (data.user_gender) setUserGender(data.user_gender);
-      } else {
-        // New user: start with personalization
+        if (data) {
+          setVisionId(data.id);
+          setHasExistingVision(true);
+
+          const history = (data.conversation_history as unknown as Message[]) || [];
+          setMessages(history);
+          setNarrative(data.narrative || '');
+
+          const savedGoals = (data.goals as string[]) || [];
+          if (savedGoals.length > 0) {
+            setPhase('complete');
+          }
+
+          // Restore user info from vision data
+          if (data.user_name) setUserName(data.user_name);
+          if (data.user_gender) setUserGender(data.user_gender);
+        } else {
+          // New user: start with personalization
+          setHasExistingVision(false);
+          startPersonalization();
+        }
+      } catch (err) {
+        // Demo mode - start fresh
+        console.log('Starting fresh (demo mode):', err);
         setHasExistingVision(false);
         startPersonalization();
       }
@@ -272,28 +287,33 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
   const saveProgress = async (msgs?: Message[]) => {
     if (!userId) return;
 
-    const conversationHistory = msgs || messages;
-    const visionData: Record<string, unknown> = {
-      user_id: userId,
-      conversation_history: JSON.parse(JSON.stringify(conversationHistory)),
-      goals: tiles.map(t => t.name),
-      narrative,
-      is_complete: phase === 'complete',
-      phase,
-      user_name: userName,
-      user_gender: userGender,
-      updated_at: new Date().toISOString(),
-    };
+    try {
+      const conversationHistory = msgs || messages;
+      const visionData: Record<string, unknown> = {
+        user_id: userId,
+        conversation_history: JSON.parse(JSON.stringify(conversationHistory)),
+        goals: tiles.map(t => t.name),
+        narrative,
+        is_complete: phase === 'complete',
+        phase,
+        user_name: userName,
+        user_gender: userGender,
+        updated_at: new Date().toISOString(),
+      };
 
-    if (visionId) {
-      await supabase.from('future_visions').update(visionData).eq('id', visionId);
-    } else {
-      const { data } = await supabase
-        .from('future_visions')
-        .insert(visionData)
-        .select('id')
-        .single();
-      if (data) setVisionId(data.id);
+      if (visionId) {
+        await supabase.from('future_visions').update(visionData).eq('id', visionId);
+      } else {
+        const { data } = await supabase
+          .from('future_visions')
+          .insert(visionData)
+          .select('id')
+          .single();
+        if (data) setVisionId(data.id);
+      }
+    } catch (err) {
+      // Demo mode - skip saving to Supabase
+      console.log('Skipping save (demo mode):', err);
     }
   };
 

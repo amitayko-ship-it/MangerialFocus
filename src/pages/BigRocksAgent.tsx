@@ -70,7 +70,7 @@ const BigRocksAgent: React.FC = () => {
       const { userName, userGender } = getUserInfo();
       const visionText = loadWithExpiry<string>('vision-narrative');
 
-      const fallbackOpening = 'אבנים גדולות – בחירה אסטרטגית\n\nגם כשיש תמונת עתיד ברורה, בלי בחירה מודעת במה להתמקד – האנרגיה מתפזרת על משימות קטנות ועומס יומיומי.\n\nאבנים גדולות הן מעט מוקדים משמעותיים, שאם הם זזים – החיים זזים.\n\nאבן גדולה היא לא משימה ולא פרויקט קצר.\nזו יוזמה מתמשכת או תחום תוצאה רחב, עם אימפקט גבוה, שדורש השקעה לאורך זמן.\n\nכשמוכנים, כתבו כאן את תמונת העתיד או תארו אותה בחופשיות, ואעזור לזקק ממנה את האבנים הגדולות.';
+      const fallbackOpening = 'אבנים גדולות – בחירה אסטרטגית\n\nגם כשיש תמונת עתיד ברורה, בלי בחירה מודעת במה להתמקד – האנרגיה מתפזרת על משימות קטנות ועומס יומיומי.\n\nאבנים גדולות הן מעט מוקדים משמעותיים, שאם הם זזים – החיים זזים.\n\nאבן גדולה היא לא משימה ולא פרויקט קצר.\nזו יוזמה מתמשכת או תחום תוצאה רחב, עם אימפקט גבוה, שדורש השקעה לאורך זמן.\n\nעכשיו, על בסיס תמונת העתיד שבנינו יחד, נזקק ממנה את האבנים הגדולות.';
 
       try {
         const response = await fetch('/api/coach/extract-rocks', {
@@ -89,7 +89,7 @@ const BigRocksAgent: React.FC = () => {
         const openingMessage: ChatMessage = { role: 'assistant', content: openingText };
 
         if (visionText) {
-          setMessages([openingMessage, { role: 'user', content: visionText }]);
+          setMessages([openingMessage]);
           setInitialLoading(false);
           setIsLoading(true);
 
@@ -110,7 +110,7 @@ const BigRocksAgent: React.FC = () => {
             if (rocksResponse.ok) {
               const rocksData = await rocksResponse.json();
               const assistantMessage: ChatMessage = { role: 'assistant', content: rocksData.response };
-              setMessages([openingMessage, { role: 'user', content: visionText }, assistantMessage]);
+              setMessages([openingMessage, assistantMessage]);
 
               const rocks = extractRocksFromResponse(rocksData.response);
               if (rocks) {

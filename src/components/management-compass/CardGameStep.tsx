@@ -225,7 +225,13 @@ const CardGameStep: React.FC<CardGameStepProps> = ({
   
   const totalStones = bigStones.length;
   const stone = bigStones[currentStone];
-  const selection = cardGameData[stone.id];
+  const rawSelection = cardGameData[stone.id];
+  
+  // Ensure selection has the correct format (handle old localStorage data)
+  const selection = {
+    describes: Array.isArray(rawSelection?.describes) ? rawSelection.describes : [],
+    doesNotDescribe: Array.isArray(rawSelection?.doesNotDescribe) ? rawSelection.doesNotDescribe : []
+  };
 
   const getCardStatus = (cardId: string): CardStatus => {
     if (selection.describes.includes(cardId)) return 'describes';

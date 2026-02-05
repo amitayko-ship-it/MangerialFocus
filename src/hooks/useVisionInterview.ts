@@ -10,6 +10,7 @@ interface UseVisionInterviewReturn {
   progress: number;
   phase: InterviewPhase;
   sendMessage: (text: string) => Promise<void>;
+  finishEarly: () => Promise<void>;
   saveVision: () => Promise<void>;
   visionId: string | null;
   hasExistingVision: boolean;
@@ -17,9 +18,10 @@ interface UseVisionInterviewReturn {
   userGender: 'male' | 'female' | null;
   narrative: string;
   tiles: VisionTile[];
+  userMessageCount: number;
 }
 
-export function useVisionInterview(userId: string | undefined): UseVisionInterviewReturn {
+export function useVisionInterview(userId: string | number | undefined): UseVisionInterviewReturn {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [phase, setPhase] = useState<InterviewPhase>('narrative');
@@ -31,8 +33,8 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
   const [tiles, setTiles] = useState<VisionTile[]>([]);
 
   const isComplete = phase === 'complete';
+  const userMessageCount = messages.filter(m => m.role === 'user').length;
 
-  // Calculate progress based on phase and message count
   const progress = (() => {
     switch (phase) {
       case 'narrative': return Math.min(10 + messages.length * 5, 50);
@@ -148,11 +150,29 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
     setMessages(updatedMessages);
     setIsLoading(true);
 
+    const currentUserCount = updatedMessages.filter(m => m.role === 'user').length;
+
+    if (currentUserCount >= 20) {
+      const allUserText = updatedMessages
+        .filter(m => m.role === 'user')
+        .map(m => m.content)
+        .join('\n\n');
+      setNarrative(allUserText);
+      setPhase('complete');
+
+      const closingMessage: Message = {
+        role: 'assistant',
+        content: 'תודה רבה על השיתוף! אספנו מספיק תוכן כדי לבנות את תמונת העתיד שלך. לחץ על הכפתור למטה כדי לראות את הסיכום.',
+        timestamp: new Date(),
+      };
+      setMessages([...updatedMessages, closingMessage]);
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      // Send message to AI and get response
       const response = await callAI(updatedMessages);
 
-      // Detect phase transitions from AI response
       if (response.includes('זיהיתי כמה תחומים') || response.includes('תחומים מרכזיים')) {
         setPhase('clustering');
       } else if (response.includes('פעולה מדידה') || response.includes('הרגל קבוע') || response.includes('פעולות מרכזיות')) {
@@ -170,7 +190,6 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
 
       setMessages([...updatedMessages, assistantMessage]);
 
-      // Auto-save progress
       await saveProgress([...updatedMessages]);
     } catch (error) {
       console.error('Error in vision interview:', error);
@@ -184,6 +203,28 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
       setIsLoading(false);
     }
   }, [messages, isLoading, phase, userName, userGender, userId]);
+
+  const finishEarly = useCallback(async () => {
+    if (isLoading) return;
+
+    const allUserText = messages
+      .filter(m => m.role === 'user')
+      .map(m => m.content)
+      .join('\n\n');
+
+    if (allUserText.trim()) {
+      setNarrative(allUserText);
+    }
+    setPhase('complete');
+
+    const closingMessage: Message = {
+      role: 'assistant',
+      content: 'מעולה! אספנו את התוכן שלך. בוא נמשיך להגדרת האבנים הגדולות.',
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, closingMessage]);
+    await saveProgress();
+  }, [messages, isLoading]);
 
   const extractFinalOutput = (text: string) => {
     // Extract narrative (Part 1)
@@ -272,6 +313,7 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
     progress,
     phase,
     sendMessage,
+    finishEarly,
     saveVision,
     visionId,
     hasExistingVision,
@@ -279,5 +321,6 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
     userGender,
     narrative,
     tiles,
+    userMessageCount,
   };
 }

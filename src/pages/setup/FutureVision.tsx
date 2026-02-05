@@ -21,8 +21,8 @@ const FutureVision: React.FC = () => {
 
   const {
     messages, isLoading, isComplete, progress, phase,
-    sendMessage, saveVision, visionId, hasExistingVision,
-    narrative, tiles,
+    sendMessage, finishEarly, saveVision, visionId, hasExistingVision,
+    narrative, tiles, userMessageCount,
   } = useVisionInterview(user?.id);
 
   const [inputValue, setInputValue] = useState('');
@@ -80,6 +80,18 @@ const FutureVision: React.FC = () => {
   };
 
   const handleSkip = () => {
+    navigate('/intro-rocks-video');
+  };
+
+  const handleFinishEarly = async () => {
+    await finishEarly();
+    const userVisionMessages = messages
+      .filter(m => m.role === 'user')
+      .map(m => m.content)
+      .join('\n\n');
+    if (userVisionMessages) {
+      saveWithExpiry('vision-narrative', userVisionMessages);
+    }
     navigate('/intro-rocks-video');
   };
 
@@ -188,7 +200,6 @@ const FutureVision: React.FC = () => {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input or Complete button */}
               {isComplete ? (
                 <div className="sticky bottom-4">
                   <Button onClick={() => setShowSummary(true)} size="lg" className="w-full gap-2">
@@ -197,7 +208,7 @@ const FutureVision: React.FC = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="sticky bottom-4">
+                <div className="sticky bottom-4 space-y-2">
                   <ChatInput
                     value={inputValue}
                     onChange={setInputValue}
@@ -206,6 +217,18 @@ const FutureVision: React.FC = () => {
                     isRTL={isRTL}
                     placeholder={vt.placeholder}
                   />
+                  {userMessageCount >= 3 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleFinishEarly}
+                      disabled={isLoading}
+                      className="w-full text-muted-foreground"
+                    >
+                      <Check className="w-4 h-4" />
+                      סיימתי, בוא נמשיך להגדרת האבנים הגדולות
+                    </Button>
+                  )}
                 </div>
               )}
             </div>

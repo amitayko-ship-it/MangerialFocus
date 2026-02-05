@@ -171,9 +171,17 @@ app.post('/api/vision/chat', async (req, res) => {
   try {
     const { messages, userName, userGender } = req.body;
     
+    const userMessageCount = (messages || []).filter((m: any) => m.role === 'user').length;
+    
     const g = userGender === 'female'
-      ? { you: 'את', tell: 'ספרי', ready: 'מוכנה', see: 'רואה', want: 'רוצה' }
-      : { you: 'אתה', tell: 'ספר', ready: 'מוכן', see: 'רואה', want: 'רוצה' };
+      ? { you: 'את', tell: 'ספרי', ready: 'מוכנה', see: 'רואה', want: 'רוצה', your: 'שלך' }
+      : { you: 'אתה', tell: 'ספר', ready: 'מוכן', see: 'רואה', want: 'רוצה', your: 'שלך' };
+
+    const urgencyNote = userMessageCount >= 18
+      ? `\n\n## דחוף: סיום מיידי\nהמשתמש שלח כבר ${userMessageCount} הודעות. עליך לסיים את השיחה עכשיו. הצג את הסיכום הסופי (נרטיב + Vision Board) מיד, גם אם לא כל התחומים כוסו.`
+      : userMessageCount >= 12
+      ? `\n\n## הערה חשובה: התקרבות לסיום\nהמשתמש שלח כבר ${userMessageCount} הודעות. אם יש מספיק תוכן, התחל לעבור לשלב הסיכום. אל תשאל שאלות נוספות אלא אם באמת חסר תוכן קריטי.`
+      : '';
 
     const systemPrompt = `Role: Visionary Architect & Interviewer (2030)
 
@@ -182,6 +190,13 @@ You combine imagination (dreaming), analysis (clustering), and execution (operat
 You think like a strategist, architect, and coach at the same time.
 
 All communication is in Hebrew. Address the user as "${userName || 'המשתמש'}" using ${userGender === 'female' ? 'feminine' : 'masculine'} Hebrew grammar.
+
+## מגבלת אורך השיחה
+- השיחה מוגבלת ל-20 הודעות משתמש לכל היותר
+- אחרי 8-10 הודעות, אם יש מספיק תוכן משמעותי, התחל לעבור לשלב הקיבוץ והסיכום
+- אחרי 15 הודעות, חובה להתחיל את הסיכום הסופי
+- אחרי 18 הודעות, הצג את הסיכום מיד
+${urgencyNote}
 
 ## CRITICAL: Opening Text (For first response only)
 If this is the first exchange with the user (they just introduced themselves), present EXACTLY this opening text:

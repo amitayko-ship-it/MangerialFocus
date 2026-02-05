@@ -10,6 +10,7 @@ import VisionSummaryCard from '@/components/vision/VisionSummaryCard';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Sparkles, ArrowRight, ArrowLeft, Check, MessageSquare, Loader2 } from 'lucide-react';
+import { saveWithExpiry } from '@/lib/storageUtils';
 import { motion } from 'framer-motion';
 
 const FutureVision: React.FC = () => {
@@ -67,6 +68,14 @@ const FutureVision: React.FC = () => {
   };
 
   const handleContinueWithExisting = () => {
+    const userVisionMessages = messages
+      .filter(m => m.role === 'user')
+      .map(m => m.content)
+      .join('\n\n');
+    const visionText = narrative || userVisionMessages;
+    if (visionText) {
+      saveWithExpiry('vision-narrative', visionText);
+    }
     navigate('/intro-rocks-video');
   };
 
@@ -86,6 +95,14 @@ const FutureVision: React.FC = () => {
 
   const handleContinue = async () => {
     await saveVision();
+    const userVisionMessages = messages
+      .filter(m => m.role === 'user')
+      .map(m => m.content)
+      .join('\n\n');
+    const visionText = narrative || userVisionMessages;
+    if (visionText) {
+      saveWithExpiry('vision-narrative', visionText);
+    }
     navigate('/intro-rocks-video');
   };
 

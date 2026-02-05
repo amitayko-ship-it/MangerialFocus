@@ -68,6 +68,10 @@ const BigRocksAgent: React.FC = () => {
   useEffect(() => {
     const initChat = async () => {
       const { userName, userGender } = getUserInfo();
+      const visionText = loadWithExpiry<string>('vision-narrative');
+
+      const fallbackOpening = 'אבנים גדולות – בחירה אסטרטגית\n\nגם כשיש תמונת עתיד ברורה, בלי בחירה מודעת במה להתמקד – האנרגיה מתפזרת על משימות קטנות ועומס יומיומי.\n\nאבנים גדולות הן מעט מוקדים משמעותיים, שאם הם זזים – החיים זזים.\n\nאבן גדולה היא לא משימה ולא פרויקט קצר.\nזו יוזמה מתמשכת או תחום תוצאה רחב, עם אימפקט גבוה, שדורש השקעה לאורך זמן.\n\nכשמוכנים, כתבו כאן את תמונת העתיד או תארו אותה בחופשיות, ואעזור לזקק ממנה את האבנים הגדולות.';
+
       try {
         const response = await fetch('/api/coach/extract-rocks', {
           method: 'POST',
@@ -78,17 +82,55 @@ const BigRocksAgent: React.FC = () => {
             userGender
           }),
         });
-        if (response.ok) {
-          const data = await response.json();
-          setMessages([{ role: 'assistant', content: data.response }]);
+
+        const openingText = response.ok
+          ? (await response.json()).response
+          : fallbackOpening;
+        const openingMessage: ChatMessage = { role: 'assistant', content: openingText };
+
+        if (visionText) {
+          setMessages([openingMessage, { role: 'user', content: visionText }]);
+          setInitialLoading(false);
+          setIsLoading(true);
+
+          try {
+            const rocksResponse = await fetch('/api/coach/extract-rocks', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                messages: [
+                  { role: 'assistant', content: openingText },
+                  { role: 'user', content: visionText }
+                ],
+                userName,
+                userGender
+              }),
+            });
+
+            if (rocksResponse.ok) {
+              const rocksData = await rocksResponse.json();
+              const assistantMessage: ChatMessage = { role: 'assistant', content: rocksData.response };
+              setMessages([openingMessage, { role: 'user', content: visionText }, assistantMessage]);
+
+              const rocks = extractRocksFromResponse(rocksData.response);
+              if (rocks) {
+                setExtractedRocks(rocks);
+              }
+            } else {
+              toast.error('שגיאה בעיבוד תמונת העתיד, נסו שוב');
+            }
+          } catch {
+            toast.error('שגיאה בתקשורת עם הסוכן');
+          } finally {
+            setIsLoading(false);
+          }
+        } else {
+          setMessages([openingMessage]);
+          setInitialLoading(false);
         }
       } catch (error) {
         console.error('Init error:', error);
-        setMessages([{
-          role: 'assistant',
-          content: 'אבנים גדולות – בחירה אסטרטגית\n\nגם כשיש תמונת עתיד ברורה, בלי בחירה מודעת במה להתמקד – האנרגיה מתפזרת על משימות קטנות ועומס יומיומי.\n\nאבנים גדולות הן מעט מוקדים משמעותיים, שאם הם זזים – החיים זזים.\n\nאבן גדולה היא לא משימה ולא פרויקט קצר.\nזו יוזמה מתמשכת או תחום תוצאה רחב, עם אימפקט גבוה, שדורש השקעה לאורך זמן.\n\nכשתהיה מוכן, הדבק כאן את תמונת העתיד שלך או תאר אותה בחופשיות, ואעזור לך לזקק ממנה את האבנים הגדולות.'
-        }]);
-      } finally {
+        setMessages([{ role: 'assistant', content: fallbackOpening }]);
         setInitialLoading(false);
       }
     };
@@ -270,7 +312,7 @@ const BigRocksAgent: React.FC = () => {
                 value={input}
                 onChange={(e) => { setInput(e.target.value); autoResize(); }}
                 onKeyDown={handleKeyDown}
-                placeholder="הדבק כאן את תמונת העתיד שלך או כתוב בחופשיות..."
+                placeholder="כתוב כאן..."
                 className="flex-1 resize-none rounded-xl border border-border bg-card px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 min-h-[48px] max-h-[200px]"
                 rows={2}
                 disabled={isLoading}

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Message, InterviewPhase, VisionTile } from '@/types/vision';
-import { getVisionSystemPrompt, PERSONALIZATION_PROMPT } from '@/lib/visionSystemPrompt';
+import { OPENING_PROMPT } from '@/lib/visionSystemPrompt';
 
 interface UseVisionInterviewReturn {
   messages: Message[];
@@ -22,7 +22,7 @@ interface UseVisionInterviewReturn {
 export function useVisionInterview(userId: string | undefined): UseVisionInterviewReturn {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [phase, setPhase] = useState<InterviewPhase>('personalization');
+  const [phase, setPhase] = useState<InterviewPhase>('narrative');
   const [visionId, setVisionId] = useState<string | null>(null);
   const [hasExistingVision, setHasExistingVision] = useState(false);
   const [userName, setUserName] = useState('');
@@ -35,12 +35,11 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
   // Calculate progress based on phase and message count
   const progress = (() => {
     switch (phase) {
-      case 'personalization': return 5;
       case 'narrative': return Math.min(10 + messages.length * 5, 50);
       case 'clustering': return 60;
       case 'hardening': return 80;
       case 'complete': return 100;
-      default: return 0;
+      default: return 5;
     }
   })();
 
@@ -62,7 +61,7 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
           // Demo mode or Supabase not configured - start fresh
           console.log('Starting fresh (demo mode or no Supabase)');
           setHasExistingVision(false);
-          startPersonalization();
+          startInterview();
           return;
         }
 
@@ -85,48 +84,27 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
         } else {
           // New user: start with personalization
           setHasExistingVision(false);
-          startPersonalization();
+          startInterview();
         }
       } catch (err) {
         // Demo mode - start fresh
         console.log('Starting fresh (demo mode):', err);
         setHasExistingVision(false);
-        startPersonalization();
+        startInterview();
       }
     };
 
     loadExisting();
   }, [userId]);
 
-  const startPersonalization = () => {
+  const startInterview = () => {
     const welcomeMessage: Message = {
       role: 'assistant',
-      content: PERSONALIZATION_PROMPT,
+      content: OPENING_PROMPT,
       timestamp: new Date(),
     };
     setMessages([welcomeMessage]);
-    setPhase('personalization');
-  };
-
-  const parsePersonalization = (text: string): { name: string; gender: 'male' | 'female' } | null => {
-    const lower = text.toLowerCase();
-    // Try to detect gender
-    let gender: 'male' | 'female' = 'male';
-    if (lower.includes('נקבה') || lower.includes('נקבית') || lower.includes('בנקבה') || lower.includes('female')) {
-      gender = 'female';
-    }
-
-    // Extract name - take the first substantial word that isn't a gender indicator
-    const cleanText = text
-      .replace(/נקבה|זכר|בנקבה|בזכר|female|male/gi, '')
-      .replace(/קוראים לי|שמי|אני|שם/gi, '')
-      .trim();
-
-    const words = cleanText.split(/[\s,،.]+/).filter(w => w.length > 1);
-    const name = words[0] || '';
-
-    if (!name) return null;
-    return { name, gender };
+    setPhase('narrative');
   };
 
   const callAI = async (
@@ -171,60 +149,26 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
     setIsLoading(true);
 
     try {
-      if (phase === 'personalization') {
-        // Parse name and gender from response
-        const parsed = parsePersonalization(text);
-        if (parsed) {
-          setUserName(parsed.name);
-          setUserGender(parsed.gender);
+      // Send message to AI and get response
+      const response = await callAI(updatedMessages);
 
-          // Generate the opening message - pass parsed values directly to avoid stale state
-          const response = await callAI(
-            [{ role: 'user', content: `שמי ${parsed.name} ואני מעדיפ${parsed.gender === 'female' ? 'ה' : ''} פנייה ב${parsed.gender === 'female' ? 'נקבה' : 'זכר'}`, timestamp: new Date() }],
-            parsed.name,
-            parsed.gender
-          );
-
-          const assistantMessage: Message = {
-            role: 'assistant',
-            content: response,
-            timestamp: new Date(),
-          };
-
-          setMessages([...updatedMessages, assistantMessage]);
-          setPhase('narrative');
-        } else {
-          // Couldn't parse - ask again
-          const retryMessage: Message = {
-            role: 'assistant',
-            content: 'לא הצלחתי לקלוט את השם. אפשר לנסות שוב? מה השם שלך ואיך לפנות אליך - בזכר או בנקבה?',
-            timestamp: new Date(),
-          };
-          setMessages([...updatedMessages, retryMessage]);
-        }
-      } else {
-        // Regular interview flow
-        const response = await callAI(updatedMessages);
-
-        // Detect phase transitions from AI response
-        const responseContent = response;
-        if (responseContent.includes('זיהיתי כמה תחומים') || responseContent.includes('תחומים מרכזיים')) {
-          setPhase('clustering');
-        } else if (responseContent.includes('פעולה מדידה') || responseContent.includes('הרגל קבוע') || responseContent.includes('פעולות מרכזיות')) {
-          setPhase('hardening');
-        } else if (responseContent.includes('[חלק 1') || responseContent.includes('נרטיב אישי') || responseContent.includes('Vision Board תפעולי')) {
-          setPhase('complete');
-          extractFinalOutput(responseContent);
-        }
-
-        const assistantMessage: Message = {
-          role: 'assistant',
-          content: responseContent,
-          timestamp: new Date(),
-        };
-
-        setMessages([...updatedMessages, assistantMessage]);
+      // Detect phase transitions from AI response
+      if (response.includes('זיהיתי כמה תחומים') || response.includes('תחומים מרכזיים')) {
+        setPhase('clustering');
+      } else if (response.includes('פעולה מדידה') || response.includes('הרגל קבוע') || response.includes('פעולות מרכזיות')) {
+        setPhase('hardening');
+      } else if (response.includes('[חלק 1') || response.includes('נרטיב אישי') || response.includes('Vision Board תפעולי')) {
+        setPhase('complete');
+        extractFinalOutput(response);
       }
+
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: response,
+        timestamp: new Date(),
+      };
+
+      setMessages([...updatedMessages, assistantMessage]);
 
       // Auto-save progress
       await saveProgress([...updatedMessages]);

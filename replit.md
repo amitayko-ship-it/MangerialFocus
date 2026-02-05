@@ -70,10 +70,9 @@ Without these, the app runs in demo mode with a mock user.
 - **AI Coach Integration**:
   - Intro video page (YouTube embed) before Future Vision
   - **Interactive AI Vision Interview**: GPT-powered conversational agent that guides users through building their 2030 Vision Board
-    - Phase 1: Personalization (name + gender)
-    - Phase 2: Narrative Harvest - sensory, specific questions about future vision
-    - Phase 3: Auto-Clustering - extracts life domains ("Tiles")
-    - Phase 4: Operational Hardening - converts dreams to measurable actions
+    - Narrative Harvest - sensory, specific questions about future vision
+    - Auto-Clustering - extracts life domains ("Tiles")
+    - Operational Hardening - converts dreams to measurable actions
     - Outputs: Narrative essay + structured Vision Board tiles
   - GPT-powered reflection on user's success vision
   - GPT-powered clarifier for Big Rocks wording check
@@ -85,7 +84,7 @@ Without these, the app runs in demo mode with a mock user.
 
 ## Onboarding Flow
 
-1. Login/Signup → 2. Questionnaire → 3. **Intro Video** → 4. Future Vision (with AI interview) → 5. **Intro Rocks Video** → 6. Focus Area (Big Rocks with AI check) → 7. Tasks Energy → 8. Stakeholders → 9. Summary → Dashboard
+1. Login/Signup → 2. **Intro Video** → 3. Future Vision (with AI interview) → 4. **Intro Rocks Video** → 5. Focus Area (Big Rocks with AI check) → 6. Tasks Energy → 7. Stakeholders → 8. Summary → Dashboard
 
 ## Recent Changes
 

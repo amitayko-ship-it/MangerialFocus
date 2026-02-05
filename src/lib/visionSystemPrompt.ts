@@ -129,8 +129,14 @@ Your mindset: Dream like an artist, Analyze like a consultant, Execute like an e
 }
 
 /**
- * The initial personalization prompt - asked before the system prompt is configured.
+ * The initial opening prompt - starts the vision interview directly.
  */
-export const PERSONALIZATION_PROMPT = `שלום 🙂
-איך קוראים לך?
-ואיך תרצה/י שאפנה אליך – בזכר או בנקבה?`;
+export const OPENING_PROMPT = `בתרגיל הזה אנחנו בונים Vision Board לשנת 2030.
+
+המטרה איננה לייצר השראה כללית או "חלום יפה", אלא לבצע כיול מודע בין הכוונות שלנו לבין המציאות שאנחנו רוצים להגיע אליה בפועל.
+
+זהו תהליך שמחבר רגש ועשייה: מצד אחד, לאפשר לעצמנו לחלום עתיד שמאיץ אותנו קדימה ופותח אפשרויות. מצד שני, להישאר מחוברים לקרקע כך שהחזון יהיה מספיק קונקרטי כדי שנוכל לממש אותו.
+
+טיפ קטן: מומלץ מאוד להשתמש בהקלטה קולית (סימן המיקרופון) ולדבר בשפה חופשית וזורמת. אני כבר אדאג לתמלל את הדברים ולסדר אותם בתוך השיחה שלנו.
+
+נתחיל? ספר/י לי איפה את/ה רואה את עצמך בעוד 3–5 שנים קדימה מהיום?`;

@@ -45,8 +45,8 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     );
   }
 
-  // In demo mode, redirect to questionnaire (start of onboarding flow)
-  if (user && isDemo) return <Navigate to="/questionnaire" replace />;
+  // In demo mode, redirect to intro video (start of onboarding flow)
+  if (user && isDemo) return <Navigate to="/intro-video" replace />;
   if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };

@@ -1,0 +1,346 @@
+PRD
+Product: Big Stones Scheduler
+Version: V1 (MVP)
+1. מטרת המוצר
+
+לאפשר תכנון חודשי ברמת אבנים גדולות, ולהמיר אותן אוטומטית ל-Time Blocks ביומן Outlook, ללא תיאום ידני.
+
+המערכת:
+
+מפחיתה החלטות יומיות
+
+מייצרת Deep Work מובנה
+
+מבטיחה שהדברים החשובים באמת מקבלים זמן
+
+2. בעיה (Problem Statement)
+
+כיום:
+
+משימות נשארות ברמת כוונה
+
+היומן מתמלא ריאקטיבית
+
+אין תרגום אוטומטי מתוצרים לזמן
+
+נוצר עומס קוגניטיבי של תיאום
+
+תוצאה:
+Execution נמוך מהתכנון.
+
+3. עקרונות מוצר (Non-negotiables)
+
+אוטומטי כברירת מחדל
+
+מינימום החלטות למשתמש
+
+אין drag & drop
+
+אין טודו ליסט
+
+הכל מתבטא ב-Calendar Blocks בלבד
+
+יומן Outlook הוא ה-source of truth
+
+4. User Flow ראשי
+Flow A – תכנון חודשי
+שלב 1: מסך שיח (Chat Planning)
+
+האפליקציה שואלת:
+
+מה האבנים הגדולות החודש? (3–5)
+
+לכל אבן:
+
+תוצרים מדידים?
+
+כמה שעות לכל תוצר?
+
+דדליין?
+
+פלט לדוגמה:
+
+Stone: Webinar Launch
+Deliverables:
+
+Deck – 3h
+
+Landing – 2h
+
+Rehearsal – 1h
+Deadline: 25/2
+
+Flow B – המרה אוטומטית
+
+המערכת:
+
+מפרקת לשעות
+
+מחלקת לבלוקים (ברירת מחדל 60 דק)
+
+יוצרת Blocks
+
+Flow C – Scheduling
+
+המערכת:
+
+מושכת את Outlook
+
+מזהה Slots פנויים
+
+משבצת לפי חוקים
+
+יוצרת Events ביומן
+
+Flow D – Execution יומי
+
+המשתמש:
+
+רואה רק את היומן
+
+עובד לפי מה שחסום
+
+אין צורך להיכנס לאפליקציה
+
+Flow E – שינוי / עדכון
+
+אם:
+
+דדליין השתנה
+
+היקף השתנה
+
+פגישה התנגשה
+
+→ לחיצה על "Replan"
+
+5. Functional Requirements
+5.1 Authentication
+
+Microsoft OAuth
+
+הרשאות Calendar Read/Write
+
+5.2 Stones Planning (Chat UI)
+חובה
+
+הוספת אבן
+
+הוספת תוצרים
+
+זמן משוער (בשעות)
+
+דדליין
+
+לא ב-MVP
+
+תתי משימות
+
+תגיות
+
+שיתוף
+
+5.3 Blocks Engine
+לוגיקה
+
+כל שעה → Block
+
+מינימום 30 דק
+
+ברירת מחדל 60 דק
+
+פלט
+
+רשימת Blocks לשיבוץ
+
+5.4 Scheduling Engine
+חוקים (V1)
+
+שעות מועדפות: 08:00–17:00
+
+בקרים עדיפות ל-Deep Work
+
+לא יותר מ-2 בלוקים רצוף
+
+לא לחסום פגישות קיימות
+
+earliest slot first
+
+לפני הדדליין
+
+פעולה
+
+יצירת Calendar Event דרך Microsoft Graph
+
+כותרת אירוע
+
+Deep Work – {Deliverable Name}
+
+5.5 Sync
+נדרש
+
+אם אירוע נמחק → block חוזר ל-unscheduled
+
+אם זז → נשמר
+
+אם עבר הזמן → מסומן done
+
+5.6 Replan
+
+כפתור אחד:
+
+מוחק blocks עתידיים
+
+מחשב מחדש
+
+משבץ מחדש
+
+6. Non-Functional Requirements
+
+טעינה < 2 שניות
+
+mobile friendly
+
+timezone Asia/Jerusalem
+
+אמינות גבוהה (לא ליצור כפילויות)
+
+idempotent event creation
+
+7. Data Model (MVP)
+Stones
+
+id
+
+title
+
+month
+
+Deliverables
+
+id
+
+stone_id
+
+title
+
+estimated_minutes
+
+deadline
+
+Blocks
+
+id
+
+deliverable_id
+
+duration
+
+status (scheduled / done / pending)
+
+calendar_event_id
+
+Users
+
+id
+
+microsoft_token
+
+8. API Requirements
+Microsoft Graph
+Read calendar
+
+GET /me/calendarview
+
+Create event
+
+POST /me/events
+
+Delete event
+
+DELETE /me/events/{id}
+
+9. UX Requirements
+מסכים בלבד
+
+Login
+
+Chat Planning
+
+Stones Overview
+
+Settings (שעות עבודה)
+
+אין:
+
+Kanban
+
+רשימות
+
+dashboards
+
+גרפים
+
+10. Success Metrics
+
+לא engagement
+לא זמן באפליקציה
+
+כן:
+
+% blocks שבוצעו
+
+כמה שעות Deep Work בשבוע
+
+כמה אבנים הושלמו בזמן
+
+11. MVP Scope (מה כן / מה לא)
+כן
+
+OAuth
+
+Chat planning
+
+Block splitting
+
+Auto scheduling
+
+Replan
+
+לא
+
+AI
+
+Mobile app
+
+Sharing
+
+Notifications
+
+Integrations
+
+Booking links
+
+Collaboration
+
+12. Timeline ריאלי
+
+Week 1 – Outlook API
+Week 2 – Chat UI
+Week 3 – Block Engine
+Week 4 – Scheduler
+Week 5 – Sync + Replan
+
+13. Definition of Done (MVP)
+
+כשאפשר:
+
+להגדיר 3 אבנים
+
+ללחוץ Plan
+
+לראות שבוע שלם מתמלא אוטומטית ביומן
+
+בלי מגע ידני
+
+אם זה קורה → המוצר הצליח.

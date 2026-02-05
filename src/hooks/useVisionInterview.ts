@@ -129,7 +129,11 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
     return { name, gender };
   };
 
-  const callAI = async (conversationHistory: Message[], _systemPrompt?: string): Promise<string> => {
+  const callAI = async (
+    conversationHistory: Message[],
+    overrideName?: string,
+    overrideGender?: 'male' | 'female'
+  ): Promise<string> => {
     const aiMessages = conversationHistory.map(msg => ({
       role: msg.role,
       content: msg.content,
@@ -140,8 +144,8 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         messages: aiMessages,
-        userName,
-        userGender,
+        userName: overrideName || userName,
+        userGender: overrideGender || userGender,
       }),
     });
 
@@ -174,11 +178,11 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
           setUserName(parsed.name);
           setUserGender(parsed.gender);
 
-          // Generate the opening message using the full system prompt
-          const systemPrompt = getVisionSystemPrompt(parsed.name, parsed.gender);
+          // Generate the opening message - pass parsed values directly to avoid stale state
           const response = await callAI(
             [{ role: 'user', content: `שמי ${parsed.name} ואני מעדיפ${parsed.gender === 'female' ? 'ה' : ''} פנייה ב${parsed.gender === 'female' ? 'נקבה' : 'זכר'}`, timestamp: new Date() }],
-            systemPrompt
+            parsed.name,
+            parsed.gender
           );
 
           const assistantMessage: Message = {
@@ -199,12 +203,8 @@ export function useVisionInterview(userId: string | undefined): UseVisionIntervi
           setMessages([...updatedMessages, retryMessage]);
         }
       } else {
-        // Regular interview flow - send to AI with system prompt
-        const systemPrompt = userName && userGender
-          ? getVisionSystemPrompt(userName, userGender)
-          : undefined;
-
-        const response = await callAI(updatedMessages, systemPrompt);
+        // Regular interview flow
+        const response = await callAI(updatedMessages);
 
         // Detect phase transitions from AI response
         const responseContent = response;

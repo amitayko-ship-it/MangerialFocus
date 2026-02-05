@@ -69,6 +69,12 @@ Without these, the app runs in demo mode with a mock user.
 - User onboarding questionnaire
 - **AI Coach Integration**:
   - Intro video page (YouTube embed) before Future Vision
+  - **Interactive AI Vision Interview**: GPT-powered conversational agent that guides users through building their 2030 Vision Board
+    - Phase 1: Personalization (name + gender)
+    - Phase 2: Narrative Harvest - sensory, specific questions about future vision
+    - Phase 3: Auto-Clustering - extracts life domains ("Tiles")
+    - Phase 4: Operational Hardening - converts dreams to measurable actions
+    - Outputs: Narrative essay + structured Vision Board tiles
   - GPT-powered reflection on user's success vision
   - GPT-powered clarifier for Big Rocks wording check
 - Vision board creation
@@ -87,7 +93,10 @@ Without these, the app runs in demo mode with a mock user.
   - IntroVideo page with YouTube embed between Questionnaire and FutureVision
   - AI reflection feature after completing Future Vision
   - AI rock clarifier for Big Rocks wording validation
-- Created Express backend server for coach API endpoints (/api/coach/reflect, /api/coach/clarify-rock)
+- Created Express backend server for coach API endpoints:
+  - `/api/coach/reflect` - Vision reflection
+  - `/api/coach/clarify-rock` - Big Rocks validation
+  - `/api/vision/chat` - Interactive vision interview with multi-phase system prompt
 - Added useCoachAgent hook for frontend AI calls
 - Configured Vite proxy for API requests
 - Configured Vite for Replit environment (port 5000, allowedHosts: true)

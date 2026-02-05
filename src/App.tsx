@@ -10,6 +10,7 @@ import Signup from '@/pages/Signup';
 import Questionnaire from '@/pages/Questionnaire';
 import IntroVideo from '@/pages/IntroVideo';
 import IntroRocksVideo from '@/pages/IntroRocksVideo';
+import ManagementCompass from '@/pages/ManagementCompass';
 import FutureVision from '@/pages/setup/FutureVision';
 import FocusAreaSelection from '@/pages/setup/FocusAreaSelection';
 import TasksEnergySetup from '@/pages/setup/TasksEnergySetup';
@@ -45,8 +46,8 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     );
   }
 
-  // In demo mode, redirect to intro video (start of onboarding flow)
-  if (user && isDemo) return <Navigate to="/intro-video" replace />;
+  // In demo mode, redirect to management compass (start of onboarding flow)
+  if (user && isDemo) return <Navigate to="/management-compass" replace />;
   if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };
@@ -62,6 +63,7 @@ function AppRoutes() {
       <Route path="/feedback/:token" element={<FeedbackPage />} />
 
       {/* Onboarding flow */}
+      <Route path="/management-compass" element={<ProtectedRoute><ManagementCompass /></ProtectedRoute>} />
       <Route path="/questionnaire" element={<ProtectedRoute><Questionnaire /></ProtectedRoute>} />
       <Route path="/intro-video" element={<ProtectedRoute><IntroVideo /></ProtectedRoute>} />
       <Route path="/setup/vision" element={<ProtectedRoute><FutureVision /></ProtectedRoute>} />

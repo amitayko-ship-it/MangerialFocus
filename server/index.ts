@@ -200,7 +200,7 @@ Method:
 
 Deep Dive Technique (Modified 5 Whys):
 If the answer is abstract, ask for concreteness. Examples:
-- איך זה נראה ביום שלישי בבוקר?
+- איך נראה בוקר טיפוסי ${g.your}?
 - עם מי ${g.you} עובד${userGender === 'female' ? 'ת' : ''}?
 - איפה ${g.you} גר${userGender === 'female' ? 'ה' : ''} פיזית?
 - מה יש על השולחן?

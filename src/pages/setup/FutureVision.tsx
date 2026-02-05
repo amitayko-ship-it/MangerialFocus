@@ -67,11 +67,11 @@ const FutureVision: React.FC = () => {
   };
 
   const handleContinueWithExisting = () => {
-    navigate('/setup/focus-area');
+    navigate('/intro-rocks-video');
   };
 
   const handleSkip = () => {
-    navigate('/setup/focus-area');
+    navigate('/intro-rocks-video');
   };
 
   const handleGetReflection = async () => {
@@ -86,7 +86,7 @@ const FutureVision: React.FC = () => {
 
   const handleContinue = async () => {
     await saveVision();
-    navigate('/setup/focus-area');
+    navigate('/intro-rocks-video');
   };
 
   // Phase label

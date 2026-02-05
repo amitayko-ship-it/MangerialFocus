@@ -85,7 +85,7 @@ Without these, the app runs in demo mode with a mock user.
 
 ## Onboarding Flow
 
-1. Login/Signup → 2. Questionnaire → 3. **Intro Video** → 4. Future Vision (with AI reflection) → 5. Focus Area (Big Rocks with AI check) → 6. Tasks Energy → 7. Stakeholders → 8. Summary → Dashboard
+1. Login/Signup → 2. Questionnaire → 3. **Intro Video** → 4. Future Vision (with AI interview) → 5. **Intro Rocks Video** → 6. Focus Area (Big Rocks with AI check) → 7. Tasks Energy → 8. Stakeholders → 9. Summary → Dashboard
 
 ## Recent Changes
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Play, Target, ChevronLeft } from 'lucide-react';
+import { Target, ChevronLeft } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -72,18 +72,6 @@ const IntroVideo: React.FC = () => {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
-            {YOUTUBE_VIDEO_ID === 'YOUR_VIDEO_ID' && (
-              <div className="absolute inset-0 flex items-center justify-center bg-muted/80">
-                <div className="text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto">
-                    <Play className="w-8 h-8 text-primary" />
-                  </div>
-                  <p className="text-muted-foreground">
-                    {isRTL ? 'הסרטון יופיע כאן' : 'Video will appear here'}
-                  </p>
-                </div>
-              </div>
-            )}
           </motion.div>
 
           <motion.div

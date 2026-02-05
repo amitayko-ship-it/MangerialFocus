@@ -4,6 +4,7 @@ import Header from '@/components/management-compass/layout/Header';
 import Footer from '@/components/management-compass/layout/Footer';
 import WelcomeScreen from '@/components/management-compass/WelcomeScreen';
 import IntroductionStep from '@/components/management-compass/IntroductionStep';
+import QuestionnaireIntroStep from '@/components/management-compass/QuestionnaireIntroStep';
 import CardGameStep from '@/components/management-compass/CardGameStep';
 import CardGameSummaryScreen from '@/components/management-compass/CardGameSummaryScreen';
 import FocusControlStep from '@/components/management-compass/FocusControlStep';
@@ -23,6 +24,7 @@ const STEP_STORAGE_KEY = 'management-compass-step';
 type Step = 
   | 'welcome'
   | 'introduction'
+  | 'questionnaireIntro'
   | 'cardGame'
   | 'cardGameSummary'
   | 'focusControl' 
@@ -76,6 +78,14 @@ const ManagementCompass: React.FC = () => {
           <IntroductionStep
             userInfo={data.userInfo}
             onUserInfoChange={(userInfo: UserInfo) => updateData({ userInfo })}
+            onNext={() => setCurrentStep('questionnaireIntro')}
+          />
+        );
+      
+      case 'questionnaireIntro':
+        return (
+          <QuestionnaireIntroStep
+            userName={data.userInfo?.name || ''}
             onNext={() => setCurrentStep('cardGame')}
           />
         );

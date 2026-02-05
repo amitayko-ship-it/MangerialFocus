@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useVisionInterview } from '@/hooks/useVisionInterview';
+import { useCoachAgent } from '@/hooks/useCoachAgent';
 import { ChatMessage } from '@/components/vision/ChatMessage';
 import { ChatInput } from '@/components/vision/ChatInput';
 import VisionSummaryCard from '@/components/vision/VisionSummaryCard';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Sparkles, ArrowRight, ArrowLeft, Check } from 'lucide-react';
+import { Sparkles, ArrowRight, ArrowLeft, Check, MessageSquare, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const FutureVision: React.FC = () => {
@@ -27,7 +28,10 @@ const FutureVision: React.FC = () => {
   const [showSummary, setShowSummary] = useState(false);
   const [showExistingChoice, setShowExistingChoice] = useState(false);
   const [wantsToEdit, setWantsToEdit] = useState(false);
+  const [reflection, setReflection] = useState<{ themes: string[]; summary: string } | null>(null);
+  const [showReflection, setShowReflection] = useState(false);
 
+  const { reflectVision, loading: reflectionLoading } = useCoachAgent();
   const vt = t.vision;
 
   // Never Ask Twice: show choice if user already has a completed vision
@@ -68,6 +72,16 @@ const FutureVision: React.FC = () => {
 
   const handleSkip = () => {
     navigate('/setup/focus-area');
+  };
+
+  const handleGetReflection = async () => {
+    if (narrative) {
+      const result = await reflectVision(narrative);
+      if (result) {
+        setReflection(result);
+        setShowReflection(true);
+      }
+    }
   };
 
   const handleContinue = async () => {
@@ -179,6 +193,63 @@ const FutureVision: React.FC = () => {
               )}
             </div>
 
+          ) : showReflection && reflection ? (
+            /* Coach Reflection View */
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <div className="bg-card rounded-2xl p-6 border shadow-soft">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
+                    <MessageSquare className="w-5 h-5 text-green-600" />
+                  </div>
+                  <h3 className="font-semibold">
+                    {isRTL ? 'שיקוף מהמנחה' : 'Coach Reflection'}
+                  </h3>
+                </div>
+
+                <p className="text-muted-foreground mb-4">{reflection.summary}</p>
+
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">
+                    {isRTL ? 'תמות מרכזיות שזיהיתי:' : 'Key themes I identified:'}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {reflection.themes.map((theme, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                      >
+                        {theme}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground text-center">
+                {isRTL
+                  ? 'הסוכן מציע ניסוח ושיקוף בלבד. הבחירה וההחלטה תמיד שלך.'
+                  : 'The coach offers suggestions and reflections only. The choice and decision is always yours.'}
+              </p>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => { setShowReflection(false); setShowSummary(false); }}
+                  className="flex-1"
+                >
+                  {vt.editAnswers}
+                </Button>
+                <Button onClick={handleContinue} className="flex-1">
+                  <Check className="w-4 h-4 ml-2" />
+                  {isRTL ? 'מאשר וממשיך' : 'Confirm & Continue'}
+                </Button>
+              </div>
+            </motion.div>
+
           ) : (
             /* Summary View */
             <>
@@ -187,18 +258,36 @@ const FutureVision: React.FC = () => {
                 tiles={tiles}
                 isRTL={isRTL}
               />
-              <div className="flex gap-3 mt-6">
+              <div className="flex flex-col gap-3 mt-6">
                 <Button
-                  variant="outline"
-                  onClick={() => setShowSummary(false)}
-                  className="flex-1"
+                  onClick={handleGetReflection}
+                  disabled={reflectionLoading}
+                  className="w-full gap-2"
                 >
-                  {vt.editAnswers}
+                  {reflectionLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      {isRTL ? 'מעבד...' : 'Processing...'}
+                    </>
+                  ) : (
+                    <>
+                      <MessageSquare className="w-4 h-4" />
+                      {isRTL ? 'קבל שיקוף מהמנחה' : 'Get Coach Reflection'}
+                    </>
+                  )}
                 </Button>
-                <Button onClick={handleContinue} className="flex-1">
-                  <Check className="w-4 h-4 ml-2" />
-                  {vt.looksGood}
-                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowSummary(false)}
+                    className="flex-1"
+                  >
+                    {vt.editAnswers}
+                  </Button>
+                  <Button variant="ghost" onClick={handleContinue} className="flex-1">
+                    {isRTL ? 'דלג והמשך' : 'Skip & Continue'}
+                  </Button>
+                </div>
               </div>
             </>
           )}

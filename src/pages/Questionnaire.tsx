@@ -45,9 +45,9 @@ const Questionnaire: React.FC = () => {
     if (currentStep < TOTAL_STEPS - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
-      // Save answers and navigate to vision
+      // Save answers and navigate to intro video
       saveWithExpiry('questionnaire-data', answers);
-      navigate('/setup/vision');
+      navigate('/intro-video');
     }
   };
 

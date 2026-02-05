@@ -8,6 +8,7 @@ import { Toaster } from 'sonner';
 import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
 import Questionnaire from '@/pages/Questionnaire';
+import IntroVideo from '@/pages/IntroVideo';
 import FutureVision from '@/pages/setup/FutureVision';
 import FocusAreaSelection from '@/pages/setup/FocusAreaSelection';
 import TasksEnergySetup from '@/pages/setup/TasksEnergySetup';
@@ -61,6 +62,7 @@ function AppRoutes() {
 
       {/* Onboarding flow */}
       <Route path="/questionnaire" element={<ProtectedRoute><Questionnaire /></ProtectedRoute>} />
+      <Route path="/intro-video" element={<ProtectedRoute><IntroVideo /></ProtectedRoute>} />
       <Route path="/setup/vision" element={<ProtectedRoute><FutureVision /></ProtectedRoute>} />
       <Route path="/setup/focus-area" element={<ProtectedRoute><FocusAreaSelection /></ProtectedRoute>} />
       <Route path="/setup/tasks-energy" element={<ProtectedRoute><TasksEnergySetup /></ProtectedRoute>} />

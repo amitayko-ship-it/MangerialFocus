@@ -115,8 +115,22 @@ export interface CoachingData {
   oneSmallThing: string;
 }
 
+// User info collected at intro
+export interface UserInfo {
+  name: string;
+  gender: 'male' | 'female' | '';
+}
+
+export const initialUserInfo: UserInfo = {
+  name: '',
+  gender: '',
+};
+
 // All questionnaire data
 export interface QuestionnaireData {
+  // User info
+  userInfo: UserInfo;
+  
   // Screen 0: Card Game
   cardGameData: CardGameData;
   
@@ -201,6 +215,9 @@ export const initialTeamHealthData: TeamHealthData = {
 };
 
 export const initialQuestionnaireData: QuestionnaireData = {
+  // User info
+  userInfo: initialUserInfo,
+  
   // Screen 0
   cardGameData: initialCardGameData,
   

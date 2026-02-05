@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '@/components/management-compass/layout/Header';
 import Footer from '@/components/management-compass/layout/Footer';
 import WelcomeScreen from '@/components/management-compass/WelcomeScreen';
+import IntroductionStep from '@/components/management-compass/IntroductionStep';
 import CardGameStep from '@/components/management-compass/CardGameStep';
 import CardGameSummaryScreen from '@/components/management-compass/CardGameSummaryScreen';
 import FocusControlStep from '@/components/management-compass/FocusControlStep';
@@ -13,14 +14,15 @@ import CoachingStep from '@/components/management-compass/CoachingStep';
 import TeamHealthStep from '@/components/management-compass/TeamHealthStep';
 import ModuleSelectionScreen from '@/components/management-compass/ModuleSelectionScreen';
 import ManagementCompassDashboard from '@/components/management-compass/ManagementCompassDashboard';
-import { QuestionnaireData, initialQuestionnaireData, InterfaceJourneyData, CoachingData, TeamHealthData, CardGameData } from '@/types/managementCompass';
+import { QuestionnaireData, initialQuestionnaireData, InterfaceJourneyData, CoachingData, TeamHealthData, CardGameData, UserInfo } from '@/types/managementCompass';
 import { saveWithExpiry, loadWithExpiry } from '@/lib/storageUtils';
 
 const STORAGE_KEY = 'management-compass-data';
 const STEP_STORAGE_KEY = 'management-compass-step';
 
 type Step = 
-  | 'welcome' 
+  | 'welcome'
+  | 'introduction'
   | 'cardGame'
   | 'cardGameSummary'
   | 'focusControl' 
@@ -67,7 +69,16 @@ const ManagementCompass: React.FC = () => {
   const renderStep = () => {
     switch (currentStep) {
       case 'welcome':
-        return <WelcomeScreen onStart={() => setCurrentStep('cardGame')} />;
+        return <WelcomeScreen onStart={() => setCurrentStep('introduction')} />;
+      
+      case 'introduction':
+        return (
+          <IntroductionStep
+            userInfo={data.userInfo}
+            onUserInfoChange={(userInfo: UserInfo) => updateData({ userInfo })}
+            onNext={() => setCurrentStep('cardGame')}
+          />
+        );
       
       case 'cardGame':
         return (
@@ -75,7 +86,7 @@ const ManagementCompass: React.FC = () => {
             cardGameData={data.cardGameData}
             onCardGameDataChange={(cardGameData: CardGameData) => updateData({ cardGameData })}
             onNext={() => setCurrentStep('cardGameSummary')}
-            onBack={() => setCurrentStep('welcome')}
+            onBack={() => setCurrentStep('introduction')}
           />
         );
       

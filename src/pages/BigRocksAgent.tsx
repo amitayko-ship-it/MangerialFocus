@@ -86,6 +86,7 @@ const BigRocksAgent: React.FC = () => {
 
   const [phase, setPhase] = useState<'rocks' | 'practices'>('rocks');
   const [selectedRockIndex, setSelectedRockIndex] = useState<number | null>(null);
+  const [showRockSelection, setShowRockSelection] = useState(false);
   const [practicesMessages, setPracticesMessages] = useState<ChatMessage[]>([]);
   const [extractedPractices, setExtractedPractices] = useState<ExtractedPractices | null>(null);
 
@@ -333,6 +334,7 @@ const BigRocksAgent: React.FC = () => {
     if (phase === 'practices') {
       setPhase('rocks');
       setSelectedRockIndex(null);
+      setShowRockSelection(false);
       setPracticesMessages([]);
       setExtractedPractices(null);
       return;
@@ -442,14 +444,42 @@ const BigRocksAgent: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {phase === 'rocks' && extractedRocks && (
+        {phase === 'rocks' && extractedRocks && !showRockSelection && selectedRockIndex === null && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-card border-2 border-primary/30 rounded-2xl p-5 mb-4 shadow-md"
           >
-            <h3 className="font-bold text-foreground mb-3 text-lg">האבנים הגדולות שזוקקנו:</h3>
-            <p className="text-sm text-muted-foreground mb-4">בחרו אבן גדולה כדי לבנות עבורה פרקטיקות:</p>
+            <h3 className="font-bold text-foreground mb-3 text-lg">האבנים הגדולות שלך:</h3>
+            <div className="space-y-2 mb-5">
+              {extractedRocks.map((rock, i) => (
+                <div key={i} className="flex items-start gap-3 p-3 bg-accent/50 rounded-xl">
+                  <span className="text-lg">🪨</span>
+                  <span className="text-foreground font-medium">{rock}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground mb-4 text-center">
+              עכשיו נבנה פרקטיקות לכל אבן גדולה. איך תעדיפו?
+            </p>
+            <div className="space-y-2">
+              <Button onClick={() => setShowRockSelection(true)} size="lg" className="w-full gap-2">
+                עזרה בזיקוק פרקטיקות עם הסוכן
+              </Button>
+              <Button variant="outline" onClick={handleSkip} size="lg" className="w-full">
+                אמלא עצמאית
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {phase === 'rocks' && extractedRocks && showRockSelection && selectedRockIndex === null && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-card border-2 border-primary/30 rounded-2xl p-5 mb-4 shadow-md"
+          >
+            <h3 className="font-bold text-foreground mb-3 text-lg">בחרו אבן גדולה לעבוד עליה:</h3>
             <div className="space-y-2 mb-4">
               {extractedRocks.map((rock, i) => (
                 <button
@@ -463,8 +493,8 @@ const BigRocksAgent: React.FC = () => {
                 </button>
               ))}
             </div>
-            <Button variant="ghost" size="sm" onClick={handleSkip} className="w-full text-muted-foreground">
-              דלג בינתיים
+            <Button variant="ghost" size="sm" onClick={() => setShowRockSelection(false)} className="w-full text-muted-foreground">
+              חזרה
             </Button>
           </motion.div>
         )}

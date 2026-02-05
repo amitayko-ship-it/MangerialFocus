@@ -14,6 +14,11 @@ interface ChatMessage {
   content: string;
 }
 
+interface ExtractedPractices {
+  practices: string[];
+  keystone: string;
+}
+
 function extractRocksFromResponse(text: string): string[] | null {
   const fencedMatch = text.match(/```\w*\s*([\s\S]*?)```/);
   if (fencedMatch) {
@@ -36,8 +41,37 @@ function extractRocksFromResponse(text: string): string[] | null {
   return null;
 }
 
+function extractPracticesFromResponse(text: string): ExtractedPractices | null {
+  const fencedMatch = text.match(/```\w*\s*([\s\S]*?)```/);
+  if (fencedMatch) {
+    try {
+      const parsed = JSON.parse(fencedMatch[1].trim());
+      if (parsed.practices && Array.isArray(parsed.practices) && parsed.practices.length >= 1) {
+        return { practices: parsed.practices, keystone: parsed.keystone || '' };
+      }
+    } catch {}
+  }
+  try {
+    const inlineMatch = text.match(/\{"practices"\s*:\s*\[[\s\S]*?\]/);
+    if (inlineMatch) {
+      const fullMatch = text.match(/\{"practices"\s*:\s*\[[\s\S]*?\][\s\S]*?\}/);
+      if (fullMatch) {
+        const parsed = JSON.parse(fullMatch[0]);
+        if (parsed.practices && Array.isArray(parsed.practices) && parsed.practices.length >= 1) {
+          return { practices: parsed.practices, keystone: parsed.keystone || '' };
+        }
+      }
+    }
+  } catch {}
+  return null;
+}
+
 function cleanMessageForDisplay(text: string): string {
-  return text.replace(/```\w*\s*[\s\S]*?```/g, '').replace(/\{"rocks"\s*:\s*\[[\s\S]*?\]\}/g, '').trim();
+  return text
+    .replace(/```\w*\s*[\s\S]*?```/g, '')
+    .replace(/\{"rocks"\s*:\s*\[[\s\S]*?\]\}/g, '')
+    .replace(/\{"practices"\s*:\s*\[[\s\S]*?\][\s\S]*?\}/g, '')
+    .trim();
 }
 
 const BigRocksAgent: React.FC = () => {
@@ -49,6 +83,11 @@ const BigRocksAgent: React.FC = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const [phase, setPhase] = useState<'rocks' | 'practices'>('rocks');
+  const [selectedRockIndex, setSelectedRockIndex] = useState<number | null>(null);
+  const [practicesMessages, setPracticesMessages] = useState<ChatMessage[]>([]);
+  const [extractedPractices, setExtractedPractices] = useState<ExtractedPractices | null>(null);
 
   const getUserInfo = () => {
     const raw = localStorage.getItem('questionnaire-data');
@@ -137,13 +176,55 @@ const BigRocksAgent: React.FC = () => {
     initChat();
   }, []);
 
+  const activeMessages = phase === 'practices' ? practicesMessages : messages;
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [activeMessages, isLoading]);
+
+  const handleSelectRock = async (index: number) => {
+    if (!extractedRocks) return;
+    setSelectedRockIndex(index);
+    setPhase('practices');
+    setIsLoading(true);
+
+    const { userName, userGender } = getUserInfo();
+    const gWrite = userGender === 'female' ? 'כתבי' : 'כתוב';
+    const gPersist = userGender === 'female' ? 'תתמידי' : 'תתמיד';
+    const fallbackPracticesOpening = `מעבר מאבן גדולה לתנועה יומיומית\n\nאבן גדולה לא מתממשת מהחלטה חד-פעמית.\nהיא מתקדמת דרך פרקטיקות קבועות שחוזרות על עצמן ובונות ערך מצטבר לאורך זמן.\n\nנתחיל ממך.\n\n${gWrite} מהן 3 הפרקטיקות המרכזיות שלדעתך, אם ${gPersist} בהן, יקדמו את האבן הגדולה שבחרת.`;
+
+    try {
+      const response = await fetch('/api/coach/practices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: 'התחל' }],
+          userName,
+          userGender,
+          rockTitle: extractedRocks[index]
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPracticesMessages([{ role: 'assistant', content: data.response }]);
+      } else {
+        setPracticesMessages([{ role: 'assistant', content: fallbackPracticesOpening }]);
+      }
+    } catch {
+      setPracticesMessages([{ role: 'assistant', content: fallbackPracticesOpening }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const sendMessage = async () => {
     const trimmed = input.trim();
     if (!trimmed || isLoading) return;
+
+    if (phase === 'practices') {
+      return sendPracticesMessage(trimmed);
+    }
 
     const userMessage: ChatMessage = { role: 'user', content: trimmed };
     const updatedMessages = [...messages, userMessage];
@@ -182,6 +263,44 @@ const BigRocksAgent: React.FC = () => {
     }
   };
 
+  const sendPracticesMessage = async (trimmed: string) => {
+    const userMessage: ChatMessage = { role: 'user', content: trimmed };
+    const updatedMessages = [...practicesMessages, userMessage];
+    setPracticesMessages(updatedMessages);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const { userName, userGender } = getUserInfo();
+      const response = await fetch('/api/coach/practices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
+          userName,
+          userGender,
+          rockTitle: extractedRocks![selectedRockIndex!]
+        }),
+      });
+
+      if (!response.ok) throw new Error('API error');
+
+      const data = await response.json();
+      const assistantMessage: ChatMessage = { role: 'assistant', content: data.response };
+      setPracticesMessages(prev => [...prev, assistantMessage]);
+
+      const practices = extractPracticesFromResponse(data.response);
+      if (practices) {
+        setExtractedPractices(practices);
+      }
+    } catch (error) {
+      console.error('Practices chat error:', error);
+      toast.error('שגיאה בתקשורת עם הסוכן');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -189,26 +308,49 @@ const BigRocksAgent: React.FC = () => {
     }
   };
 
-  const handleContinueWithRocks = () => {
+  const handleContinueWithPractices = () => {
     if (!extractedRocks) return;
 
     const bigRocks: BigRock[] = extractedRocks.map((title, index) => ({
       id: `rock-${Date.now()}-${index}`,
       title,
       order: index,
-      practices: [],
+      practices: index === selectedRockIndex && extractedPractices
+        ? extractedPractices.practices
+        : [],
       isBreakthrough: index === 0
     }));
+
+    if (extractedPractices?.keystone) {
+      saveWithExpiry('keystone-habit', extractedPractices.keystone);
+    }
 
     saveWithExpiry('big-rocks-order', bigRocks);
     navigate('/setup/focus-area');
   };
 
   const handleBack = () => {
+    if (phase === 'practices') {
+      setPhase('rocks');
+      setSelectedRockIndex(null);
+      setPracticesMessages([]);
+      setExtractedPractices(null);
+      return;
+    }
     navigate('/intro-rocks-video');
   };
 
   const handleSkip = () => {
+    if (phase === 'practices' && extractedRocks) {
+      const bigRocks: BigRock[] = extractedRocks.map((title, index) => ({
+        id: `rock-${Date.now()}-${index}`,
+        title,
+        order: index,
+        practices: [],
+        isBreakthrough: index === 0
+      }));
+      saveWithExpiry('big-rocks-order', bigRocks);
+    }
     navigate('/setup/focus-area');
   };
 
@@ -234,16 +376,34 @@ const BigRocksAgent: React.FC = () => {
     );
   }
 
+  const showInput = phase === 'practices'
+    ? !extractedPractices
+    : !extractedRocks;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex flex-col" dir="rtl">
       <Header />
 
       <main className="flex-1 flex flex-col max-w-3xl mx-auto w-full p-4">
+        {phase === 'practices' && selectedRockIndex !== null && extractedRocks && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-4"
+          >
+            <div className="flex items-center gap-2 text-sm text-foreground">
+              <span>🪨</span>
+              <span className="font-medium">אבן גדולה:</span>
+              <span>{extractedRocks[selectedRockIndex]}</span>
+            </div>
+          </motion.div>
+        )}
+
         <div className="flex-1 overflow-y-auto space-y-4 pb-4">
           <AnimatePresence>
-            {messages.map((msg, i) => (
+            {activeMessages.map((msg, i) => (
               <motion.div
-                key={i}
+                key={`${phase}-${i}`}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
@@ -282,29 +442,65 @@ const BigRocksAgent: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {extractedRocks && (
+        {phase === 'rocks' && extractedRocks && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-card border-2 border-primary/30 rounded-2xl p-5 mb-4 shadow-md"
           >
             <h3 className="font-bold text-foreground mb-3 text-lg">האבנים הגדולות שזוקקנו:</h3>
+            <p className="text-sm text-muted-foreground mb-4">בחרו אבן גדולה כדי לבנות עבורה פרקטיקות:</p>
             <div className="space-y-2 mb-4">
               {extractedRocks.map((rock, i) => (
-                <div key={i} className="flex items-start gap-3 p-3 bg-accent/50 rounded-xl">
+                <button
+                  key={i}
+                  onClick={() => handleSelectRock(i)}
+                  className="w-full flex items-center gap-3 p-3 bg-accent/50 rounded-xl hover:bg-accent transition-colors text-right"
+                >
                   <span className="text-lg">🪨</span>
-                  <span className="text-foreground font-medium">{rock}</span>
-                </div>
+                  <span className="text-foreground font-medium flex-1">{rock}</span>
+                  <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+                </button>
               ))}
             </div>
-            <Button onClick={handleContinueWithRocks} size="lg" className="w-full gap-2">
-              <ChevronLeft className="w-4 h-4" />
-              המשך עם האבנים האלה
+            <Button variant="ghost" size="sm" onClick={handleSkip} className="w-full text-muted-foreground">
+              דלג בינתיים
             </Button>
           </motion.div>
         )}
 
-        {!extractedRocks && (
+        {phase === 'practices' && extractedPractices && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-card border-2 border-primary/30 rounded-2xl p-5 mb-4 shadow-md"
+          >
+            <h3 className="font-bold text-foreground mb-3 text-lg">הפרקטיקות שגובשו:</h3>
+            <div className="space-y-2 mb-3">
+              {extractedPractices.practices.map((practice, i) => (
+                <div key={i} className="flex items-start gap-3 p-3 bg-accent/50 rounded-xl">
+                  <span className="text-lg">⚡</span>
+                  <span className="text-foreground font-medium">{practice}</span>
+                </div>
+              ))}
+            </div>
+            {extractedPractices.keystone && (
+              <div className="flex items-start gap-3 p-3 bg-primary/10 border border-primary/20 rounded-xl mb-4">
+                <span className="text-lg">🔑</span>
+                <div>
+                  <span className="text-xs text-muted-foreground">הרגל מפתח</span>
+                  <p className="text-foreground font-medium">{extractedPractices.keystone}</p>
+                </div>
+              </div>
+            )}
+            <Button onClick={handleContinueWithPractices} size="lg" className="w-full gap-2">
+              <ChevronLeft className="w-4 h-4" />
+              המשך
+            </Button>
+          </motion.div>
+        )}
+
+        {showInput && (
           <div className="border-t border-border pt-4 pb-2">
             <div className="flex gap-2 items-end">
               <textarea

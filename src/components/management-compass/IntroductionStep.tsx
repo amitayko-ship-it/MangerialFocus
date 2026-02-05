@@ -8,12 +8,14 @@ interface IntroductionStepProps {
   userInfo: UserInfo;
   onUserInfoChange: (userInfo: UserInfo) => void;
   onNext: () => void;
+  onBack?: () => void;
 }
 
 const IntroductionStep: React.FC<IntroductionStepProps> = ({
   userInfo,
   onUserInfoChange,
-  onNext
+  onNext,
+  onBack
 }) => {
   const safeUserInfo = userInfo || { name: '', gender: '' as 'male' | 'female' | '' };
   const canProceed = safeUserInfo.name.trim() !== '' && safeUserInfo.gender !== '';
@@ -85,7 +87,12 @@ const IntroductionStep: React.FC<IntroductionStepProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-center mt-8">
+        <div className="flex justify-center gap-3 mt-8">
+          {onBack && (
+            <Button variant="outline" onClick={onBack} size="lg">
+              חזרה
+            </Button>
+          )}
           <Button
             onClick={onNext}
             disabled={!canProceed}

@@ -43,9 +43,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
         {/* CTA Button */}
         <div className="text-center">
           <Button 
-            variant="hero" 
-            size="xl" 
             onClick={onStart}
+            size="lg"
             className="min-w-[200px]"
           >
             התחלה

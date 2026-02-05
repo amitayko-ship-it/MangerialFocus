@@ -4,12 +4,13 @@ import { QuestionnaireData } from '@/types/managementCompass';
 import { CardGameData } from '@/types/managementCompass';
 import { getModuleResults, getFullModules, ModuleResult } from '@/lib/moduleSelection';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Compass, Eye, ChevronLeft, Sparkles, Lightbulb } from 'lucide-react';
+import { Compass, Eye, ChevronLeft, Sparkles, Lightbulb, ArrowRight } from 'lucide-react';
 
 interface ManagementCompassDashboardProps {
   data: QuestionnaireData;
   onRestart: () => void;
   onContinue?: () => void;
+  onBack?: () => void;
 }
 
 // Card data for getting labels
@@ -81,7 +82,7 @@ const getObservation = (cardGameData: CardGameData): string => {
   return 'שים לב לרגעים שבהם דפוס מוכר חוזר על עצמו - ונסה לתפוס אותו בזמן אמת.';
 };
 
-const ManagementCompassDashboard: React.FC<ManagementCompassDashboardProps> = ({ data, onRestart, onContinue }) => {
+const ManagementCompassDashboard: React.FC<ManagementCompassDashboardProps> = ({ data, onRestart, onContinue, onBack }) => {
   const [selectedModule, setSelectedModule] = useState<ModuleResult | null>(null);
   
   const moduleResults = getModuleResults(data.cardGameData, data.teamHealthData);
@@ -274,7 +275,13 @@ const ManagementCompassDashboard: React.FC<ManagementCompassDashboardProps> = ({
             <br />
             ומה שווה להזיז עכשיו.
           </p>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3 justify-center">
+            {onBack && (
+              <Button variant="outline" onClick={onBack} className="gap-2">
+                <ArrowRight className="w-4 h-4" />
+                חזרה לשאלון
+              </Button>
+            )}
             <Button variant="outline" onClick={onRestart}>
               מילוי שאלון חדש
             </Button>

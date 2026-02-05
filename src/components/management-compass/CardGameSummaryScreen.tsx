@@ -7,9 +7,10 @@ import { ArrowLeft, Compass } from 'lucide-react';
 interface CardGameSummaryScreenProps {
   cardGameData: CardGameData;
   onNext: () => void;
+  onBack?: () => void;
 }
 
-const CardGameSummaryScreen: React.FC<CardGameSummaryScreenProps> = ({ cardGameData, onNext }) => {
+const CardGameSummaryScreen: React.FC<CardGameSummaryScreenProps> = ({ cardGameData, onNext, onBack }) => {
   // Get the first full module to show what's next
   const fullModules = getFullModules(cardGameData);
   const firstModule = fullModules[0];
@@ -64,14 +65,21 @@ const CardGameSummaryScreen: React.FC<CardGameSummaryScreenProps> = ({ cardGameD
         )}
 
         {/* Continue Button */}
-        <Button
-          size="lg"
-          onClick={onNext}
-          className="gap-2"
-        >
-          להמשך
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
+        <div className="flex justify-center gap-3">
+          {onBack && (
+            <Button variant="outline" size="lg" onClick={onBack}>
+              חזרה
+            </Button>
+          )}
+          <Button
+            size="lg"
+            onClick={onNext}
+            className="gap-2"
+          >
+            להמשך
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+        </div>
 
         {/* Subtle footnote */}
         <p className="text-xs text-muted-foreground mt-4">

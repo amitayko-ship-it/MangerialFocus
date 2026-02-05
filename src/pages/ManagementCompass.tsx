@@ -14,6 +14,8 @@ import CoachingStep from '@/components/management-compass/CoachingStep';
 import TeamHealthStep from '@/components/management-compass/TeamHealthStep';
 import ModuleSelectionScreen from '@/components/management-compass/ModuleSelectionScreen';
 import ManagementCompassDashboard from '@/components/management-compass/ManagementCompassDashboard';
+import { Button } from '@/components/ui/button';
+import { LayoutDashboard, ArrowRight } from 'lucide-react';
 import { QuestionnaireData, initialQuestionnaireData, InterfaceJourneyData, CoachingData, TeamHealthData, CardGameData, UserInfo } from '@/types/managementCompass';
 import { saveWithExpiry, loadWithExpiry } from '@/lib/storageUtils';
 
@@ -34,6 +36,12 @@ type Step =
   | 'moduleSelection'
   | 'dashboard';
 
+const STEP_ORDER: Step[] = [
+  'welcome', 'introduction', 'questionnaireIntro', 'cardGame', 'cardGameSummary',
+  'focusControl', 'decisionsPrice', 'interfacesMap', 'coaching', 'teamHealth',
+  'moduleSelection', 'dashboard'
+];
+
 const ManagementCompass: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<Step>(() => {
@@ -44,6 +52,7 @@ const ManagementCompass: React.FC = () => {
     const saved = loadWithExpiry<QuestionnaireData>(STORAGE_KEY);
     return saved || initialQuestionnaireData;
   });
+  const [previousStep, setPreviousStep] = useState<Step | null>(null);
 
   useEffect(() => {
     saveWithExpiry(STORAGE_KEY, data);
@@ -66,6 +75,20 @@ const ManagementCompass: React.FC = () => {
     setCurrentStep('welcome');
   };
 
+  const goToDashboard = () => {
+    setPreviousStep(currentStep);
+    setCurrentStep('dashboard');
+  };
+
+  const goBackFromDashboard = () => {
+    if (previousStep && previousStep !== 'dashboard') {
+      setCurrentStep(previousStep);
+      setPreviousStep(null);
+    }
+  };
+
+  const showDashboardButton = !['welcome', 'introduction', 'dashboard'].includes(currentStep);
+
   const renderStep = () => {
     switch (currentStep) {
       case 'welcome':
@@ -77,6 +100,7 @@ const ManagementCompass: React.FC = () => {
             userInfo={data.userInfo}
             onUserInfoChange={(userInfo: UserInfo) => updateData({ userInfo })}
             onNext={() => setCurrentStep('questionnaireIntro')}
+            onBack={() => setCurrentStep('welcome')}
           />
         );
       
@@ -85,6 +109,7 @@ const ManagementCompass: React.FC = () => {
           <QuestionnaireIntroStep
             userName={data.userInfo?.name || ''}
             onNext={() => setCurrentStep('cardGame')}
+            onBack={() => setCurrentStep('introduction')}
           />
         );
       
@@ -94,7 +119,7 @@ const ManagementCompass: React.FC = () => {
             cardGameData={data.cardGameData}
             onCardGameDataChange={(cardGameData: CardGameData) => updateData({ cardGameData })}
             onNext={() => setCurrentStep('cardGameSummary')}
-            onBack={() => setCurrentStep('introduction')}
+            onBack={() => setCurrentStep('questionnaireIntro')}
           />
         );
       
@@ -103,6 +128,7 @@ const ManagementCompass: React.FC = () => {
           <CardGameSummaryScreen
             cardGameData={data.cardGameData}
             onNext={() => setCurrentStep('focusControl')}
+            onBack={() => setCurrentStep('cardGame')}
           />
         );
       
@@ -116,7 +142,7 @@ const ManagementCompass: React.FC = () => {
             onTimeDrainChange={(drain) => updateData({ timeDrain: drain })}
             onTimeDrainOtherChange={(text) => updateData({ timeDrainOther: text })}
             onNext={() => setCurrentStep('decisionsPrice')}
-            onBack={() => setCurrentStep('cardGame')}
+            onBack={() => setCurrentStep('cardGameSummary')}
           />
         );
       
@@ -174,7 +200,14 @@ const ManagementCompass: React.FC = () => {
         );
       
       case 'dashboard':
-        return <ManagementCompassDashboard data={data} onRestart={handleRestart} onContinue={handleComplete} />;
+        return (
+          <ManagementCompassDashboard 
+            data={data} 
+            onRestart={handleRestart} 
+            onContinue={handleComplete}
+            onBack={previousStep ? goBackFromDashboard : undefined}
+          />
+        );
       
       default:
         return <WelcomeScreen onStart={() => setCurrentStep('cardGame')} />;
@@ -184,6 +217,22 @@ const ManagementCompass: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col" dir="rtl">
       <Header />
+      {showDashboardButton && (
+        <div className="bg-card/80 backdrop-blur-sm border-b border-border px-4 py-2 flex justify-between items-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={goToDashboard}
+            className="gap-2 text-primary hover:text-primary/80"
+          >
+            <LayoutDashboard className="w-4 h-4" />
+            צפייה בדשבורד
+          </Button>
+          <span className="text-xs text-muted-foreground">
+            שלב {STEP_ORDER.indexOf(currentStep) + 1} מתוך {STEP_ORDER.length}
+          </span>
+        </div>
+      )}
       <main className="flex-1">
         {renderStep()}
       </main>

@@ -5,11 +5,13 @@ import { ArrowLeft, ClipboardList, Clock, Brain } from 'lucide-react';
 interface QuestionnaireIntroStepProps {
   userName: string;
   onNext: () => void;
+  onBack?: () => void;
 }
 
 const QuestionnaireIntroStep: React.FC<QuestionnaireIntroStepProps> = ({
   userName,
-  onNext
+  onNext,
+  onBack
 }) => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
@@ -69,7 +71,12 @@ const QuestionnaireIntroStep: React.FC<QuestionnaireIntroStepProps> = ({
           התשובות שלך יעזרו לנו להתאים את התוכנית עבורך
         </p>
 
-        <div className="flex justify-center mt-8">
+        <div className="flex justify-center gap-3 mt-8">
+          {onBack && (
+            <Button variant="outline" onClick={onBack} size="lg">
+              חזרה
+            </Button>
+          )}
           <Button
             onClick={onNext}
             size="lg"

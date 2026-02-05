@@ -17,9 +17,9 @@ const IntroVideo: React.FC = () => {
   useEffect(() => {
     const watched = loadWithExpiry<boolean>('intro_video_completed');
     if (watched) {
-      navigate('/setup/vision');
+      setHasWatched(true);
     }
-  }, [navigate]);
+  }, []);
 
   const handleContinue = () => {
     saveWithExpiry('intro_video_completed', true);

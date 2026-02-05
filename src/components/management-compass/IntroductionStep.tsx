@@ -15,7 +15,8 @@ const IntroductionStep: React.FC<IntroductionStepProps> = ({
   onUserInfoChange,
   onNext
 }) => {
-  const canProceed = userInfo.name.trim() !== '' && userInfo.gender !== '';
+  const safeUserInfo = userInfo || { name: '', gender: '' as 'male' | 'female' | '' };
+  const canProceed = safeUserInfo.name.trim() !== '' && safeUserInfo.gender !== '';
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
@@ -40,8 +41,8 @@ const IntroductionStep: React.FC<IntroductionStepProps> = ({
             </label>
             <Input
               type="text"
-              value={userInfo.name}
-              onChange={(e) => onUserInfoChange({ ...userInfo, name: e.target.value })}
+              value={safeUserInfo.name}
+              onChange={(e) => onUserInfoChange({ ...safeUserInfo, name: e.target.value })}
               placeholder="הכנס את שמך"
               className="text-right"
               dir="rtl"
@@ -54,10 +55,10 @@ const IntroductionStep: React.FC<IntroductionStepProps> = ({
             </label>
             <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => onUserInfoChange({ ...userInfo, gender: 'male' })}
+                onClick={() => onUserInfoChange({ ...safeUserInfo, gender: 'male' })}
                 className={`
                   py-4 px-6 rounded-xl border-2 transition-all text-center
-                  ${userInfo.gender === 'male'
+                  ${safeUserInfo.gender === 'male'
                     ? 'border-primary bg-primary/10 text-primary font-bold'
                     : 'border-border bg-card text-muted-foreground hover:border-primary/50'
                   }
@@ -68,10 +69,10 @@ const IntroductionStep: React.FC<IntroductionStepProps> = ({
               </button>
               
               <button
-                onClick={() => onUserInfoChange({ ...userInfo, gender: 'female' })}
+                onClick={() => onUserInfoChange({ ...safeUserInfo, gender: 'female' })}
                 className={`
                   py-4 px-6 rounded-xl border-2 transition-all text-center
-                  ${userInfo.gender === 'female'
+                  ${safeUserInfo.gender === 'female'
                     ? 'border-primary bg-primary/10 text-primary font-bold'
                     : 'border-border bg-card text-muted-foreground hover:border-primary/50'
                   }

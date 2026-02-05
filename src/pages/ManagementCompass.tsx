@@ -8,7 +8,6 @@ import QuestionnaireIntroStep from '@/components/management-compass/Questionnair
 import CardGameStep from '@/components/management-compass/CardGameStep';
 import CardGameSummaryScreen from '@/components/management-compass/CardGameSummaryScreen';
 import FocusControlStep from '@/components/management-compass/FocusControlStep';
-import TimeEnergyStep from '@/components/management-compass/TimeEnergyStep';
 import DecisionsPriceStep from '@/components/management-compass/DecisionsPriceStep';
 import InterfacesMapStep from '@/components/management-compass/InterfacesMapStep';
 import CoachingStep from '@/components/management-compass/CoachingStep';
@@ -28,7 +27,6 @@ type Step =
   | 'cardGame'
   | 'cardGameSummary'
   | 'focusControl' 
-  | 'timeEnergy' 
   | 'decisionsPrice' 
   | 'interfacesMap' 
   | 'coaching' 
@@ -117,20 +115,8 @@ const ManagementCompass: React.FC = () => {
             onAnchorChange={(score) => updateData({ anchorScore: score })}
             onTimeDrainChange={(drain) => updateData({ timeDrain: drain })}
             onTimeDrainOtherChange={(text) => updateData({ timeDrainOther: text })}
-            onNext={() => setCurrentStep('timeEnergy')}
-            onBack={() => setCurrentStep('cardGame')}
-          />
-        );
-      
-      case 'timeEnergy':
-        return (
-          <TimeEnergyStep
-            quadrants={data.quadrants}
-            breathingSpace={data.breathingSpace}
-            onQuadrantsChange={(quadrants) => updateData({ quadrants })}
-            onBreathingSpaceChange={(score) => updateData({ breathingSpace: score })}
             onNext={() => setCurrentStep('decisionsPrice')}
-            onBack={() => setCurrentStep('focusControl')}
+            onBack={() => setCurrentStep('cardGame')}
           />
         );
       
@@ -144,7 +130,7 @@ const ManagementCompass: React.FC = () => {
             onLongTermPriceChange={(val) => updateData({ longTermPrice: val })}
             onRetrospectiveChange={(val) => updateData({ retrospective: val })}
             onNext={() => setCurrentStep('interfacesMap')}
-            onBack={() => setCurrentStep('timeEnergy')}
+            onBack={() => setCurrentStep('focusControl')}
           />
         );
       

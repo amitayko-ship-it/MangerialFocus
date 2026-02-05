@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
           className="h-10 object-contain"
         />
         <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} מיילסטון. כל הזכויות שמורות.
+          © {new Date().getFullYear()} כל הזכויות שמורות.
         </p>
       </div>
     </footer>

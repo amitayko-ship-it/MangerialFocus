@@ -6,11 +6,11 @@ const Footer: React.FC = () => {
       <div className="max-w-4xl mx-auto flex flex-col items-center gap-3">
         <img 
           src="/milestone-logo.png" 
-          alt="Milestone - Lead By Nature" 
+          alt="מיילסטון - מובילים מטבעם" 
           className="h-10 object-contain"
         />
         <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Milestone. כל הזכויות שמורות.
+          © {new Date().getFullYear()} מיילסטון. כל הזכויות שמורות.
         </p>
       </div>
     </footer>

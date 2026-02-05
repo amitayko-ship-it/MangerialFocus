@@ -6,7 +6,7 @@ const Header: React.FC = () => {
       <div className="max-w-4xl mx-auto flex justify-center">
         <img 
           src="/milestone-logo.png" 
-          alt="Milestone - Lead By Nature" 
+          alt="מיילסטון - מובילים מטבעם" 
           className="h-12 object-contain"
         />
       </div>

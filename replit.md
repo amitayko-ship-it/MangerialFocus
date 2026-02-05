@@ -91,7 +91,7 @@ The app uses Replit's built-in PostgreSQL database. Environment variables are au
 
 ## Onboarding Flow
 
-1. Login/Register → 2. **Management Compass** (9-step assessment) → 3. **Intro Video** → 4. Future Vision (with AI interview) → 5. **Intro Rocks Video** → 6. **Big Rocks Agent** (AI extracts rocks from vision) → 7. Focus Area (Big Rocks with AI check) → 8. Tasks Energy → 9. Stakeholders → 10. Summary → Dashboard
+1. Login/Register → 2. **Management Compass** (9-step assessment) → 3. **Intro Video** → 4. Future Vision (with AI interview) → 5. **Intro Rocks Video** → 6. **Big Rocks Agent** (AI extracts rocks from vision) → 7. Focus Area (Big Rocks with AI check) → 8. Stakeholders → 9. Summary → Dashboard
 
 ### Management Compass Steps (מצפן הניהול)
 The Management Compass is a 10-step assessment that runs without email/password:

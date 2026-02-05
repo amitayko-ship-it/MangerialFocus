@@ -13,7 +13,6 @@ import BigRocksAgent from '@/pages/BigRocksAgent';
 import ManagementCompass from '@/pages/ManagementCompass';
 import FutureVision from '@/pages/setup/FutureVision';
 import FocusAreaSelection from '@/pages/setup/FocusAreaSelection';
-import TasksEnergySetup from '@/pages/setup/TasksEnergySetup';
 import StakeholdersSetup from '@/pages/setup/StakeholdersSetup';
 import OnboardingSummary from '@/pages/setup/OnboardingSummary';
 import Dashboard from '@/pages/Dashboard';
@@ -67,7 +66,6 @@ function AppRoutes() {
       <Route path="/intro-rocks-video" element={<ProtectedRoute><IntroRocksVideo /></ProtectedRoute>} />
       <Route path="/setup/big-rocks-agent" element={<ProtectedRoute><BigRocksAgent /></ProtectedRoute>} />
       <Route path="/setup/focus-area" element={<ProtectedRoute><FocusAreaSelection /></ProtectedRoute>} />
-      <Route path="/setup/tasks-energy" element={<ProtectedRoute><TasksEnergySetup /></ProtectedRoute>} />
       <Route path="/setup/stakeholders" element={<ProtectedRoute><StakeholdersSetup /></ProtectedRoute>} />
       <Route path="/setup/summary" element={<ProtectedRoute><OnboardingSummary /></ProtectedRoute>} />
 

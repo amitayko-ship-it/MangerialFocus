@@ -43,7 +43,7 @@ export default function FocusAreaSelection() {
     try {
       saveWithExpiry('big-rocks-order', rocks);
       toast.success('האבנים הגדולות נשמרו בהצלחה');
-      navigate('/setup/tasks-energy');
+      navigate('/setup/stakeholders');
     } catch (error) {
       console.error('Error:', error);
       toast.error('שגיאה בשמירה');
@@ -86,7 +86,7 @@ export default function FocusAreaSelection() {
                 onRocksChange={setRocks}
                 maxRocks={5}
                 title="האבנים הגדולות"
-                subtitle="גרור כדי לשנות סדר עדיפות. הראשונה היא הכי חשובה."
+                subtitle="ערוך, הוסף או הסר אבנים גדולות לפי הצורך."
                 showBreakthroughStar={true}
                 isRTL={true}
                 addRockLabel="הוסף אבן גדולה"

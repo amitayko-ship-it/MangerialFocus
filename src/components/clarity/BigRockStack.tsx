@@ -1,23 +1,8 @@
 import { useState } from 'react';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
 import { Plus, Sparkles, MessageSquare, Loader2, Check, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { SortableRock } from './SortableRock';
+import { RockCard } from './RockCard';
 import { BigRock } from '@/types/focus';
 import { useCoachAgent } from '@/hooks/useCoachAgent';
 
@@ -52,26 +37,6 @@ export default function BigRockStack({
   const [newRockTitle, setNewRockTitle] = useState('');
   const [clarification, setClarification] = useState<{ isRock: boolean; feedback: string; suggestion?: string } | null>(null);
   const { clarifyRock, clarifyLoading } = useCoachAgent();
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = rocks.findIndex((r) => r.id === active.id);
-      const newIndex = rocks.findIndex((r) => r.id === over.id);
-
-      const reordered = arrayMove(rocks, oldIndex, newIndex);
-      const updated = reordered.map((rock, idx) => ({ ...rock, order: idx }));
-      onRocksChange(updated);
-    }
-  };
 
   const handleCheckRock = async () => {
     if (newRockTitle.trim()) {
@@ -146,27 +111,19 @@ export default function BigRockStack({
         </p>
       </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={rocks.map((r) => r.id)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-3">
-            {rocks.map((rock) => (
-              <SortableRock
-                key={rock.id}
-                rock={rock}
-                onRemove={() => handleRemoveRock(rock.id)}
-                onTitleChange={(value) => handleTitleChange(rock.id, value)}
-                onPracticeChange={(idx, value) => handlePracticeChange(rock.id, idx, value)}
-                isRTL={isRTL}
-                practiceLabel={practiceLabel}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+      <div className="space-y-3">
+        {rocks.map((rock) => (
+          <RockCard
+            key={rock.id}
+            rock={rock}
+            onRemove={() => handleRemoveRock(rock.id)}
+            onTitleChange={(value) => handleTitleChange(rock.id, value)}
+            onPracticeChange={(idx, value) => handlePracticeChange(rock.id, idx, value)}
+            isRTL={isRTL}
+            practiceLabel={practiceLabel}
+          />
+        ))}
+      </div>
 
       {isAdding ? (
         <div className="bg-white rounded-lg border p-4 space-y-3">

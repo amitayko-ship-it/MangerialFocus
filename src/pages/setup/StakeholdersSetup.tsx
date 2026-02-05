@@ -63,7 +63,7 @@ export default function StakeholdersSetup() {
   };
 
   const handleBack = () => {
-    navigate('/setup/tasks-energy');
+    navigate('/setup/focus-area');
   };
 
   return (

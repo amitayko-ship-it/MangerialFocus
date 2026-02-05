@@ -23,6 +23,8 @@ src/
 │   ├── auth/          # Authentication-related components
 │   ├── clarity/       # Big rocks and focus components
 │   ├── dashboard/     # Dashboard components
+│   ├── management-compass/  # Management Compass assessment components
+│   │   └── layout/    # Header/Footer for compass section
 │   └── vision/        # Vision board components
 ├── contexts/          # React contexts (Auth, Language)
 ├── hooks/             # Custom React hooks
@@ -30,6 +32,7 @@ src/
 ├── integrations/      # External service integrations (Supabase)
 ├── lib/               # Utility functions
 ├── pages/             # Page components
+│   ├── ManagementCompass.tsx # Management assessment (first step)
 │   ├── IntroVideo.tsx # YouTube intro before FutureVision
 │   └── setup/         # Onboarding flow pages
 └── types/             # TypeScript type definitions
@@ -84,10 +87,33 @@ Without these, the app runs in demo mode with a mock user.
 
 ## Onboarding Flow
 
-1. Login/Signup → 2. **Intro Video** → 3. Future Vision (with AI interview) → 4. **Intro Rocks Video** → 5. Focus Area (Big Rocks with AI check) → 6. Tasks Energy → 7. Stakeholders → 8. Summary → Dashboard
+1. Login/Signup → 2. **Management Compass** (10-step assessment) → 3. **Intro Video** → 4. Future Vision (with AI interview) → 5. **Intro Rocks Video** → 6. Focus Area (Big Rocks with AI check) → 7. Tasks Energy → 8. Stakeholders → 9. Summary → Dashboard
+
+### Management Compass Steps (מצפן הניהול)
+The Management Compass is a 10-step assessment that runs without email/password:
+1. Welcome Screen
+2. Card Game (forced-choice selection across 5 categories)
+3. Card Game Summary
+4. Focus Control (anchor score + time drain)
+5. Time & Energy (4 quadrants + breathing space)
+6. Decisions Price (immediate/long-term)
+7. Interfaces Map (9-step journey)
+8. Coaching (7 layers)
+9. Team Health (Lencioni 5 dysfunctions)
+10. Module Selection + Dashboard
+
+Data persists in localStorage with 7-day expiry.
 
 ## Recent Changes
 
+- **Integrated Management Compass** (מצפן הניהול):
+  - 10-step management assessment imported from leadtheway project
+  - Runs as first step in onboarding (no email/password required)
+  - Card games, focus control, time/energy analysis, decision pricing
+  - Interface mapping, coaching evaluation, team health assessment
+  - Module selection with full/light depth calculation
+  - localStorage persistence with 7-day expiry
+  - Hebrew RTL interface with Milestone branding
 - Added AI coach features using Replit AI Integrations (OpenAI):
   - IntroVideo page with YouTube embed between Questionnaire and FutureVision
   - AI reflection feature after completing Future Vision

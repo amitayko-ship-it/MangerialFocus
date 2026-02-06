@@ -91,7 +91,14 @@ The app uses Replit's built-in PostgreSQL database. Environment variables are au
 
 ## Onboarding Flow
 
-1. Login/Register → 2. **Management Compass** (9-step assessment) → 3. **Intro Video** → 4. Future Vision (with AI interview) → 5. **Intro Rocks Video** → 6. **Big Rocks Agent** (AI extracts rocks from vision) → 7. Focus Area (Big Rocks with AI check) → 8. Stakeholders → 9. Summary → Dashboard
+1. Login/Register → 2. **Management Compass** (9-step assessment) → 3. **Intro Video** → 4. Future Vision (with AI interview) → 5. **Intro Rocks Video** → 6. **Big Rocks Agent** (AI extracts rocks from vision) → 7. Focus Area (Big Rocks editing) → 8. **Execution Stakeholders** → 9. **30 Day Plan** → 10. **Keystone & Success** → Dashboard
+
+### Execution Plan Flow (from "Create New Plan" or after Focus Area)
+Deterministic UI flow (no AI) for converting big rocks into actionable plans:
+1. **Execution Stakeholders** (`/setup/execution-stakeholders`) - Add people with roles (Partner/Approver/FYI), ask text, message generator with copy, status tracking
+2. **30 Day Plan** (`/setup/thirty-day-plan`) - Schedule practices: frequency (1-7/week), duration (15/30/45/60 min), time window (morning/afternoon/evening), energy meter, auto-schedule calendar view
+3. **Keystone & Success** (`/setup/keystone-success`) - Keystone habit (trigger + action, 5 min fixed) + measurable success metric
+Data stored in localStorage: `execution-stakeholders`, `execution-plan`, `keystone-success`
 
 ### Management Compass Steps (מצפן הניהול)
 The Management Compass is a 10-step assessment that runs without email/password:

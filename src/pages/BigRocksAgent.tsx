@@ -141,7 +141,11 @@ const BigRocksAgent: React.FC = () => {
         const openingMessage: ChatMessage = { role: 'assistant', content: openingText };
 
         if (visionText) {
-          setMessages([openingMessage]);
+          const visionPreview = visionText.length > 200
+            ? visionText.substring(0, 200) + '...'
+            : visionText;
+          const userVisionMessage: ChatMessage = { role: 'user', content: visionPreview };
+          setMessages([openingMessage, userVisionMessage]);
           setInitialLoading(false);
           setIsLoading(true);
 
@@ -162,7 +166,7 @@ const BigRocksAgent: React.FC = () => {
             if (rocksResponse.ok) {
               const rocksData = await rocksResponse.json();
               const assistantMessage: ChatMessage = { role: 'assistant', content: rocksData.response };
-              setMessages([openingMessage, assistantMessage]);
+              setMessages([openingMessage, userVisionMessage, assistantMessage]);
 
               const rocks = extractRocksFromResponse(rocksData.response);
               if (rocks) {

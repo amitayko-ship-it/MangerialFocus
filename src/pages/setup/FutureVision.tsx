@@ -80,6 +80,14 @@ const FutureVision: React.FC = () => {
   };
 
   const handleSkip = () => {
+    const userVisionMessages = messages
+      .filter(m => m.role === 'user')
+      .map(m => m.content)
+      .join('\n\n');
+    const visionText = narrative || userVisionMessages;
+    if (visionText) {
+      saveWithExpiry('vision-narrative', visionText);
+    }
     navigate('/intro-rocks-video');
   };
 

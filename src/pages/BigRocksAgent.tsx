@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, ChevronLeft, ArrowRight } from 'lucide-react';
+import { Send, Loader2, ChevronLeft, ArrowRight, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { loadWithExpiry, saveWithExpiry } from '@/lib/storageUtils';
@@ -567,13 +567,23 @@ const BigRocksAgent: React.FC = () => {
               </Button>
             </div>
 
+            {activeMessages.filter(m => m.role === 'user').length >= 1 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSkip}
+                disabled={isLoading}
+                className="w-full mt-2 text-muted-foreground gap-1"
+              >
+                <Check className="w-4 h-4" />
+                זהו, סיימתי – אפשר להמשיך הלאה
+              </Button>
+            )}
+
             <div className="flex justify-between items-center mt-3">
               <Button variant="ghost" size="sm" onClick={handleBack} className="gap-1 text-muted-foreground">
                 <ArrowRight className="w-4 h-4" />
                 חזרה
-              </Button>
-              <Button variant="ghost" size="sm" onClick={handleSkip} className="text-muted-foreground">
-                דלג בינתיים
               </Button>
             </div>
           </div>

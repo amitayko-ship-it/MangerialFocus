@@ -226,7 +226,7 @@ const FutureVision: React.FC = () => {
                       className="w-full text-muted-foreground"
                     >
                       <Check className="w-4 h-4" />
-                      סיימתי, בוא נמשיך להגדרת האבנים הגדולות
+                      זהו, סיימתי – אפשר להמשיך הלאה
                     </Button>
                   )}
                 </div>

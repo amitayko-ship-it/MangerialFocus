@@ -49,7 +49,12 @@ const Dashboard: React.FC = () => {
 
     setLoading(true);
     try {
-      // Load active focus plan
+      if (!supabase) {
+        setFocusPlan(null);
+        setLoading(false);
+        return;
+      }
+
       const { data: planData, error: planError } = await supabase
         .from('focus_plans')
         .select('id, weekly_work_hours, tasks')
@@ -64,7 +69,6 @@ const Dashboard: React.FC = () => {
       setFocusPlan(planData);
 
       if (planData) {
-        // Load current week's check-in
         const { data: currentCheck } = await supabase
           .from('weekly_checks')
           .select('*')
@@ -75,7 +79,6 @@ const Dashboard: React.FC = () => {
 
         setCurrentWeekCheck(currentCheck);
 
-        // Load all weekly checks for the journey
         const { data: allChecks } = await supabase
           .from('weekly_checks')
           .select('*')
@@ -129,7 +132,7 @@ const Dashboard: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => navigate('/setup/focus-areas')}>
+              <Button onClick={() => navigate('/setup/focus-area')}>
                 <Plus className="h-4 w-4 mr-2" />
                 {t.dashboard.createPlan}
               </Button>

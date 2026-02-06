@@ -94,11 +94,13 @@ const BigRocksAgent: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const [phase, setPhase] = useState<'rocks' | 'practices'>('rocks');
+  const [phase, setPhase] = useState<'rocks' | 'practices' | 'summary'>('rocks');
   const [selectedRockIndex, setSelectedRockIndex] = useState<number | null>(null);
   const [showRockSelection, setShowRockSelection] = useState(false);
   const [practicesMessages, setPracticesMessages] = useState<ChatMessage[]>([]);
   const [extractedPractices, setExtractedPractices] = useState<ExtractedPractices | null>(null);
+  const [allPractices, setAllPractices] = useState<Record<number, string[]>>({});
+  const [keystoneHabit, setKeystoneHabit] = useState<string>('');
 
   const getUserInfo = () => {
     const raw = localStorage.getItem('questionnaire-data');
@@ -321,25 +323,62 @@ const BigRocksAgent: React.FC = () => {
   const handleContinueWithPractices = () => {
     if (!extractedRocks) return;
 
+    const initial: Record<number, string[]> = {};
+    extractedRocks.forEach((_, i) => {
+      if (i === selectedRockIndex && extractedPractices) {
+        initial[i] = extractedPractices.practices.map(p =>
+          p.cadence ? `${p.name} (${p.cadence})` : p.name
+        );
+        while (initial[i].length < 3) initial[i].push('');
+      } else {
+        initial[i] = ['', '', ''];
+      }
+    });
+    setAllPractices(initial);
+    if (extractedPractices?.keystone) {
+      setKeystoneHabit(extractedPractices.keystone);
+    }
+    setPhase('summary');
+  };
+
+  const handleSaveAndContinue = () => {
+    if (!extractedRocks) return;
+
     const bigRocks: BigRock[] = extractedRocks.map((title, index) => ({
       id: `rock-${Date.now()}-${index}`,
       title,
       order: index,
-      practices: index === selectedRockIndex && extractedPractices
-        ? extractedPractices.practices.map(p => p.cadence ? `${p.name} (${p.cadence})` : p.name)
-        : [],
+      practices: (allPractices[index] || ['', '', '']).filter(p => p.trim() !== ''),
       isBreakthrough: index === 0
     }));
 
-    if (extractedPractices?.keystone) {
-      saveWithExpiry('keystone-habit', extractedPractices.keystone);
+    if (keystoneHabit) {
+      saveWithExpiry('keystone-habit', keystoneHabit);
     }
 
     saveWithExpiry('big-rocks-order', bigRocks);
     navigate('/setup/focus-area');
   };
 
+  const updatePractice = (rockIndex: number, practiceIndex: number, value: string) => {
+    setAllPractices(prev => {
+      const updated = { ...prev };
+      const arr = [...(updated[rockIndex] || ['', '', ''])];
+      arr[practiceIndex] = value;
+      updated[rockIndex] = arr;
+      return updated;
+    });
+  };
+
   const handleBack = () => {
+    if (phase === 'summary') {
+      if (selectedRockIndex !== null) {
+        setPhase('practices');
+      } else {
+        setPhase('rocks');
+      }
+      return;
+    }
     if (phase === 'practices') {
       setPhase('rocks');
       setSelectedRockIndex(null);
@@ -352,17 +391,16 @@ const BigRocksAgent: React.FC = () => {
   };
 
   const handleSkip = () => {
-    if (phase === 'practices' && extractedRocks) {
-      const bigRocks: BigRock[] = extractedRocks.map((title, index) => ({
-        id: `rock-${Date.now()}-${index}`,
-        title,
-        order: index,
-        practices: [],
-        isBreakthrough: index === 0
-      }));
-      saveWithExpiry('big-rocks-order', bigRocks);
+    if (!extractedRocks) {
+      navigate('/setup/focus-area');
+      return;
     }
-    navigate('/setup/focus-area');
+    const initial: Record<number, string[]> = {};
+    extractedRocks.forEach((_, i) => {
+      initial[i] = ['', '', ''];
+    });
+    setAllPractices(initial);
+    setPhase('summary');
   };
 
   const autoResize = () => {
@@ -387,71 +425,77 @@ const BigRocksAgent: React.FC = () => {
     );
   }
 
-  const showInput = phase === 'practices'
-    ? !extractedPractices
-    : !extractedRocks;
+  const showInput = phase === 'summary'
+    ? false
+    : phase === 'practices'
+      ? !extractedPractices
+      : !extractedRocks;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex flex-col" dir="rtl">
       <Header />
 
       <main className="flex-1 flex flex-col max-w-3xl mx-auto w-full p-4">
-        {phase === 'practices' && selectedRockIndex !== null && extractedRocks && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-4"
-          >
-            <div className="flex items-center gap-2 text-sm text-foreground">
-              <span>🪨</span>
-              <span className="font-medium">אבן גדולה:</span>
-              <span>{extractedRocks[selectedRockIndex]}</span>
-            </div>
-          </motion.div>
-        )}
-
-        <div className="flex-1 overflow-y-auto space-y-4 pb-4">
-          <AnimatePresence>
-            {activeMessages.map((msg, i) => (
+        {phase !== 'summary' && (
+          <>
+            {phase === 'practices' && selectedRockIndex !== null && extractedRocks && (
               <motion.div
-                key={`${phase}-${i}`}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className={`flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'}`}
+                className="bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 mb-4"
               >
-                <div
-                  className={`max-w-[85%] rounded-2xl px-5 py-4 ${
-                    msg.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-card border border-border shadow-sm'
-                  }`}
-                >
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {msg.role === 'assistant' ? cleanMessageForDisplay(msg.content) : msg.content}
-                  </div>
+                <div className="flex items-center gap-2 text-sm text-foreground">
+                  <span>🪨</span>
+                  <span className="font-medium">אבן גדולה:</span>
+                  <span>{extractedRocks[selectedRockIndex]}</span>
                 </div>
               </motion.div>
-            ))}
-          </AnimatePresence>
+            )}
 
-          {isLoading && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex justify-end"
-            >
-              <div className="bg-card border border-border rounded-2xl px-5 py-4 shadow-sm">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm">חושב...</span>
-                </div>
-              </div>
-            </motion.div>
-          )}
+            <div className="flex-1 overflow-y-auto space-y-4 pb-4">
+              <AnimatePresence>
+                {activeMessages.map((msg, i) => (
+                  <motion.div
+                    key={`${phase}-${i}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className={`flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'}`}
+                  >
+                    <div
+                      className={`max-w-[85%] rounded-2xl px-5 py-4 ${
+                        msg.role === 'user'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-card border border-border shadow-sm'
+                      }`}
+                    >
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                        {msg.role === 'assistant' ? cleanMessageForDisplay(msg.content) : msg.content}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
 
-          <div ref={messagesEndRef} />
-        </div>
+              {isLoading && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex justify-end"
+                >
+                  <div className="bg-card border border-border rounded-2xl px-5 py-4 shadow-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-sm">חושב...</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
+          </>
+        )}
 
         {phase === 'rocks' && extractedRocks && !showRockSelection && selectedRockIndex === null && (
           <motion.div
@@ -541,6 +585,65 @@ const BigRocksAgent: React.FC = () => {
               <ChevronLeft className="w-4 h-4" />
               המשך
             </Button>
+          </motion.div>
+        )}
+
+        {phase === 'summary' && extractedRocks && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6 pb-4"
+          >
+            <h3 className="font-bold text-foreground text-lg text-center">אבנים גדולות ופרקטיקות</h3>
+            {extractedRocks.map((rock, rockIdx) => (
+              <div key={rockIdx} className="bg-card border border-border rounded-2xl p-4 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-lg">🪨</span>
+                  <span className="font-bold text-foreground">{rock}</span>
+                </div>
+                <div className="space-y-2">
+                  {[0, 1, 2].map(pIdx => {
+                    const val = (allPractices[rockIdx] || ['', '', ''])[pIdx] || '';
+                    const isFilled = val.trim() !== '';
+                    return (
+                      <div key={pIdx} className="flex items-center gap-2">
+                        <span className={`text-sm ${isFilled ? 'text-primary' : 'text-muted-foreground'}`}>
+                          {isFilled ? '⚡' : `${pIdx + 1}.`}
+                        </span>
+                        <input
+                          type="text"
+                          value={val}
+                          onChange={(e) => updatePractice(rockIdx, pIdx, e.target.value)}
+                          placeholder="פרקטיקה חוזרת..."
+                          className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            {keystoneHabit && (
+              <div className="flex items-start gap-3 p-3 bg-primary/10 border border-primary/20 rounded-xl">
+                <span className="text-lg">🔑</span>
+                <div>
+                  <span className="text-xs text-muted-foreground">הרגל מפתח</span>
+                  <p className="text-foreground font-medium">{keystoneHabit}</p>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2 pt-2">
+              <Button onClick={handleSaveAndContinue} size="lg" className="w-full gap-2">
+                <ChevronLeft className="w-4 h-4" />
+                המשך
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleBack} className="w-full gap-1 text-muted-foreground">
+                <ArrowRight className="w-4 h-4" />
+                חזרה
+              </Button>
+            </div>
           </motion.div>
         )}
 

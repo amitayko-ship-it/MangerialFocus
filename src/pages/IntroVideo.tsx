@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Target, ChevronLeft } from 'lucide-react';
+import { Target, ChevronLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -105,6 +105,27 @@ const IntroVideo: React.FC = () => {
               {isRTL ? 'דלג בינתיים' : 'Skip for now'}
             </Button>
           </motion.div>
+
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/compass')}
+              className="gap-1 text-muted-foreground"
+            >
+              {isRTL ? (
+                <>
+                  <ArrowRight className="w-4 h-4" />
+                  חזרה
+                </>
+              ) : (
+                <>
+                  <ArrowRight className="w-4 h-4 rotate-180" />
+                  Back
+                </>
+              )}
+            </Button>
+          </div>
 
           <p className="text-center text-xs text-muted-foreground">
             {isRTL 

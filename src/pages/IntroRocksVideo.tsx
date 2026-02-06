@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/management-compass/layout/Header';
 import Footer from '@/components/management-compass/layout/Footer';
@@ -75,6 +75,18 @@ const IntroRocksVideo: React.FC = () => {
               דלג בינתיים
             </Button>
           </motion.div>
+
+          <div className="flex justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/setup/vision')}
+              className="gap-1 text-muted-foreground"
+            >
+              <ArrowRight className="w-4 h-4" />
+              חזרה
+            </Button>
+          </div>
 
           <p className="text-center text-xs text-muted-foreground">
             הסוכן מציע ניסוח ושיקוף בלבד. הבחירה וההחלטה תמיד שלך.

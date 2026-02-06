@@ -132,7 +132,7 @@ const Dashboard: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => navigate('/setup/focus-area')}>
+              <Button onClick={() => navigate('/setup/execution-stakeholders')}>
                 <Plus className="h-4 w-4 mr-2" />
                 {t.dashboard.createPlan}
               </Button>

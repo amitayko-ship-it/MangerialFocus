@@ -4,7 +4,6 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
 import { Toaster } from 'sonner';
 
-// Pages
 import AuthPage from '@/pages/AuthPage';
 import Questionnaire from '@/pages/Questionnaire';
 import IntroVideo from '@/pages/IntroVideo';
@@ -14,6 +13,9 @@ import ManagementCompass from '@/pages/ManagementCompass';
 import FutureVision from '@/pages/setup/FutureVision';
 import FocusAreaSelection from '@/pages/setup/FocusAreaSelection';
 import StakeholdersSetup from '@/pages/setup/StakeholdersSetup';
+import ExecutionStakeholders from '@/pages/setup/ExecutionStakeholders';
+import ThirtyDayPlan from '@/pages/setup/ThirtyDayPlan';
+import KeystoneSuccess from '@/pages/setup/KeystoneSuccess';
 import OnboardingSummary from '@/pages/setup/OnboardingSummary';
 import Dashboard from '@/pages/Dashboard';
 import WeeklyCheckIn from '@/pages/WeeklyCheckIn';
@@ -52,13 +54,9 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public auth routes */}
       <Route path="/login" element={<PublicRoute><AuthPage /></PublicRoute>} />
-
-      {/* Public feedback form (no auth required) */}
       <Route path="/feedback/:token" element={<FeedbackPage />} />
 
-      {/* Onboarding flow */}
       <Route path="/management-compass" element={<ProtectedRoute><ManagementCompass /></ProtectedRoute>} />
       <Route path="/questionnaire" element={<ProtectedRoute><Questionnaire /></ProtectedRoute>} />
       <Route path="/intro-video" element={<ProtectedRoute><IntroVideo /></ProtectedRoute>} />
@@ -67,13 +65,14 @@ function AppRoutes() {
       <Route path="/setup/big-rocks-agent" element={<ProtectedRoute><BigRocksAgent /></ProtectedRoute>} />
       <Route path="/setup/focus-area" element={<ProtectedRoute><FocusAreaSelection /></ProtectedRoute>} />
       <Route path="/setup/stakeholders" element={<ProtectedRoute><StakeholdersSetup /></ProtectedRoute>} />
+      <Route path="/setup/execution-stakeholders" element={<ProtectedRoute><ExecutionStakeholders /></ProtectedRoute>} />
+      <Route path="/setup/thirty-day-plan" element={<ProtectedRoute><ThirtyDayPlan /></ProtectedRoute>} />
+      <Route path="/setup/keystone-success" element={<ProtectedRoute><KeystoneSuccess /></ProtectedRoute>} />
       <Route path="/setup/summary" element={<ProtectedRoute><OnboardingSummary /></ProtectedRoute>} />
 
-      {/* Main app */}
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/weekly-check" element={<ProtectedRoute><WeeklyCheckIn /></ProtectedRoute>} />
 
-      {/* Default redirect */}
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

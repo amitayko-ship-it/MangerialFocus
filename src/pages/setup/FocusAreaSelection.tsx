@@ -43,7 +43,7 @@ export default function FocusAreaSelection() {
     try {
       saveWithExpiry('big-rocks-order', rocks);
       toast.success('האבנים הגדולות נשמרו בהצלחה');
-      navigate('/setup/stakeholders');
+      navigate('/setup/execution-stakeholders');
     } catch (error) {
       console.error('Error:', error);
       toast.error('שגיאה בשמירה');

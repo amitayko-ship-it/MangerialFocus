@@ -1,5 +1,8 @@
 export type FocusArea = 'big-rocks' | 'interfaces' | 'managing-up' | 'strategy';
 
+export type StakeholderRole = 'partner' | 'approver' | 'fyi';
+export type StakeholderStatus = 'none' | 'asked' | 'approved';
+
 export interface Stakeholder {
   name: string;
   role: string;
@@ -10,12 +13,54 @@ export interface Stakeholder {
   frequency?: string;
 }
 
+export interface ExecutionStakeholder {
+  id: string;
+  name: string;
+  role: StakeholderRole;
+  ask: string;
+  status: StakeholderStatus;
+}
+
 export interface BigRock {
   id: string;
   title: string;
   order: number;
   practices?: string[];
   isBreakthrough?: boolean;
+}
+
+export type TimeWindow = 'morning' | 'afternoon' | 'evening';
+
+export interface PracticeSchedule {
+  practice: string;
+  weeklyFrequency: number;
+  duration: 15 | 30 | 45 | 60;
+  timeWindow: TimeWindow;
+}
+
+export interface ScheduledEvent {
+  practice: string;
+  day: number;
+  timeWindow: TimeWindow;
+  duration: number;
+}
+
+export interface ExecutionPlan {
+  rockTitle: string;
+  practices: PracticeSchedule[];
+  scheduledEvents: ScheduledEvent[];
+  totalWeeklyMinutes: number;
+}
+
+export interface KeystoneHabit {
+  trigger: string;
+  action: string;
+  duration: number;
+}
+
+export interface KeystoneSuccess {
+  keystone: KeystoneHabit;
+  successMetric: string;
 }
 
 export interface OnboardingData {

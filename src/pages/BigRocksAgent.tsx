@@ -14,8 +14,13 @@ interface ChatMessage {
   content: string;
 }
 
+interface PracticeItem {
+  name: string;
+  cadence: string;
+}
+
 interface ExtractedPractices {
-  practices: string[];
+  practices: PracticeItem[];
   keystone: string;
 }
 
@@ -41,26 +46,31 @@ function extractRocksFromResponse(text: string): string[] | null {
   return null;
 }
 
+function normalizePractices(parsed: any): ExtractedPractices | null {
+  if (!parsed.practices || !Array.isArray(parsed.practices) || parsed.practices.length < 1) return null;
+  const practices: PracticeItem[] = parsed.practices.map((p: any) => {
+    if (typeof p === 'string') return { name: p, cadence: '' };
+    return { name: p.name || '', cadence: p.cadence || '' };
+  });
+  const keystone = parsed.keystone_habit || parsed.keystone || '';
+  return { practices, keystone };
+}
+
 function extractPracticesFromResponse(text: string): ExtractedPractices | null {
   const fencedMatch = text.match(/```\w*\s*([\s\S]*?)```/);
   if (fencedMatch) {
     try {
       const parsed = JSON.parse(fencedMatch[1].trim());
-      if (parsed.practices && Array.isArray(parsed.practices) && parsed.practices.length >= 1) {
-        return { practices: parsed.practices, keystone: parsed.keystone || '' };
-      }
+      const result = normalizePractices(parsed);
+      if (result) return result;
     } catch {}
   }
   try {
-    const inlineMatch = text.match(/\{"practices"\s*:\s*\[[\s\S]*?\]/);
-    if (inlineMatch) {
-      const fullMatch = text.match(/\{"practices"\s*:\s*\[[\s\S]*?\][\s\S]*?\}/);
-      if (fullMatch) {
-        const parsed = JSON.parse(fullMatch[0]);
-        if (parsed.practices && Array.isArray(parsed.practices) && parsed.practices.length >= 1) {
-          return { practices: parsed.practices, keystone: parsed.keystone || '' };
-        }
-      }
+    const jsonMatch = text.match(/\{[\s\S]*"practices"\s*:\s*\[[\s\S]*\][\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      const result = normalizePractices(parsed);
+      if (result) return result;
     }
   } catch {}
   return null;
@@ -70,7 +80,7 @@ function cleanMessageForDisplay(text: string): string {
   return text
     .replace(/```\w*\s*[\s\S]*?```/g, '')
     .replace(/\{"rocks"\s*:\s*\[[\s\S]*?\]\}/g, '')
-    .replace(/\{"practices"\s*:\s*\[[\s\S]*?\][\s\S]*?\}/g, '')
+    .replace(/\{[\s\S]*"practices"\s*:\s*\[[\s\S]*\][\s\S]*\}/g, '')
     .trim();
 }
 
@@ -191,8 +201,7 @@ const BigRocksAgent: React.FC = () => {
 
     const { userName, userGender } = getUserInfo();
     const gWrite = userGender === 'female' ? 'כתבי' : 'כתוב';
-    const gPersist = userGender === 'female' ? 'תתמידי' : 'תתמיד';
-    const fallbackPracticesOpening = `מעבר מאבן גדולה לתנועה יומיומית\n\nאבן גדולה לא מתממשת מהחלטה חד-פעמית.\nהיא מתקדמת דרך פרקטיקות קבועות שחוזרות על עצמן ובונות ערך מצטבר לאורך זמן.\n\nנתחיל ממך.\n\n${gWrite} מהן 3 הפרקטיקות המרכזיות שלדעתך, אם ${gPersist} בהן, יקדמו את האבן הגדולה שבחרת.`;
+    const fallbackPracticesOpening = `${gWrite} 3 פרקטיקות מרכזיות שיעזרו לקדם את האבן הזו בשגרה.`;
 
     try {
       const response = await fetch('/api/coach/practices', {
@@ -317,7 +326,7 @@ const BigRocksAgent: React.FC = () => {
       title,
       order: index,
       practices: index === selectedRockIndex && extractedPractices
-        ? extractedPractices.practices
+        ? extractedPractices.practices.map(p => p.cadence ? `${p.name} (${p.cadence})` : p.name)
         : [],
       isBreakthrough: index === 0
     }));
@@ -510,7 +519,12 @@ const BigRocksAgent: React.FC = () => {
               {extractedPractices.practices.map((practice, i) => (
                 <div key={i} className="flex items-start gap-3 p-3 bg-accent/50 rounded-xl">
                   <span className="text-lg">⚡</span>
-                  <span className="text-foreground font-medium">{practice}</span>
+                  <div className="flex-1">
+                    <span className="text-foreground font-medium">{practice.name}</span>
+                    {practice.cadence && (
+                      <span className="text-muted-foreground text-sm mr-2"> | {practice.cadence}</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

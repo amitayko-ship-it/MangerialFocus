@@ -217,7 +217,7 @@ const FutureVision: React.FC = () => {
                     isRTL={isRTL}
                     placeholder={vt.placeholder}
                   />
-                  {userMessageCount >= 3 && (
+                  {userMessageCount >= 1 && (
                     <Button
                       variant="outline"
                       size="sm"

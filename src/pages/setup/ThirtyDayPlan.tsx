@@ -9,6 +9,7 @@ import Footer from '@/components/management-compass/layout/Footer';
 import ExecutionNavBar from '@/components/execution/ExecutionNavBar';
 import { saveWithExpiry, loadWithExpiry } from '@/lib/storageUtils';
 import { BigRock, PracticeSchedule, ScheduledEvent, TimeWindow } from '@/types/focus';
+import { toast } from 'sonner';
 
 const DURATION_OPTIONS = [15, 30, 45, 60] as const;
 const FREQUENCY_OPTIONS = [1, 2, 3, 4, 5, 6, 7];
@@ -95,7 +96,8 @@ export default function ThirtyDayPlan() {
       events: scheduledEvents,
       totalWeeklyMinutes,
     });
-    navigate('/setup/keystone-success');
+    toast.success('התוכנית נשמרה!');
+    navigate('/dashboard');
   };
 
   const handleBack = () => {
@@ -105,7 +107,7 @@ export default function ThirtyDayPlan() {
       events: scheduledEvents,
       totalWeeklyMinutes,
     });
-    navigate('/setup/execution-stakeholders');
+    navigate('/setup/keystone-success');
   };
 
   const getEventsForDay = (day: number) =>
@@ -289,7 +291,7 @@ export default function ThirtyDayPlan() {
               חזרה
             </Button>
             <Button onClick={handleContinue} className="flex-1">
-              המשך
+              סיום ומעבר לדשבורד
               <ChevronLeft className="h-4 w-4 mr-2" />
             </Button>
           </div>

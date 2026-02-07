@@ -125,7 +125,7 @@ export default function ExecutionStakeholders() {
 
   const handleContinue = () => {
     saveWithExpiry('execution-stakeholders', stakeholders);
-    navigate('/setup/thirty-day-plan');
+    navigate('/setup/keystone-success');
   };
 
   const handleBack = () => {

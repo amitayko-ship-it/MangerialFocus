@@ -68,8 +68,7 @@ export default function KeystoneSuccess() {
     };
 
     saveWithExpiry('keystone-success', data);
-    toast.success('התוכנית נשמרה!');
-    navigate('/dashboard');
+    navigate('/setup/thirty-day-plan');
   };
 
   const handleBack = () => {
@@ -80,7 +79,7 @@ export default function KeystoneSuccess() {
         successMetric: successMetric.trim(),
       });
     }
-    navigate('/setup/thirty-day-plan');
+    navigate('/setup/execution-stakeholders');
   };
 
   return (
@@ -190,7 +189,7 @@ export default function KeystoneSuccess() {
               className="flex-1"
               disabled={!action.trim() || !successMetric.trim()}
             >
-              סיום ומעבר לדשבורד
+              המשך
               <ChevronLeft className="h-4 w-4 mr-2" />
             </Button>
           </div>

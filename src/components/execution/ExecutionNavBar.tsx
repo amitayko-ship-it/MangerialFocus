@@ -9,14 +9,14 @@ const STEPS = [
     icon: Users,
   },
   {
-    path: '/setup/thirty-day-plan',
-    label: 'תוכנית 30 יום',
-    icon: Calendar,
-  },
-  {
     path: '/setup/keystone-success',
     label: 'הרגל מפתח',
     icon: Target,
+  },
+  {
+    path: '/setup/thirty-day-plan',
+    label: 'תוכנית 30 יום',
+    icon: Calendar,
   },
 ];
 

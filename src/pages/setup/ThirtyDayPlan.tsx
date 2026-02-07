@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Header from '@/components/management-compass/layout/Header';
 import Footer from '@/components/management-compass/layout/Footer';
+import ExecutionNavBar from '@/components/execution/ExecutionNavBar';
 import { saveWithExpiry, loadWithExpiry } from '@/lib/storageUtils';
 import { BigRock, PracticeSchedule, ScheduledEvent, TimeWindow } from '@/types/focus';
 
@@ -120,6 +121,7 @@ export default function ThirtyDayPlan() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex flex-col" dir="rtl">
       <Header />
+      <ExecutionNavBar />
 
       <main className="flex-1 p-4">
         <div className="w-full max-w-2xl mx-auto space-y-6 py-6">

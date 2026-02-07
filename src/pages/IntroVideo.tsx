@@ -78,12 +78,12 @@ const IntroVideo: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-3 justify-center items-center"
+            className="flex flex-col gap-3 items-center w-full max-w-sm mx-auto"
           >
             <Button
               onClick={handleContinue}
               size="lg"
-              className="gap-2 min-w-[200px]"
+              className="gap-2 w-full h-12 text-base"
             >
               {isRTL ? (
                 <>
@@ -100,15 +100,12 @@ const IntroVideo: React.FC = () => {
             <Button
               variant="ghost"
               onClick={handleSkip}
-              className="text-muted-foreground"
+              className="text-muted-foreground w-full h-11"
             >
               {isRTL ? 'דלג בינתיים' : 'Skip for now'}
             </Button>
-          </motion.div>
-
-          <div className="flex justify-center">
             <Button
-              variant="ghost"
+              variant="link"
               size="sm"
               onClick={() => navigate('/compass')}
               className="gap-1 text-muted-foreground"
@@ -125,7 +122,7 @@ const IntroVideo: React.FC = () => {
                 </>
               )}
             </Button>
-          </div>
+          </motion.div>
 
           <p className="text-center text-xs text-muted-foreground">
             {isRTL 

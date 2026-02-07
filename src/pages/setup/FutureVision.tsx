@@ -152,7 +152,7 @@ const FutureVision: React.FC = () => {
               </div>
             </div>
             {!showSummary && (
-              <Button variant="ghost" size="sm" onClick={handleSkip}>
+              <Button variant="ghost" onClick={handleSkip} className="h-10 px-4 text-sm text-muted-foreground">
                 {vt.skipForNow}
               </Button>
             )}

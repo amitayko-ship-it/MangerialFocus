@@ -87,6 +87,21 @@ export interface WeeklyProgress {
   completed: boolean;
 }
 
+export interface WeeklyPracticeLog {
+  [practiceIndex: number]: boolean[];
+}
+
+export interface WeeklyTracker {
+  startDate: string;
+  weeks: {
+    [weekNumber: number]: {
+      practiceCompletions: WeeklyPracticeLog;
+      keystoneDays: boolean[];
+      notes: string;
+    };
+  };
+}
+
 export interface FocusPlanSummary {
   focusArea: FocusArea;
   goal: string;

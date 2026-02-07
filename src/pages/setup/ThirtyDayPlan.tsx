@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, ChevronLeft, ChevronRight, Clock, Zap } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Clock, Zap, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Header from '@/components/management-compass/layout/Header';
@@ -11,7 +11,6 @@ import { saveWithExpiry, loadWithExpiry } from '@/lib/storageUtils';
 import { BigRock, PracticeSchedule, ScheduledEvent, TimeWindow } from '@/types/focus';
 import { toast } from 'sonner';
 
-const DURATION_OPTIONS = [15, 30, 45, 60] as const;
 const FREQUENCY_OPTIONS = [1, 2, 3, 4, 5, 6, 7];
 const TIME_WINDOW_OPTIONS: { value: TimeWindow; label: string }[] = [
   { value: 'morning', label: 'בוקר' },
@@ -19,6 +18,82 @@ const TIME_WINDOW_OPTIONS: { value: TimeWindow; label: string }[] = [
   { value: 'evening', label: 'ערב' },
 ];
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+
+const timeWindowStartHour: Record<TimeWindow, number> = {
+  morning: 8,
+  afternoon: 13,
+  evening: 18,
+};
+
+function generateICS(events: ScheduledEvent[]): string {
+  const now = new Date();
+  const sunday = new Date(now);
+  sunday.setDate(now.getDate() - now.getDay());
+  sunday.setHours(0, 0, 0, 0);
+
+  const batchId = Date.now().toString(36);
+
+  const fmtUtc = (d: Date) => {
+    const utc = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return utc.getFullYear().toString() +
+      String(utc.getMonth() + 1).padStart(2, '0') +
+      String(utc.getDate()).padStart(2, '0') +
+      'T' +
+      String(utc.getHours()).padStart(2, '0') +
+      String(utc.getMinutes()).padStart(2, '0') +
+      '00Z';
+  };
+
+  const dtstamp = fmtUtc(now);
+
+  let ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//FocusTracker//30DayPlan//HE',
+    'CALSCALE:GREGORIAN',
+  ];
+
+  for (let week = 0; week < 4; week++) {
+    events.forEach((event, idx) => {
+      const eventDate = new Date(sunday);
+      eventDate.setDate(sunday.getDate() + (week * 7) + event.day);
+      const startHour = timeWindowStartHour[event.timeWindow];
+      eventDate.setHours(startHour, 0, 0, 0);
+
+      const endDate = new Date(eventDate);
+      endDate.setMinutes(endDate.getMinutes() + event.duration);
+
+      const uid = `focus-w${week}-e${idx}-${batchId}@focustracker`;
+
+      ics.push(
+        'BEGIN:VEVENT',
+        `DTSTAMP:${dtstamp}`,
+        `DTSTART:${fmtUtc(eventDate)}`,
+        `DTEND:${fmtUtc(endDate)}`,
+        `SUMMARY:${event.practice}`,
+        `DESCRIPTION:פרקטיקה מתוכנית 30 יום - ${event.duration} דקות`,
+        `UID:${uid}`,
+        'END:VEVENT'
+      );
+    });
+  }
+
+  ics.push('END:VCALENDAR');
+  return ics.join('\r\n');
+}
+
+function downloadICS(events: ScheduledEvent[]) {
+  const content = generateICS(events);
+  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'focus-30-day-plan.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 export default function ThirtyDayPlan() {
   const navigate = useNavigate();
@@ -71,9 +146,19 @@ export default function ThirtyDayPlan() {
     setSchedules(prev => prev.map((s, i) => i === index ? { ...s, [field]: value } : s));
   };
 
+  const handleDurationChange = (index: number, val: string) => {
+    const num = parseInt(val, 10);
+    if (!isNaN(num) && num > 0 && num <= 480) {
+      updateSchedule(index, 'duration', num);
+    } else if (val === '') {
+      updateSchedule(index, 'duration', 0);
+    }
+  };
+
   const autoSchedule = () => {
     const events: ScheduledEvent[] = [];
     schedules.forEach(schedule => {
+      if (schedule.duration <= 0) return;
       const spacing = Math.floor(7 / schedule.weeklyFrequency);
       for (let i = 0; i < schedule.weeklyFrequency; i++) {
         const day = (i * spacing) % 7;
@@ -87,6 +172,15 @@ export default function ThirtyDayPlan() {
     });
     setScheduledEvents(events);
     setShowCalendar(true);
+  };
+
+  const handleDownloadCalendar = () => {
+    if (scheduledEvents.length === 0) {
+      toast.error('אין אירועים לייצא');
+      return;
+    }
+    downloadICS(scheduledEvents);
+    toast.success('קובץ יומן הורד! ניתן לייבא אותו ליומן שלך');
   };
 
   const handleContinue = () => {
@@ -188,22 +282,24 @@ export default function ThirtyDayPlan() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-xs text-muted-foreground">משך (דקות)</label>
-                        <div className="flex flex-wrap gap-1">
-                          {DURATION_OPTIONS.map(d => (
-                            <button
-                              key={d}
-                              onClick={() => updateSchedule(index, 'duration', d)}
-                              className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                                schedule.duration === d
-                                  ? 'bg-primary text-primary-foreground'
-                                  : 'bg-muted hover:bg-muted/80'
-                              }`}
-                            >
-                              {d}
-                            </button>
-                          ))}
+                        <label className="text-xs text-muted-foreground">כמה דקות לפעילות?</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min="5"
+                            max="480"
+                            value={schedule.duration || ''}
+                            onChange={(e) => handleDurationChange(index, e.target.value)}
+                            placeholder="30"
+                            className={`w-20 h-10 rounded-lg border bg-background text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 ${
+                              schedule.duration <= 0 ? 'border-red-300' : 'border-border'
+                            }`}
+                          />
+                          <span className="text-xs text-muted-foreground">דקות</span>
                         </div>
+                        {schedule.duration <= 0 && (
+                          <p className="text-[11px] text-red-500">נא להזין משך זמן</p>
+                        )}
                       </div>
 
                       <div className="space-y-1.5">
@@ -242,7 +338,7 @@ export default function ThirtyDayPlan() {
           </motion.div>
 
           {!showCalendar && (
-            <Button onClick={autoSchedule} className="w-full gap-2" size="lg" disabled={schedules.length === 0}>
+            <Button onClick={autoSchedule} className="w-full gap-2" size="lg" disabled={schedules.length === 0 || schedules.every(s => s.duration <= 0)}>
               <Calendar className="w-4 h-4" />
               שבץ לי ביומן
             </Button>
@@ -279,6 +375,16 @@ export default function ThirtyDayPlan() {
                         </div>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t">
+                    <Button onClick={handleDownloadCalendar} variant="outline" className="w-full gap-2">
+                      <Download className="w-4 h-4" />
+                      הורד קובץ יומן (.ics)
+                    </Button>
+                    <p className="text-[11px] text-muted-foreground text-center mt-2">
+                      ניתן לייבא את הקובץ ליומן Google, Outlook או Apple Calendar
+                    </p>
                   </div>
                 </CardContent>
               </Card>

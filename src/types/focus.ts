@@ -34,7 +34,7 @@ export type TimeWindow = 'morning' | 'afternoon' | 'evening';
 export interface PracticeSchedule {
   practice: string;
   weeklyFrequency: number;
-  duration: 15 | 30 | 45 | 60;
+  duration: number;
   timeWindow: TimeWindow;
 }
 

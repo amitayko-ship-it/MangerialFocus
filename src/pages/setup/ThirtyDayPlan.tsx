@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, ChevronLeft, ChevronRight, Clock, Zap, Download } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Clock, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Header from '@/components/management-compass/layout/Header';
 import Footer from '@/components/management-compass/layout/Footer';
 import ExecutionNavBar from '@/components/execution/ExecutionNavBar';
 import { saveWithExpiry, loadWithExpiry } from '@/lib/storageUtils';
-import { BigRock, PracticeSchedule, ScheduledEvent, TimeWindow } from '@/types/focus';
+import { BigRock, PracticeSchedule, ScheduledEvent, TimeWindow, KeystoneSuccess as KeystoneSuccessType } from '@/types/focus';
 import { toast } from 'sonner';
 
 const FREQUENCY_OPTIONS = [1, 2, 3, 4, 5, 6, 7];
@@ -100,6 +100,7 @@ export default function ThirtyDayPlan() {
   const rocks = loadWithExpiry<BigRock[]>('big-rocks-order');
   const selectedRock = rocks?.find(r => r.isBreakthrough) || rocks?.[0];
   const practices = selectedRock?.practices?.filter(p => p.trim()) || [];
+  const keystoneData = loadWithExpiry<KeystoneSuccessType>('keystone-success');
 
   const [schedules, setSchedules] = useState<PracticeSchedule[]>([]);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -107,17 +108,29 @@ export default function ThirtyDayPlan() {
 
   useEffect(() => {
     const saved = loadWithExpiry<{ schedules: PracticeSchedule[]; events: ScheduledEvent[] }>('execution-plan');
-    if (saved) {
+    if (saved && saved.schedules.length > 0) {
       setSchedules(saved.schedules);
-      setScheduledEvents(saved.events);
-      if (saved.events.length > 0) setShowCalendar(true);
+      setScheduledEvents(saved.events || []);
+      if (saved.events?.length > 0) setShowCalendar(true);
     } else {
-      setSchedules(practices.map(p => ({
-        practice: p,
-        weeklyFrequency: 2,
-        duration: 30,
-        timeWindow: 'morning' as TimeWindow,
-      })));
+      const items: PracticeSchedule[] = [];
+      if (keystoneData?.keystone?.action) {
+        items.push({
+          practice: `הרגל מפתח: ${keystoneData.keystone.action}`,
+          weeklyFrequency: 7,
+          duration: keystoneData.keystone.duration || 5,
+          timeWindow: 'morning' as TimeWindow,
+        });
+      }
+      practices.forEach(p => {
+        items.push({
+          practice: p,
+          weeklyFrequency: 2,
+          duration: 30,
+          timeWindow: 'morning' as TimeWindow,
+        });
+      });
+      setSchedules(items);
     }
   }, []);
 
@@ -125,22 +138,6 @@ export default function ThirtyDayPlan() {
     schedules.reduce((sum, s) => sum + s.weeklyFrequency * s.duration, 0),
     [schedules]
   );
-
-  const totalWeeklyHours = (totalWeeklyMinutes / 60).toFixed(1);
-
-  const energyLevel = useMemo(() => {
-    const weeklyAvailableMinutes = 40 * 60;
-    const pct = (totalWeeklyMinutes / weeklyAvailableMinutes) * 100;
-    if (pct <= 20) return 'green';
-    if (pct <= 35) return 'orange';
-    return 'red';
-  }, [totalWeeklyMinutes]);
-
-  const energyColors = {
-    green: 'bg-green-100 text-green-800 border-green-200',
-    orange: 'bg-orange-100 text-orange-800 border-orange-200',
-    red: 'bg-red-100 text-red-800 border-red-200',
-  };
 
   const updateSchedule = (index: number, field: keyof PracticeSchedule, value: number | string) => {
     setSchedules(prev => prev.map((s, i) => i === index ? { ...s, [field]: value } : s));
@@ -326,16 +323,6 @@ export default function ThirtyDayPlan() {
               </motion.div>
             ))}
           </div>
-
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-            <div className={`p-4 rounded-xl border flex items-center justify-between ${energyColors[energyLevel]}`}>
-              <div className="flex items-center gap-2">
-                <Zap className="w-5 h-5" />
-                <span className="font-medium text-sm">עומס שבועי: {totalWeeklyHours} שעות</span>
-              </div>
-              <span className="text-xs opacity-70">{totalWeeklyMinutes} דקות</span>
-            </div>
-          </motion.div>
 
           {!showCalendar && (
             <Button onClick={autoSchedule} className="w-full gap-2" size="lg" disabled={schedules.length === 0 || schedules.every(s => s.duration <= 0)}>

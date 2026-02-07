@@ -26,6 +26,7 @@ export default function KeystoneSuccess() {
   const [selectedTrigger, setSelectedTrigger] = useState('after-coffee');
   const [customTrigger, setCustomTrigger] = useState('');
   const [action, setAction] = useState('');
+  const [habitDuration, setHabitDuration] = useState<number>(5);
   const [successMetric, setSuccessMetric] = useState('');
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function KeystoneSuccess() {
         setCustomTrigger(saved.keystone.trigger);
       }
       setAction(saved.keystone.action);
+      if (saved.keystone.duration) setHabitDuration(saved.keystone.duration);
       setSuccessMetric(saved.successMetric);
     }
   }, []);
@@ -62,7 +64,7 @@ export default function KeystoneSuccess() {
       keystone: {
         trigger: getTriggerLabel(),
         action: action.trim(),
-        duration: 5,
+        duration: habitDuration,
       },
       successMetric: successMetric.trim(),
     };
@@ -75,7 +77,7 @@ export default function KeystoneSuccess() {
     const triggerLabel = getTriggerLabel();
     if (action.trim() || successMetric.trim()) {
       saveWithExpiry('keystone-success', {
-        keystone: { trigger: triggerLabel, action: action.trim(), duration: 5 },
+        keystone: { trigger: triggerLabel, action: action.trim(), duration: habitDuration },
         successMetric: successMetric.trim(),
       });
     }
@@ -141,15 +143,30 @@ export default function KeystoneSuccess() {
                   />
                 </div>
 
-                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                  <Clock className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">משך: 5 דקות (קבוע)</span>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">כמה זמן ידרוש להטמיע את ההרגל?</label>
+                  <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="number"
+                      min="1"
+                      max="120"
+                      value={habitDuration || ''}
+                      onChange={e => {
+                        const v = parseInt(e.target.value, 10);
+                        if (!isNaN(v) && v > 0 && v <= 120) setHabitDuration(v);
+                        else if (e.target.value === '') setHabitDuration(0);
+                      }}
+                      className="w-16 h-8 rounded-lg border border-border bg-background text-center text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                    <span className="text-sm text-muted-foreground">דקות</span>
+                  </div>
                 </div>
 
-                {action.trim() && (
+                {action.trim() && habitDuration > 0 && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-3 bg-primary/5 rounded-lg border border-primary/10">
                     <p className="text-sm">
-                      מיד אחרי <strong>{getTriggerLabel() || '...'}</strong>, אני אבצע <strong>{action}</strong> למשך 5 דקות.
+                      מיד אחרי <strong>{getTriggerLabel() || '...'}</strong>, אני אבצע <strong>{action}</strong> למשך {habitDuration} דקות.
                     </p>
                   </motion.div>
                 )}

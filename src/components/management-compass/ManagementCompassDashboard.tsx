@@ -4,6 +4,7 @@ import { QuestionnaireData } from '@/types/managementCompass';
 import { CardGameData } from '@/types/managementCompass';
 import { getModuleResults, getFullModules, ModuleResult } from '@/lib/moduleSelection';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { FloatingNav } from '@/components/layout/FloatingNav';
 import { Compass, Eye, ChevronLeft, Sparkles, Lightbulb, ArrowRight } from 'lucide-react';
 
 interface ManagementCompassDashboardProps {
@@ -340,6 +341,7 @@ const ManagementCompassDashboard: React.FC<ManagementCompassDashboardProps> = ({
           </SheetContent>
         </Sheet>
       </div>
+      <FloatingNav />
     </div>
   );
 };

@@ -45,8 +45,22 @@ export function useVisionInterview(userId: string | number | undefined): UseVisi
     }
   })();
 
+  const loadCompassUserInfo = () => {
+    try {
+      const raw = localStorage.getItem('management-compass-data');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const compassData = parsed.value || parsed;
+        if (compassData.userInfo?.name) setUserName(compassData.userInfo.name);
+        if (compassData.userInfo?.gender) setUserGender(compassData.userInfo.gender);
+      }
+    } catch {}
+  };
+
   // Load existing vision on mount
   useEffect(() => {
+    loadCompassUserInfo();
+
     if (!userId) return;
 
     const loadExisting = async () => {
@@ -80,9 +94,9 @@ export function useVisionInterview(userId: string | number | undefined): UseVisi
             setPhase('complete');
           }
 
-          // Restore user info from vision data
-          if (data.user_name) setUserName(data.user_name);
-          if (data.user_gender) setUserGender(data.user_gender);
+          // Restore user info from vision data, compass data takes priority
+          if (data.user_name && !userName) setUserName(data.user_name);
+          if (data.user_gender && !userGender) setUserGender(data.user_gender);
         } else {
           // New user: start with personalization
           setHasExistingVision(false);

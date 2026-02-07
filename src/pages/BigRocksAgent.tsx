@@ -103,7 +103,7 @@ const BigRocksAgent: React.FC = () => {
   const [keystoneHabit, setKeystoneHabit] = useState<string>('');
 
   const getUserInfo = () => {
-    const raw = localStorage.getItem('questionnaire-data');
+    const raw = localStorage.getItem('management-compass-data');
     if (raw) {
       try {
         const parsed = JSON.parse(raw);

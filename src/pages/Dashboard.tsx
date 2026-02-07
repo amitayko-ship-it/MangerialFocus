@@ -123,8 +123,6 @@ const Dashboard: React.FC = () => {
   const weekData = getWeekData(selectedWeek);
 
   const weeklyStats = useMemo(() => {
-    if (!practices.length) return { completed: 0, total: 0, percentage: 0, keystonePct: 0 };
-
     let completed = 0;
     let total = 0;
 
@@ -136,6 +134,10 @@ const Dashboard: React.FC = () => {
     });
 
     const keystoneDone = weekData.keystoneDays.filter(Boolean).length;
+    if (keystoneSuccess) {
+      total += 7;
+      completed += keystoneDone;
+    }
 
     return {
       completed,
@@ -143,10 +145,10 @@ const Dashboard: React.FC = () => {
       percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
       keystonePct: Math.round((keystoneDone / 7) * 100),
     };
-  }, [practices, weekData]);
+  }, [practices, weekData, keystoneSuccess]);
 
   const overallStats = useMemo(() => {
-    if (!tracker || !practices.length) return { completed: 0, total: 0, percentage: 0 };
+    if (!tracker) return { completed: 0, total: 0, percentage: 0 };
 
     let completed = 0;
     let total = 0;
@@ -159,6 +161,12 @@ const Dashboard: React.FC = () => {
           completed += wd.practiceCompletions[pIdx].filter(Boolean).length;
         }
       });
+      if (keystoneSuccess) {
+        total += 7;
+        if (wd?.keystoneDays) {
+          completed += wd.keystoneDays.filter(Boolean).length;
+        }
+      }
     }
 
     return {
@@ -166,7 +174,7 @@ const Dashboard: React.FC = () => {
       total,
       percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
     };
-  }, [tracker, practices]);
+  }, [tracker, practices, keystoneSuccess]);
 
   if (!executionPlan) {
     return (
@@ -239,7 +247,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 <p className="text-sm bg-muted/50 p-2 rounded-lg">
                   מיד אחרי <strong>{keystoneSuccess.keystone.trigger}</strong>, אני אבצע{' '}
-                  <strong>{keystoneSuccess.keystone.action}</strong> למשך 5 דקות.
+                  <strong>{keystoneSuccess.keystone.action}</strong> למשך {keystoneSuccess.keystone.duration || 5} דקות.
                 </p>
                 <div className="flex items-center gap-2 mt-3">
                   <Trophy className="w-4 h-4 text-yellow-500" />
@@ -411,6 +419,12 @@ const Dashboard: React.FC = () => {
                       weekCompleted += wd.practiceCompletions[pIdx].filter(Boolean).length;
                     }
                   });
+                  if (keystoneSuccess) {
+                    weekTotal += 7;
+                    if (wd?.keystoneDays) {
+                      weekCompleted += wd.keystoneDays.filter(Boolean).length;
+                    }
+                  }
                   const pct = weekTotal > 0 ? Math.round((weekCompleted / weekTotal) * 100) : 0;
                   const isActive = w === selectedWeek;
 

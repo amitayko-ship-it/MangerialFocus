@@ -12,7 +12,6 @@ import DecisionsPriceStep from '@/components/management-compass/DecisionsPriceSt
 import InterfacesMapStep from '@/components/management-compass/InterfacesMapStep';
 import CoachingStep from '@/components/management-compass/CoachingStep';
 import TeamHealthStep from '@/components/management-compass/TeamHealthStep';
-import ModuleSelectionScreen from '@/components/management-compass/ModuleSelectionScreen';
 import ManagementCompassDashboard from '@/components/management-compass/ManagementCompassDashboard';
 import { Button } from '@/components/ui/button';
 import { LayoutDashboard, ArrowRight } from 'lucide-react';
@@ -33,20 +32,20 @@ type Step =
   | 'interfacesMap' 
   | 'coaching' 
   | 'teamHealth' 
-  | 'moduleSelection'
   | 'dashboard';
 
 const STEP_ORDER: Step[] = [
   'welcome', 'introduction', 'questionnaireIntro', 'cardGame', 'cardGameSummary',
   'focusControl', 'decisionsPrice', 'interfacesMap', 'coaching', 'teamHealth',
-  'moduleSelection', 'dashboard'
+  'dashboard'
 ];
 
 const ManagementCompass: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<Step>(() => {
-    const saved = loadWithExpiry<Step>(STEP_STORAGE_KEY);
-    return saved || 'welcome';
+    const saved = loadWithExpiry<string>(STEP_STORAGE_KEY);
+    if (saved === 'moduleSelection') return 'dashboard';
+    return (saved as Step) || 'welcome';
   });
   const [data, setData] = useState<QuestionnaireData>(() => {
     const saved = loadWithExpiry<QuestionnaireData>(STORAGE_KEY);
@@ -185,17 +184,8 @@ const ManagementCompass: React.FC = () => {
           <TeamHealthStep
             teamHealthData={data.teamHealthData}
             onTeamHealthDataChange={(teamHealthData: TeamHealthData) => updateData({ teamHealthData })}
-            onNext={() => setCurrentStep('moduleSelection')}
-            onBack={() => setCurrentStep('coaching')}
-          />
-        );
-      
-      case 'moduleSelection':
-        return (
-          <ModuleSelectionScreen
-            data={data}
             onNext={() => setCurrentStep('dashboard')}
-            onBack={() => setCurrentStep('teamHealth')}
+            onBack={() => setCurrentStep('coaching')}
           />
         );
       

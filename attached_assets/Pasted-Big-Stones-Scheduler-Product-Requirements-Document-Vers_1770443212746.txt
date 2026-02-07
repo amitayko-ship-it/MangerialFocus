@@ -1,0 +1,294 @@
+Big Stones Scheduler
+Product Requirements Document
+Version 5.0 - Final
+7.2.2026
+Professional, Minimal, Effective
+1. תקציר מנהלים
+Big Stones Scheduler מתרגם תכנון אסטרטגי חודשי לביצוע יומי, עם גמישות מלאה ותמיכה מקצועית בהתמדה.
+1.1 הבעיה
+משימות אסטרטגיות נשארות ברמת כוונה טובה
+היומן מתמלא באופן ריאקטיבי בפגישות ודחיפויות
+אין תרגום אוטומטי ממטרות לזמן בלוח השנה
+כלים קיימים נוקשים מדי או מורכבים מדי
+
+1.2 הפתרון
+מערכת מקצועית המשלבת תכנון חכם עם אוטונומיה מלאה למשתמש.
+2 מצבי עבודה: Structured (Type A) ו-Flexible (Type B)
+Morning Ritual - ה-Killer Feature ל-Type B
+Motivation Layer מקצועית - לא משחקית
+Real-time sync עם Outlook דרך Webhooks
+Rule-Based Defaults ללמידה הדרגתית
+
+1.3 עקרונות מנחים
+עקרון
+משמעות
+Progress over Precision
+התקדמות חשובה יותר מדיוק מושלם
+Professional, Not Playful
+מכבד את המשתמש, לא מנסה ל'גיים' אותו
+Autonomy First
+המשתמש בוחר תמיד, המערכת רק מציעה
+Outlook = Truth
+היומן הוא המקור היחיד - אין יומן פנימי
+
+2. פרסונות משתמש
+2.1 Type A: The Planner (20%)
+אוהב מבנה ותוכנית ברורה
+ממושמע ועוקב אחרי לוח זמנים
+
+2.2 Type B: The Flexible (50%) ⭐
+רוצה כיוון כללי, לא דיקטט
+עובד לפי אנרגיה ו-flow
+צריך אוטונומיה ובחירה
+
+Morning Ritual = הסיבה שהם יצליחו
+
+2.3 Type C: Chaos Workers (30%)
+לא ב-MVP
+3. מסע המשתמש
+3.1 Onboarding
+שאלה ראשונה:
+📋 תוכנית קבועה (Type A)
+🎨 גמישות (Type B)
+
+3.2 תכנון חודשי
+מה האבנים הגדולות? (3-5)
+לכל אבן: מה התוצרים?
+AI מציע זמן → משתמש מאשר
+דדליין?
+Focus Time / Task Time?
+
+3.3 Morning Ritual (Type B)
+כל בוקר ב-09:00:
+'בוקר טוב! מה הפוקוס היום?'
+רשימת נושאים + סטטוס
+המשתמש בוחר + מחליט
+המערכת יוצרת בלוק
+
+3.4 Start Block Flow
+Cloud files only (Google Docs, OneDrive, Notion)
+כפתור 'Start' פותח קובץ + מכבה notifications
+טיימר מתחיל
+
+3.5 Micro-Feedback
+אחרי בלוק:
+'✓ בלוק הושלם. עבודה טובה.'
+Progress bar מתעדכן
+זמן שנותר מוצג
+
+Micro-feedback, not celebration
+
+3.6 Weekly Review
+סיכום: X/Y תוצרים, Z שעות
+תובנות: מתי הכי פרודוקטיבי
+1-2 שאלות (1-click)
+
+4. Motivation Layer (Progress System)
+Motivation without distraction
+4.1 מטרה
+לתמוך בהתמדה ובתחושת התקדמות לאורך זמן, באמצעות חיזוקים חיוביים עדינים ומדדים ברורים.
+המערכת אינה 'משחקת' עם המשתמש, אלא:
+מחזקת עקביות
+מדגישה הישגים
+מייצרת מומנטום
+משקפת התקדמות אמיתית
+
+4.2 עקרונות עיצוב
+Professional, not playful - מקצועי, לא משחקי
+Minimal, not noisy - מינימלי, לא צעקני
+Supports work, doesn't distract - תומך עבודה, לא מסיח
+Measures real progress - מודד התקדמות אמיתית
+Optional & customizable - ניתן להתאמה וכיבוי
+
+4.3 Streaks - עקביות יומית
+מה זה:
+מדד פשוט לרצף ימים בהם המשתמש התקדם לפחות צעד אחד באבנים הגדולות.
+לא נדרש 'להשלים הכל'. מספיק:
+לעבוד על בלוק אחד
+או להתקדם 15-30 דקות
+
+למה:
+עקביות יומית חשובה יותר ממאמץ חד-פעמי גדול. המטרה: לבנות הרגל עבודה, לא מושלמות.
+תצוגה:
+🔥 רצף נוכחי (לדוגמה: 6 ימים)
+שיא אישי
+התראה עדינה אם הרצף עומד להישבר
+
+עקרון עיצובי: מינימלי, לא צעקני. מדד שקט בפינה, לא אלמנט מרכזי.
+
+4.4 Progress - התקדמות מוחשית
+מה זה:
+ייצוג ויזואלי ברור של התקדמות לכל תוצר ואבן.
+למה:
+אנשים מתמידים כשהם רואים תנועה קדימה.
+לכל תוצר מוצג:
+Progress bar (%)
+זמן שבוצע / זמן שנותר
+ימים עד דדליין
+אבני דרך (25% / 50% / 75%)
+
+עקרון: פוקוס על סיום תוצרים, לא על 'צבירת נקודות'.
+
+4.5 Recognition - חיזוקים חיוביים
+במקום חגיגות משחקיות או אנימציות מוגזמות, המערכת נותנת אישור קצר וברור:
+דוגמאות:
+'בלוק הושלם. עבודה טובה.'
+'תוצר הסתיים. אפשר להתקדם הלאה.'
+'שמרת על רצף של שבוע.'
+
+למה:
+הכרה קצרה מחזקת התנהגות בלי להפריע ל-flow.
+עקרון: Micro-feedback, not celebration.
+
+4.6 Weekly Review - למידה והתבוננות
+מה זה:
+רפלקציה שבועית קצרה על ביצוע בפועל.
+מוצג למשתמש:
+שעות מתוכננות מול שעות שבוצעו
+תוצרים שהושלמו
+ימים עם עבודה עמוקה
+זמנים בהם היה הכי פרודוקטיבי
+
+שאלות קצרות (1-click):
+מה עבד טוב השבוע?
+מה כדאי לשנות בשבוע הבא?
+
+למה:
+למידה עצמית משפרת ביצועים יותר מכל מנגנון משחקי.
+
+4.7 Cumulative Metrics (Optional - V2)
+⚠️ לא נדרש ל-MVP. רק אם מתגלה צורך במדד מצטבר נוסף.
+מה זה:
+מדד מצטבר שמסכם את היקף העבודה לאורך זמן. לא תחרותי, לא משחקי. רק שיקוף השקעה.
+דגש ניסוחי - לא 'Level Up' אלא:
+'השקעת 18 שעות עבודה עמוקה השבוע'
+'השלמת 5 תוצרים'
+'סיימת 2 אבנים החודש'
+
+שימושים:
+סיכום שבועי/חודשי
+Benchmark אישי
+זיהוי עומסים
+
+4.8 Customization & Preferences
+המשתמש יכול להתאים את רמת המוטיבציה:
+מצב
+מה מוצג
+Minimal
+רק Progress bars ומספרים. ללא Streaks, ללא Feedback.
+Standard (default)
+Progress bars + Streaks + Micro-feedback עדין
+Motivated
+הכל + Weekly highlights + Milestones
+
+
+כל אלמנט ניתן לכיבוי/הפעלה בנפרד ב-Settings.
+
+4.9 שינוי מהותי בגישה
+במקום המונח 'Gamification' (שמעורר אסוציאציות משחקיות וילדותיות), אנחנו משתמשים ב:
+Motivation Layer / Progress System
+
+זה מדויק יותר לקהל יעד של מנהלים ו-professionals.
+5. מפרט תכונות
+5.1 Smart Defaults (Rule-Based V1)
+⚠️ NO Machine Learning in V1!
+Simple Rules:
+Productivity patterns: completion rate → prefer
+Avoidance patterns: deleted 3+ times → avoid
+Calendar density: 4+ meetings → Task Time only
+User feedback: every 4 weeks ask
+
+V2: ML after 1000 data points
+
+5.2 Work Modes
+Focus Time: 90-120 דקות, ריכוז גבוה
+Task Time: 30-60 דקות, משימות רגילות
+
+6. יישום טכני
+6.1 Real-Time Sync - Webhooks
+Microsoft Graph Webhooks for real-time
+Polling fallback every 15 min
+Outlook always wins conflicts
+
+6.2 ארכיטקטורה
+Frontend: React + TypeScript
+Backend: Node.js / FastAPI
+Database: PostgreSQL
+Calendar: Microsoft Graph + Webhooks
+
+7. מודל נתונים
+7.1 Users
+id, email, microsoft_token
+work_mode: structured / flexible
+motivation_level: minimal / standard / motivated
+
+7.2 Progress_Tracking
+user_id
+current_streak
+longest_streak
+total_work_hours (not XP)
+deliverables_completed
+
+7.3 Weekly_Insights
+week_start, planned_hours, completed_hours
+best_productivity_day, best_productivity_hour
+blocks_completed, blocks_skipped
+
+8. מדדי הצלחה
+מה כן מודדים:
+Retention: שבוע 1, שבוע 4
+Streak length: ממוצע
+Completion rate: % תוצרים בזמן
+User satisfaction: 1-10
+Mode distribution: A vs B ⭐
+Motivation level preference: minimal/standard/motivated
+
+8.1 Decision Metrics
+After 3 months / 500 users:
+Mode: if >70% Type B → make Flexible default
+Motivation: if >50% use Minimal → reconsider defaults
+Features: double down on top 3
+
+9. לוח זמנים
+Week
+Tasks
+1
+OAuth + Graph API + Webhooks
+2
+Chat UI + Onboarding + Mode Selection
+3
+Block Engine + Morning Ritual
+4
+Motivation Layer: Progress + Streaks
+5
+Micro-feedback + Rule-Based Defaults
+6
+Weekly Review + Testing + Customization
+
+10. הגדרת Done
+Type A:
+תוכנית שבועית מלאה
+Progress bars
+Micro-feedback
+
+Type B:
+Morning Ritual יומי
+בחירה חופשית
+Progress + Streaks
+
+שניהם:
+Webhooks real-time
+Cloud files
+Weekly Review
+Customizable motivation level
+
+Professional. Minimal. Effective.
+11. מגבלות V1
+✅ Cloud files only
+❌ Local files
+❌ Mobile app
+❌ Team features
+❌ ML predictions
+
+— End of Document —
+Version 5.0 - Final - Professional & Minimal

@@ -48,6 +48,7 @@ const WeeklyCheckIn: React.FC = () => {
     setLoading(true);
     try {
       // Load active focus plan
+      if (!supabase) throw new Error('Supabase client not initialized');
       const { data: planData, error: planError } = await supabase
         .from('focus_plans')
         .select('id, weekly_work_hours, tasks')
@@ -62,6 +63,7 @@ const WeeklyCheckIn: React.FC = () => {
       setFocusPlan(planData);
 
       // Load existing check-in if any
+      if (!supabase) throw new Error('Supabase client not initialized');
       const { data: checkData } = await supabase
         .from('weekly_checks')
         .select('*')
@@ -95,6 +97,7 @@ const WeeklyCheckIn: React.FC = () => {
 
     setSaving(true);
     try {
+      if (!supabase) throw new Error('Supabase client not initialized');
       const { error } = await supabase.from('weekly_checks').upsert(
         {
           focus_plan_id: focusPlan.id,

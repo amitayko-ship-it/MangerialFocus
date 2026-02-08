@@ -27,13 +27,13 @@ const Signup: React.FC = () => {
       const { error } = await signUp(email, password, fullName);
 
       if (error) {
-        toast.error(error.message || t.common.error);
+        toast.error((error as any).message || t.common.error);
       } else {
         toast.success(t.auth.signupSuccess);
         navigate('/login');
       }
-    } catch (err) {
-      toast.error(t.common.error);
+    } catch (err: any) {
+      toast.error(err.message || t.common.error);
     } finally {
       setLoading(false);
     }

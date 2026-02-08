@@ -44,6 +44,7 @@ const FeedbackPage: React.FC = () => {
     if (!token) { setPageState('invalid'); return; }
 
     const loadRequest = async () => {
+      if (!supabase) { setPageState('error'); return; }
       const { data, error } = await supabase
         .from('feedback_requests')
         .select('*')
@@ -65,7 +66,7 @@ const FeedbackPage: React.FC = () => {
   }, [token]);
 
   const handleSubmit = async () => {
-    if (!request) return;
+    if (!request || !supabase) return;
     setSubmitting(true);
 
     try {

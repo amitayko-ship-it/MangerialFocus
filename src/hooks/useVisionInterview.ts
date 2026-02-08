@@ -65,6 +65,7 @@ export function useVisionInterview(userId: string | number | undefined): UseVisi
 
     const loadExisting = async () => {
       try {
+        if (!supabase) throw new Error('Supabase client not initialized');
         const { data, error } = await supabase
           .from('future_visions')
           .select('*')
@@ -301,14 +302,18 @@ export function useVisionInterview(userId: string | number | undefined): UseVisi
       };
 
       if (visionId) {
-        await supabase.from('future_visions').update(visionData).eq('id', visionId);
+        if (supabase) {
+          await supabase.from('future_visions').update(visionData).eq('id', visionId);
+        }
       } else {
-        const { data } = await supabase
-          .from('future_visions')
-          .insert(visionData)
-          .select('id')
-          .single();
-        if (data) setVisionId(data.id);
+        if (supabase) {
+          const { data } = await supabase
+            .from('future_visions')
+            .insert(visionData)
+            .select('id')
+            .single();
+          if (data) setVisionId(data.id);
+        }
       }
     } catch (err) {
       // Demo mode - skip saving to Supabase

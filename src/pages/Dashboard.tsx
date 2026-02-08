@@ -14,8 +14,10 @@ import {
 import {
   Plus, Target, Trophy, Sparkles, Calendar,
   CheckCircle2, Circle, ChevronLeft, ChevronRight,
-  Clock, Zap, Flame,
+  Clock, Zap, Flame, Sun
 } from 'lucide-react';
+import { StreakWidget, ProgressWidget } from '@/components/motivation/MotivationWidgets';
+import { MorningRitual } from '@/components/morning-ritual/MorningRitual';
 
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 const TIME_WINDOW_LABEL: Record<TimeWindow, string> = {
@@ -39,6 +41,8 @@ const Dashboard: React.FC = () => {
   const [keystoneSuccess, setKeystoneSuccess] = useState<KeystoneSuccess | null>(null);
   const [tracker, setTracker] = useState<WeeklyTracker | null>(null);
   const [selectedWeek, setSelectedWeek] = useState(1);
+  const [showRitual, setShowRitual] = useState(false);
+  const [progress, setProgress] = useState({ currentStreak: 0, longestStreak: 0 });
 
   useEffect(() => {
     const plan = loadWithExpiry<ExecutionPlanData>('execution-plan');
@@ -64,7 +68,40 @@ const Dashboard: React.FC = () => {
       saveWithExpiry('weekly-tracker', newTracker, 90 * 24 * 60 * 60 * 1000);
       setSelectedWeek(1);
     }
+
+    // Check if ritual was done today
+    const lastRitual = localStorage.getItem('last-morning-ritual');
+    const today = new Date().toDateString();
+    if (lastRitual !== today) {
+      setShowRitual(true);
+    }
+
+    // Fetch progress from API
+    fetch('/api/motivation/progress')
+      .then(res => res.json())
+      .then(data => setProgress({ 
+        currentStreak: data.current_streak || 0, 
+        longestStreak: data.longest_streak || 0 
+      }))
+      .catch(console.error);
   }, []);
+
+  const handleRitualComplete = async (selected: string[]) => {
+    localStorage.setItem('last-morning-ritual', new Date().toDateString());
+    setShowRitual(false);
+    
+    // Log activity to API
+    try {
+      const res = await fetch('/api/motivation/activity', { method: 'POST' });
+      const data = await res.json();
+      setProgress({ 
+        currentStreak: data.current_streak, 
+        longestStreak: data.longest_streak 
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const practices = executionPlan?.schedules || [];
 
@@ -205,6 +242,15 @@ const Dashboard: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="container max-w-4xl mx-auto py-6 px-4 space-y-6" dir="rtl">
+        {showRitual && executionPlan && (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+            <MorningRitual 
+              practices={practices.map((p, i) => ({ id: i.toString(), title: p.practice, duration: p.duration }))}
+              onComplete={handleRitualComplete}
+            />
+          </motion.div>
+        )}
+
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center justify-between">
             <div>
@@ -217,47 +263,63 @@ const Dashboard: React.FC = () => {
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Target className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground">האבן הגדולה</p>
-                  <p className="font-semibold text-lg">{executionPlan.rockTitle}</p>
-                  <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>{(executionPlan.totalWeeklyMinutes / 60).toFixed(1)} שעות בשבוע</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 space-y-6">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+              <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <Target className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground">האבן הגדולה</p>
+                      <p className="font-semibold text-lg">{executionPlan.rockTitle}</p>
+                      <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>{(executionPlan.totalWeeklyMinutes / 60).toFixed(1)} שעות בשבוע</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+               <StreakWidget currentStreak={progress.currentStreak} longestStreak={progress.longestStreak} />
+               <Card>
+                 <CardContent className="p-4 space-y-4">
+                   <ProgressWidget label="התקדמות חודשית" current={overallStats.completed} total={overallStats.total} />
+                   <ProgressWidget label="הרגל מפתח" current={weekData.keystoneDays.filter(Boolean).length * 4} total={28} />
+                 </CardContent>
+               </Card>
+            </div>
+          </div>
 
-        {keystoneSuccess && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-4 h-4 text-yellow-500" />
-                  <span className="font-semibold text-sm">הרגל מפתח</span>
-                </div>
-                <p className="text-sm bg-muted/50 p-2 rounded-lg">
-                  מיד אחרי <strong>{keystoneSuccess.keystone.trigger}</strong>, אני אבצע{' '}
-                  <strong>{keystoneSuccess.keystone.action}</strong> למשך {keystoneSuccess.keystone.duration || 5} דקות.
-                </p>
-                <div className="flex items-center gap-2 mt-3">
-                  <Trophy className="w-4 h-4 text-yellow-500" />
-                  <span className="text-sm text-muted-foreground">מדד הצלחה:</span>
-                  <span className="text-sm font-medium">{keystoneSuccess.successMetric}</span>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+          <div className="space-y-6">
+            {keystoneSuccess && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles className="w-4 h-4 text-yellow-500" />
+                      <span className="font-semibold text-sm">הרגל מפתח</span>
+                    </div>
+                    <p className="text-sm bg-muted/50 p-2 rounded-lg">
+                      מיד אחרי <strong>{keystoneSuccess.keystone.trigger}</strong>, אני אבצע{' '}
+                      <strong>{keystoneSuccess.keystone.action}</strong> למשך {keystoneSuccess.keystone.duration || 5} דקות.
+                    </p>
+                    <div className="flex items-center gap-2 mt-3">
+                      <Trophy className="w-4 h-4 text-yellow-500" />
+                      <span className="text-sm text-muted-foreground">מדד הצלחה:</span>
+                      <span className="text-sm font-medium">{keystoneSuccess.successMetric}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </div>
+        </div>
 
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <Card>

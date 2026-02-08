@@ -3,6 +3,7 @@ import cors from 'cors';
 import OpenAI from 'openai';
 import { initDatabase } from './db.js';
 import { setupAuth } from './auth.js';
+import { setupMotivation } from './motivation.js';
 
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
@@ -10,6 +11,7 @@ app.use(express.json());
 
 initDatabase().catch(console.error);
 setupAuth(app);
+setupMotivation(app);
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,

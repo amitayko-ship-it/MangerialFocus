@@ -53,8 +53,8 @@ export function setupAuth(app: Express) {
       }
 
       const existingUser = await pool.query(
-        'SELECT id FROM users WHERE email = $1',
-        [email.toLowerCase()]
+        'SELECT id FROM users WHERE LOWER(email) = LOWER($1)',
+        [email]
       );
 
       if (existingUser.rows.length > 0) {
@@ -64,8 +64,8 @@ export function setupAuth(app: Express) {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const result = await pool.query(
-        'INSERT INTO users (email, password, full_name, gender) VALUES ($1, $2, $3, $4) RETURNING id, email, full_name, gender',
-        [email.toLowerCase(), hashedPassword, fullName || null, gender || null]
+        'INSERT INTO users (email, password, full_name, gender) VALUES (LOWER($1), $2, $3, $4) RETURNING id, email, full_name, gender',
+        [email, hashedPassword, fullName || null, gender || null]
       );
 
       const user = result.rows[0];

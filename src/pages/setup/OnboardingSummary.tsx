@@ -17,10 +17,12 @@ export default function OnboardingSummary() {
   useEffect(() => {
     const bigRocks = loadWithExpiry<BigRock[]>('big-rocks-order');
     const onboardingData = loadWithExpiry<any>('focus-tracker-onboarding');
+    const executionPlan = loadWithExpiry<any>('execution-plan');
 
     setData({
       bigRocks: bigRocks || [],
       onboarding: onboardingData || {},
+      keystoneRock: executionPlan?.rockTitle,
     });
   }, []);
 
@@ -71,18 +73,46 @@ export default function OnboardingSummary() {
 
             <CardContent className="space-y-6">
               {data.bigRocks && data.bigRocks.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-muted-foreground">
                     האבנים הגדולות
                   </h3>
-                  <ul className="space-y-2">
-                    {data.bigRocks.map((rock: BigRock, index: number) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span>{rock.title}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="grid gap-3">
+                    {data.bigRocks.map((rock: BigRock, index: number) => {
+                      const isKeystone = rock.title === data.keystoneRock;
+                      return (
+                        <div 
+                          key={index} 
+                          className={`flex items-center gap-3 p-4 rounded-xl border transition-all ${
+                            isKeystone 
+                              ? 'bg-primary/10 border-primary/30 shadow-sm ring-1 ring-primary/20' 
+                              : 'bg-card border-border'
+                          }`}
+                        >
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                            isKeystone ? 'bg-primary text-primary-foreground' : 'bg-green-100 text-green-600'
+                          }`}>
+                            <Check className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <span className={`font-bold ${isKeystone ? 'text-primary' : 'text-foreground'}`}>
+                              {rock.title}
+                            </span>
+                            {isKeystone && (
+                              <div className="text-xs font-medium text-primary/80 mt-0.5">
+                                אבן המפתח הנבחרת
+                              </div>
+                            )}
+                          </div>
+                          {isKeystone && (
+                            <div className="bg-primary/20 text-primary text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider">
+                              Keystone
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 

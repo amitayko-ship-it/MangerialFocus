@@ -72,11 +72,13 @@ const AuthPage: React.FC = () => {
       setError(result.error);
     } else if (result.emailSent) {
       setMode('reset');
-      setSuccess('קוד איפוס נשלח לכתובת המייל שלך - בדוק את תיבת הדואר');
+      setSuccess('קוד איפוס נשלח לכתובת המייל שלך - בדוק את תיבת הדואר (כולל תיקיית ספאם)');
     } else if (result.resetToken) {
       setResetToken(result.resetToken);
       setMode('reset');
-      setSuccess('קוד איפוס נוצר - הזן אותו עם הסיסמא החדשה');
+      setSuccess('קוד איפוס נוצר (מצב פיתוח) - הזן אותו עם הסיסמא החדשה');
+    } else {
+      setError('שגיאה בשליחת המייל. אנא נסה שוב מאוחר יותר');
     }
     
     setLoading(false);

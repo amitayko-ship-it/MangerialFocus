@@ -190,10 +190,15 @@ export function setupAuth(app: Express) {
           message: 'קוד איפוס נשלח לכתובת המייל שלך',
           emailSent: true
         });
+      } else if (process.env.NODE_ENV === 'development' && !process.env.SENDGRID_API_KEY) {
+        res.json({ 
+          message: 'מערכת המייל לא מוגדרת - קוד איפוס מוצג לבדיקה בלבד',
+          resetToken: resetToken,
+          emailSent: false
+        });
       } else {
         res.json({ 
-          message: 'קוד איפוס נוצר',
-          resetToken: resetToken,
+          message: 'שגיאה בשליחת המייל. אנא נסה שוב מאוחר יותר',
           emailSent: false
         });
       }

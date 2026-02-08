@@ -162,8 +162,8 @@ export function setupAuth(app: Express) {
       }
 
       const result = await pool.query(
-        'SELECT id FROM users WHERE email = $1',
-        [email.toLowerCase()]
+        'SELECT id FROM users WHERE LOWER(email) = LOWER($1)',
+        [email]
       );
 
       if (result.rows.length === 0) {
@@ -174,8 +174,8 @@ export function setupAuth(app: Express) {
       const expires = new Date(Date.now() + 60 * 60 * 1000);
 
       await pool.query(
-        'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE email = $3',
-        [resetToken, expires, email.toLowerCase()]
+        'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE LOWER(email) = LOWER($3)',
+        [resetToken, expires, email]
       );
 
       res.json({ 

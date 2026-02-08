@@ -4,6 +4,7 @@ import connectPgSimple from 'connect-pg-simple';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { pool } from './db.js';
+import { sendPasswordResetEmail } from './email.js';
 
 const PgSession = connectPgSimple(session);
 
@@ -162,12 +163,12 @@ export function setupAuth(app: Express) {
       }
 
       const result = await pool.query(
-        'SELECT id FROM users WHERE LOWER(email) = LOWER($1)',
+        'SELECT id, name FROM users WHERE LOWER(email) = LOWER($1)',
         [email]
       );
 
       if (result.rows.length === 0) {
-        return res.json({ message: 'אם המייל קיים במערכת, תקבל הוראות לאיפוס סיסמא' });
+        return res.json({ message: 'אם המייל קיים במערכת, תקבל הוראות לאיפוס סיסמא במייל' });
       }
 
       const resetToken = crypto.randomBytes(32).toString('hex');
@@ -178,10 +179,24 @@ export function setupAuth(app: Express) {
         [resetToken, expires, email]
       );
 
-      res.json({ 
-        message: 'קוד איפוס נוצר',
-        resetToken: resetToken
-      });
+      const emailSent = await sendPasswordResetEmail(
+        email,
+        resetToken,
+        result.rows[0].name
+      );
+
+      if (emailSent) {
+        res.json({ 
+          message: 'קוד איפוס נשלח לכתובת המייל שלך',
+          emailSent: true
+        });
+      } else {
+        res.json({ 
+          message: 'קוד איפוס נוצר',
+          resetToken: resetToken,
+          emailSent: false
+        });
+      }
     } catch (error) {
       console.error('Forgot password error:', error);
       res.status(500).json({ error: 'שגיאה באיפוס סיסמא' });

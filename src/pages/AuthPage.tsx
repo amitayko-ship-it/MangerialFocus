@@ -70,6 +70,9 @@ const AuthPage: React.FC = () => {
     
     if (result.error) {
       setError(result.error);
+    } else if (result.emailSent) {
+      setMode('reset');
+      setSuccess('קוד איפוס נשלח לכתובת המייל שלך - בדוק את תיבת הדואר');
     } else if (result.resetToken) {
       setResetToken(result.resetToken);
       setMode('reset');

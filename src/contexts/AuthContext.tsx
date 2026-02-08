@@ -12,7 +12,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string, fullName: string, gender?: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
-  forgotPassword: (email: string) => Promise<{ error: string | null; resetToken?: string }>;
+  forgotPassword: (email: string) => Promise<{ error: string | null; resetToken?: string; emailSent?: boolean }>;
   resetPassword: (token: string, newPassword: string) => Promise<{ error: string | null }>;
   loading: boolean;
 }
@@ -117,7 +117,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return { error: data.error || 'שגיאה באיפוס סיסמא' };
       }
 
-      return { error: null, resetToken: data.resetToken };
+      return { error: null, resetToken: data.resetToken, emailSent: data.emailSent };
     } catch (error) {
       return { error: 'שגיאה באיפוס סיסמא' };
     }

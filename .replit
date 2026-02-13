@@ -59,6 +59,7 @@ localPort = 5001
 externalPort = 3000
 
 [deployment]
-deploymentTarget = "static"
+deploymentTarget = "autoscale"
 build = ["npm", "run", "build"]
 publicDir = "dist"
+run = ["bash", "-c", "NODE_ENV=production npx tsx server/index.ts"]

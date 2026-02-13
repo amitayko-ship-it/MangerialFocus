@@ -462,7 +462,25 @@ Your mindset: Dream like an artist, Analyze like a consultant, Execute like an e
   }
 });
 
-const PORT = process.env.API_PORT || 3001;
-app.listen(PORT, () => {
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (isProduction) {
+  const distPath = path.resolve(__dirname, '../dist');
+  app.use(express.static(distPath));
+  app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(distPath, 'index.html'));
+    }
+  });
+}
+
+const PORT: number = isProduction ? 5000 : Number(process.env.API_PORT || 3001);
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Coach API server running on port ${PORT}`);
 });

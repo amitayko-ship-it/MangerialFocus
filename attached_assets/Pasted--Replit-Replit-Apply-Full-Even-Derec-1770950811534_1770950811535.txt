@@ -1,0 +1,164 @@
+להדבקה ל-@Replit — גרסה מאוחדת: מיתוג מלא + פוטר מעודכן.
+
+---
+
+# @Replit – Apply Full Even Derech Branding + Updated Footer
+
+## 🎯 Goal
+
+Unify the entire UI under Even Derech brand language and update the global footer text.
+
+The system must feel premium, clean, professional, and consistent — not decorative.
+
+---
+
+# 1️⃣ Global Branding System
+
+## Logo Integration
+
+* Display Even Derech logo in top navigation (RTL right side).
+* Next to logo:
+  **“מערכת ניהול סדנאות ולוגיסטיקה”**
+* Logo must appear on:
+
+  * All dashboards
+  * Admin screens
+  * Login
+  * Signup
+  * Work order export header
+
+---
+
+# 2️⃣ Brand Color System (Tailwind Theme)
+
+Define custom theme tokens:
+
+Primary Palette:
+
+* Yellow → Accent / primary actions
+* Green → Success (READY / RETURNED)
+* Blue → Navigation / headers / info
+
+Status colors:
+
+* ORDERED → Blue/Neutral
+* READY → Yellow
+* PICKED_UP → Blue
+* RETURNED → Green
+* Safety incident → Red accent
+
+Rules:
+
+* White background as default
+* Soft shadows
+* No heavy gradients
+* No overuse of colors
+
+---
+
+# 3️⃣ Stones Visual Language (Subtle Integration)
+
+Use the “אבנים” concept as visual metaphor:
+
+### A) Dashboard Cards
+
+* Rounded containers (2xl)
+* Soft elevation
+* Slight layered effect like stacked stones
+
+### B) Status Badges
+
+* Rounded “stone” style badges
+* Soft shadow
+* Color-coded per status
+
+### C) Background Pattern (Very Subtle)
+
+* Low opacity abstract stone shapes (5–8%)
+* Only on dashboards
+* Not on forms
+
+Keep minimal and professional.
+
+---
+
+# 4️⃣ Layout & Components
+
+## Header
+
+* Clean top navigation
+* Role badge
+* User name
+* Logout button
+* Thin brand accent line under header (yellow or subtle gradient)
+
+## Forms
+
+* White cards
+* Soft rounded borders
+* Brand-colored focus ring
+* Consistent spacing (8px system)
+
+## Buttons
+
+* Fully rounded
+* Consistent size
+* Primary action = Yellow
+* Success action = Green
+
+---
+
+# 5️⃣ Login & Signup
+
+* Centered form card
+* Logo visible
+* Minimalistic layout
+* Soft tinted background (very light yellow/green)
+
+---
+
+# 6️⃣ Work Order PDF Styling
+
+* Logo header
+* Clean typography
+* Thin brand divider
+* Minimal color use
+
+---
+
+# 7️⃣ Global Footer (Updated)
+
+## Replace existing footer everywhere with:
+
+**Milestone**
+**Lead by nature**
+
+## Styling
+
+* Center aligned
+* Small typography
+* Light neutral color
+* Thin divider line above footer
+* Consistent across:
+
+  * Dashboards
+  * Admin
+  * Login / Signup
+  * All pages
+
+No additional slogans.
+
+---
+
+# 8️⃣ Consistency Requirements
+
+✔ Logo visible globally
+✔ Stones motif subtle, not decorative
+✔ Colors consistent and minimal
+✔ Status visually intuitive
+✔ Footer identical across all screens
+✔ RTL fully preserved
+
+---
+
+אם תרצה, השלב הבא הוא לנסח Design System מסודר (Typography scale + spacing scale + component naming) כדי למנוע drift עתידי בממשק.

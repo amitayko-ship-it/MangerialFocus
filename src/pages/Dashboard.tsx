@@ -175,10 +175,6 @@ const Dashboard: React.FC = () => {
     });
 
     const keystoneDone = weekData.keystoneDays.filter(Boolean).length;
-    if (keystoneSuccess) {
-      total += 7;
-      completed += Math.min(keystoneDone, 7);
-    }
 
     return {
       completed,
@@ -204,13 +200,6 @@ const Dashboard: React.FC = () => {
           completed += Math.min(daysCompleted, freq);
         }
       });
-      if (keystoneSuccess) {
-        total += 7;
-        if (wd?.keystoneDays) {
-          const keystoneDone = wd.keystoneDays.filter(Boolean).length;
-          completed += Math.min(keystoneDone, 7);
-        }
-      }
     }
 
     return {
@@ -536,13 +525,6 @@ const Dashboard: React.FC = () => {
                       weekCompleted += Math.min(done, freq);
                     }
                   });
-                  if (keystoneSuccess) {
-                    weekTotal += 7;
-                    if (wd?.keystoneDays) {
-                      const done = wd.keystoneDays.filter(Boolean).length;
-                      weekCompleted += Math.min(done, 7);
-                    }
-                  }
                   const pct = weekTotal > 0 ? Math.min(Math.round((weekCompleted / weekTotal) * 100), 100) : 0;
                   const isActive = w === selectedWeek;
 

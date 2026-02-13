@@ -91,7 +91,7 @@ The app uses Replit's built-in PostgreSQL database. Environment variables are au
 
 ## Onboarding Flow
 
-1. Login/Register → 2. **Management Compass** (9-step assessment) → 3. **Intro Video** → 4. Future Vision (with AI interview) → 5. **Intro Rocks Video** → 6. **Big Rocks Agent** (AI extracts rocks from vision) → 7. Focus Area (Big Rocks editing) → 8. **Execution Stakeholders** → 9. **Keystone & Success** → 10. **30 Day Plan** → Dashboard
+1. Login/Register (name + gender collected here) → 2. **Management Compass** (assessment, no name/gender step) → 3. **Intro Video** → 4. Future Vision (with AI interview) → 5. **Intro Rocks Video** → 6. **Big Rocks Agent** (AI extracts rocks from vision) → 7. Focus Area (Big Rocks editing) → 8. **Execution Stakeholders** → 9. **Keystone & Success** → 10. **30 Day Plan** → Dashboard
 
 ### Execution Plan Flow (from "Create New Plan" or after Focus Area)
 Deterministic UI flow (no AI) for converting big rocks into actionable plans:
@@ -101,18 +101,17 @@ Deterministic UI flow (no AI) for converting big rocks into actionable plans:
 Data stored in localStorage: `execution-stakeholders`, `execution-plan`, `keystone-success`
 
 ### Management Compass Steps (מצפן הניהול)
-The Management Compass is a 10-step assessment that runs without email/password:
+The Management Compass is a 10-step assessment (name/gender from auth, not asked again):
 1. Welcome Screen
-2. Introduction (name + gender preference)
-3. Questionnaire Intro
-4. Card Game (sort ALL 5 cards into "describes me" vs "doesn't describe me" - 5 categories)
-5. Card Game Summary
-6. Focus Control (anchor score + time drain)
-7. Decisions Price (immediate/long-term)
-8. Interfaces Map (9-step journey)
-9. Coaching (7 layers)
-10. Team Health (Lencioni 5 dysfunctions)
-11. Module Selection + Dashboard
+2. Questionnaire Intro
+3. Card Game (sort ALL 5 cards into "describes me" vs "doesn't describe me" - 5 categories)
+4. Card Game Summary
+5. Focus Control (anchor score + time drain)
+6. Decisions Price (immediate/long-term)
+7. Interfaces Map (9-step journey)
+8. Coaching (7 layers)
+9. Team Health (Lencioni 5 dysfunctions)
+10. Module Selection + Dashboard
 
 Data persists in localStorage with 7-day expiry.
 

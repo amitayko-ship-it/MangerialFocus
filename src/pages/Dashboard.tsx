@@ -170,19 +170,20 @@ const Dashboard: React.FC = () => {
       const freq = p.weeklyFrequency;
       total += freq;
       const days = weekData.practiceCompletions[pIdx] || [];
-      completed += days.filter(Boolean).length;
+      const daysCompleted = days.filter(Boolean).length;
+      completed += Math.min(daysCompleted, freq);
     });
 
     const keystoneDone = weekData.keystoneDays.filter(Boolean).length;
     if (keystoneSuccess) {
       total += 7;
-      completed += keystoneDone;
+      completed += Math.min(keystoneDone, 7);
     }
 
     return {
       completed,
       total,
-      percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
+      percentage: total > 0 ? Math.min(Math.round((completed / total) * 100), 100) : 0,
       keystonePct: Math.round((keystoneDone / 7) * 100),
     };
   }, [practices, weekData, keystoneSuccess]);
@@ -196,15 +197,18 @@ const Dashboard: React.FC = () => {
     for (let w = 1; w <= 4; w++) {
       const wd = tracker.weeks[w];
       practices.forEach((p, pIdx) => {
-        total += p.weeklyFrequency;
+        const freq = p.weeklyFrequency;
+        total += freq;
         if (wd?.practiceCompletions[pIdx]) {
-          completed += wd.practiceCompletions[pIdx].filter(Boolean).length;
+          const daysCompleted = wd.practiceCompletions[pIdx].filter(Boolean).length;
+          completed += Math.min(daysCompleted, freq);
         }
       });
       if (keystoneSuccess) {
         total += 7;
         if (wd?.keystoneDays) {
-          completed += wd.keystoneDays.filter(Boolean).length;
+          const keystoneDone = wd.keystoneDays.filter(Boolean).length;
+          completed += Math.min(keystoneDone, 7);
         }
       }
     }
@@ -212,7 +216,7 @@ const Dashboard: React.FC = () => {
     return {
       completed,
       total,
-      percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
+      percentage: total > 0 ? Math.min(Math.round((completed / total) * 100), 100) : 0,
     };
   }, [tracker, practices, keystoneSuccess]);
 
@@ -525,18 +529,21 @@ const Dashboard: React.FC = () => {
                   let weekCompleted = 0;
                   let weekTotal = 0;
                   practices.forEach((p, pIdx) => {
-                    weekTotal += p.weeklyFrequency;
+                    const freq = p.weeklyFrequency;
+                    weekTotal += freq;
                     if (wd?.practiceCompletions[pIdx]) {
-                      weekCompleted += wd.practiceCompletions[pIdx].filter(Boolean).length;
+                      const done = wd.practiceCompletions[pIdx].filter(Boolean).length;
+                      weekCompleted += Math.min(done, freq);
                     }
                   });
                   if (keystoneSuccess) {
                     weekTotal += 7;
                     if (wd?.keystoneDays) {
-                      weekCompleted += wd.keystoneDays.filter(Boolean).length;
+                      const done = wd.keystoneDays.filter(Boolean).length;
+                      weekCompleted += Math.min(done, 7);
                     }
                   }
-                  const pct = weekTotal > 0 ? Math.round((weekCompleted / weekTotal) * 100) : 0;
+                  const pct = weekTotal > 0 ? Math.min(Math.round((weekCompleted / weekTotal) * 100), 100) : 0;
                   const isActive = w === selectedWeek;
 
                   return (

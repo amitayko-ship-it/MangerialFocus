@@ -12,7 +12,6 @@ export const AuthLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
               alt="מיילסטון - מובילים מטבעם" 
               className="h-10 object-contain"
             />
-            <span className="text-sm text-muted-foreground font-medium hidden sm:inline">מערכת ניהול סדנאות ולוגיסטיקה</span>
           </div>
           <LanguageSwitcher />
         </div>

@@ -114,7 +114,6 @@ const AuthPage: React.FC = () => {
               alt="מיילסטון - מובילים מטבעם" 
               className="h-10 object-contain"
             />
-            <span className="text-sm text-muted-foreground font-medium hidden sm:inline">מערכת ניהול סדנאות ולוגיסטיקה</span>
           </div>
         </div>
         <div className="h-0.5 bg-gradient-to-l from-brand-yellow via-brand-yellow/60 to-transparent" />

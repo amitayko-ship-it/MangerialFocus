@@ -132,8 +132,7 @@ Data persists in localStorage with 7-day expiry.
 - Clean white card backgrounds with soft borders
 
 ### Logo
-- `public/milestone-logo.png` displayed globally
-- Subtitle: "מערכת ניהול סדנאות ולוגיסטיקה"
+- `public/milestone-logo.png` displayed globally (no subtitle text)
 
 ### Footer (Global)
 - "Milestone" + "Lead by nature"

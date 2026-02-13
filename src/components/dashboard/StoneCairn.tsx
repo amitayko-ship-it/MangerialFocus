@@ -39,7 +39,7 @@ export function StoneCairn({ rocks, keystoneTitle }: StoneCairnProps) {
             const maxWidth = 110;
             const minWidth = 40;
             const widthRange = maxWidth - minWidth;
-            const stoneWidth = minWidth + (bottomIdx / Math.max(displayRocks.length - 1, 1)) * widthRange;
+            const stoneWidth = minWidth + (idx / Math.max(displayRocks.length - 1, 1)) * widthRange;
             const xCenter = 65;
 
             return (

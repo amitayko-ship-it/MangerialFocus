@@ -38,7 +38,7 @@ export default function OnboardingSummary() {
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex items-center justify-center" dir="rtl">
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50/30 via-background to-green-50/15 flex items-center justify-center" dir="rtl">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto" />
           <p className="mt-4 text-muted-foreground">טוען...</p>
@@ -48,7 +48,7 @@ export default function OnboardingSummary() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex flex-col" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50/30 via-background to-green-50/15 flex flex-col" dir="rtl">
       <Header />
 
       <main className="flex-1 p-4">

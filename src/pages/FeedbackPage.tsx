@@ -131,7 +131,7 @@ const FeedbackPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50/30 via-background to-green-50/15" dir={isRTL ? 'rtl' : 'ltr'}>
       <header className="p-4 flex justify-between items-center max-w-2xl mx-auto">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-5 h-5 text-primary" />

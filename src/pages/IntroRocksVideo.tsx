@@ -20,7 +20,7 @@ const IntroRocksVideo: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex flex-col" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50/30 via-background to-green-50/15 flex flex-col" dir="rtl">
       <Header />
 
       <main className="flex-1 flex items-center justify-center p-4">
@@ -42,7 +42,7 @@ const IntroRocksVideo: React.FC = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
-            className="relative w-full aspect-video bg-card rounded-xl border shadow-medium overflow-hidden"
+            className="relative w-full aspect-video bg-card rounded-2xl border shadow-stone overflow-hidden"
           >
             <iframe
               className="absolute inset-0 w-full h-full"

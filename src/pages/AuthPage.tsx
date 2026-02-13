@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
-import { Compass, Mail, Lock, User, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, User, ArrowLeft } from 'lucide-react';
 
 type AuthMode = 'login' | 'register' | 'forgot' | 'reset';
 
@@ -105,14 +105,24 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50/40 via-background to-green-50/20 flex flex-col" dir="rtl">
+      <header className="w-full">
+        <div className="p-4 flex justify-center">
+          <div className="flex items-center gap-3">
+            <img 
+              src="/milestone-logo.png" 
+              alt="מיילסטון - מובילים מטבעם" 
+              className="h-10 object-contain"
+            />
+            <span className="text-sm text-muted-foreground font-medium hidden sm:inline">מערכת ניהול סדנאות ולוגיסטיקה</span>
+          </div>
+        </div>
+        <div className="h-0.5 bg-gradient-to-l from-brand-yellow via-brand-yellow/60 to-transparent" />
+      </header>
+
+      <div className="flex-1 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center">
-              <Compass className="w-8 h-8 text-primary" />
-            </div>
-          </div>
           <h1 className="text-2xl font-bold text-foreground">מצפן הניהול</h1>
           <p className="text-muted-foreground mt-2">
             {mode === 'login' && 'התחבר לחשבון שלך'}
@@ -122,7 +132,7 @@ const AuthPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-card rounded-2xl p-6 shadow-soft border border-border">
+        <div className="bg-card rounded-2xl p-6 shadow-stone border border-border">
           {error && (
             <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-lg mb-4 text-sm">
               {error}
@@ -357,6 +367,16 @@ const AuthPage: React.FC = () => {
           )}
         </div>
       </div>
+      </div>
+
+      <footer className="py-5 px-4">
+        <div className="border-t border-border/60 pt-4">
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-sm font-semibold text-muted-foreground/70 tracking-wide">Milestone</span>
+            <span className="text-xs text-muted-foreground/50 tracking-wider">Lead by nature</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

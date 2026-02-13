@@ -5,7 +5,7 @@ import {
   SidebarGroupLabel, SidebarGroupContent, SidebarMenu,
   SidebarMenuItem, SidebarMenuButton,
 } from '@/components/ui/sidebar';
-import { Target, Compass, Eye, Mountain, ClipboardList, LayoutDashboard } from 'lucide-react';
+import { Compass, Eye, Mountain, ClipboardList, LayoutDashboard } from 'lucide-react';
 
 const NAV_ITEMS = [
   { path: '/management-compass', label: 'שאלון', icon: Compass },
@@ -36,10 +36,11 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader>
         <div className="flex items-center gap-2 px-1">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-            <Target className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <span className="font-bold text-sm">Focus Tracker</span>
+          <img 
+            src="/milestone-logo.png" 
+            alt="מיילסטון" 
+            className="h-8 object-contain"
+          />
         </div>
       </SidebarHeader>
       <SidebarContent>

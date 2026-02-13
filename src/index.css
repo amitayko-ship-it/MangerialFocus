@@ -4,24 +4,35 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
+    --background: 40 20% 98%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
-    --primary: 221 100% 60%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 45 93% 47%;
+    --primary-foreground: 0 0% 10%;
     --secondary: 210 20% 96%;
     --secondary-foreground: 222 47% 11%;
-    --muted: 210 20% 96%;
+    --muted: 40 15% 96%;
     --muted-foreground: 215 16% 47%;
     --accent: 210 20% 96%;
     --accent-foreground: 222 47% 11%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 20% 90%;
-    --input: 214 20% 90%;
-    --ring: 221 100% 60%;
-    --radius: 0.625rem;
+    --border: 40 15% 90%;
+    --input: 40 15% 90%;
+    --ring: 45 93% 47%;
+    --radius: 0.75rem;
+
+    --brand-yellow: 45 93% 47%;
+    --brand-green: 142 71% 45%;
+    --brand-blue: 217 91% 50%;
+    --brand-nav: 217 91% 50%;
+
+    --status-ordered: 217 91% 50%;
+    --status-ready: 45 93% 47%;
+    --status-picked-up: 217 91% 50%;
+    --status-returned: 142 71% 45%;
+    --status-incident: 0 84% 60%;
   }
 
   * {
@@ -31,5 +42,15 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer utilities {
+  .stone-pattern {
+    background-image: 
+      radial-gradient(ellipse 120px 80px at 15% 20%, hsl(40 15% 85% / 0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 100px 120px at 75% 60%, hsl(40 15% 85% / 0.05) 0%, transparent 70%),
+      radial-gradient(ellipse 80px 60px at 45% 80%, hsl(40 15% 85% / 0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 140px 90px at 85% 15%, hsl(40 15% 85% / 0.05) 0%, transparent 70%);
   }
 }

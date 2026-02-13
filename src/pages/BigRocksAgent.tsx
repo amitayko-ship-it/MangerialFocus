@@ -416,7 +416,7 @@ const BigRocksAgent: React.FC = () => {
 
   if (initialLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex flex-col" dir="rtl">
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50/30 via-background to-green-50/15 flex flex-col" dir="rtl">
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-4">
@@ -436,7 +436,7 @@ const BigRocksAgent: React.FC = () => {
       : !extractedRocks;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex flex-col" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50/30 via-background to-green-50/15 flex flex-col" dir="rtl">
       <Header />
 
       <main className="flex-1 flex flex-col max-w-3xl mx-auto w-full p-4">

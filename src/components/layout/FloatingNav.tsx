@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Target, Compass, Eye, Mountain, ClipboardList, LayoutDashboard, LogOut } from 'lucide-react';
+import { Menu, X, Compass, Eye, Mountain, ClipboardList, LayoutDashboard, LogOut } from 'lucide-react';
 
 const NAV_ITEMS = [
   { path: '/management-compass', label: 'שאלון', icon: Compass },
@@ -43,7 +43,7 @@ export function FloatingNav() {
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-50 w-11 h-11 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-all active:scale-95"
+        className="fixed top-4 left-4 z-50 w-11 h-11 rounded-full bg-brand-blue text-white shadow-lg flex items-center justify-center hover:bg-brand-blue/90 transition-all active:scale-95"
       >
         {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
@@ -64,13 +64,14 @@ export function FloatingNav() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="fixed top-18 left-4 z-50 w-56 bg-background rounded-2xl shadow-2xl border overflow-hidden"
+              className="fixed top-18 left-4 z-50 w-56 bg-background rounded-2xl shadow-stone border overflow-hidden"
             >
               <div className="p-3 border-b flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-                  <Target className="w-3.5 h-3.5 text-primary-foreground" />
-                </div>
-                <span className="font-bold text-sm">Focus Tracker</span>
+                <img 
+                  src="/milestone-logo.png" 
+                  alt="מיילסטון" 
+                  className="h-7 object-contain"
+                />
               </div>
 
               <div className="p-2 space-y-0.5">
@@ -82,7 +83,7 @@ export function FloatingNav() {
                       onClick={() => handleNavigate(item.path)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors ${
                         active
-                          ? 'bg-primary/10 text-primary font-medium'
+                          ? 'bg-brand-yellow/15 text-foreground font-medium'
                           : 'text-foreground hover:bg-muted'
                       }`}
                     >

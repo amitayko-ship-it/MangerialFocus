@@ -2,16 +2,14 @@ import React from 'react';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="w-full py-6 px-6 bg-card border-t border-border">
-      <div className="max-w-4xl mx-auto flex flex-col items-center gap-3">
-        <img 
-          src="/milestone-logo.png" 
-          alt="מיילסטון - מובילים מטבעם" 
-          className="h-10 object-contain"
-        />
-        <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} כל הזכויות שמורות.
-        </p>
+    <footer className="w-full py-5 px-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="border-t border-border/60 pt-4">
+          <div className="flex flex-col items-center gap-1">
+            <span className="text-sm font-semibold text-muted-foreground/70 tracking-wide">Milestone</span>
+            <span className="text-xs text-muted-foreground/50 tracking-wider">Lead by nature</span>
+          </div>
+        </div>
       </div>
     </footer>
   );

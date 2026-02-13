@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, Target } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { saveWithExpiry } from '@/lib/storageUtils';
+import Header from '@/components/management-compass/layout/Header';
+import Footer from '@/components/management-compass/layout/Footer';
 
 const TOTAL_STEPS = 4;
 
@@ -60,17 +62,8 @@ const Questionnaire: React.FC = () => {
   const canProceed = answers[currentQuestion.key]?.trim().length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex flex-col">
-      {/* Header */}
-      <header className="w-full p-4 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-            <Target className="w-6 h-6 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold text-foreground">Focus Tracker</span>
-        </div>
-        <LanguageSwitcher />
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50/30 via-background to-green-50/15 flex flex-col" dir="rtl">
+      <Header />
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center p-4">
@@ -172,10 +165,7 @@ const Questionnaire: React.FC = () => {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="p-4 text-center text-sm text-muted-foreground">
-        &copy; 2026 Focus Tracker
-      </footer>
+      <Footer />
     </div>
   );
 };

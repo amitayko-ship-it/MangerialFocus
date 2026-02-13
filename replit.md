@@ -116,7 +116,42 @@ The Management Compass is a 10-step assessment that runs without email/password:
 
 Data persists in localStorage with 7-day expiry.
 
+## Brand Design System (Even Derech / Milestone)
+
+### Colors
+- **Primary (Yellow)**: `--primary: 45 93% 47%` - Accent / primary actions
+- **Brand Green**: `--brand-green: 142 71% 45%` - Success states (READY / RETURNED)
+- **Brand Blue**: `--brand-blue: 217 91% 50%` - Navigation / headers / info
+- **Destructive (Red)**: Status incidents
+
+### Visual Language
+- "Stone" motif: Rounded 2xl cards, soft `shadow-stone` elevation
+- Subtle `stone-pattern` CSS class for dashboard backgrounds
+- Fully rounded buttons (rounded-full)
+- Yellow accent gradient line under all headers
+- Clean white card backgrounds with soft borders
+
+### Logo
+- `public/milestone-logo.png` displayed globally
+- Subtitle: "מערכת ניהול סדנאות ולוגיסטיקה"
+
+### Footer (Global)
+- "Milestone" + "Lead by nature"
+- Centered, small typography, thin divider above
+- Consistent across all screens
+
 ## Recent Changes
+
+- **Applied Even Derech Full Branding** (Feb 2026):
+  - Yellow primary color, green success, blue navigation
+  - Milestone logo displayed globally (header, login, nav)
+  - "Milestone / Lead by nature" footer on all pages
+  - Stone visual language: rounded-2xl cards, soft shadows
+  - Yellow accent line under all headers
+  - Soft yellow/green tinted backgrounds
+  - Fully rounded buttons
+  - Removed all "Focus Tracker" branding remnants
+
 
 - **Added Email/Password Authentication**:
   - PostgreSQL database for user storage

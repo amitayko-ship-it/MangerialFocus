@@ -35,6 +35,19 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        brand: {
+          yellow: 'hsl(var(--brand-yellow))',
+          green: 'hsl(var(--brand-green))',
+          blue: 'hsl(var(--brand-blue))',
+          nav: 'hsl(var(--brand-nav))',
+        },
+        status: {
+          ordered: 'hsl(var(--status-ordered))',
+          ready: 'hsl(var(--status-ready))',
+          'picked-up': 'hsl(var(--status-picked-up))',
+          returned: 'hsl(var(--status-returned))',
+          incident: 'hsl(var(--status-incident))',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -44,6 +57,7 @@ const config: Config = {
       boxShadow: {
         soft: '0 2px 8px rgba(0, 0, 0, 0.04)',
         medium: '0 4px 16px rgba(0, 0, 0, 0.06)',
+        stone: '0 2px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.03)',
         glow: '0 0 20px rgba(49, 107, 255, 0.15)',
       },
       fontSize: {

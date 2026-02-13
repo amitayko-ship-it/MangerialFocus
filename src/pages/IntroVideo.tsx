@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Target, ChevronLeft, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { loadWithExpiry, saveWithExpiry } from '@/lib/storageUtils';
+import Header from '@/components/management-compass/layout/Header';
+import Footer from '@/components/management-compass/layout/Footer';
 
 const YOUTUBE_VIDEO_ID = 'KeVBfS1Ho6M';
 
@@ -31,16 +33,8 @@ const IntroVideo: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/10 flex flex-col">
-      <header className="w-full p-4 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-            <Target className="w-6 h-6 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold text-foreground">Focus Tracker</span>
-        </div>
-        <LanguageSwitcher />
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-50/30 via-background to-green-50/15 flex flex-col" dir="rtl">
+      <Header />
 
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-3xl space-y-8">
@@ -63,7 +57,7 @@ const IntroVideo: React.FC = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
-            className="relative w-full aspect-video bg-card rounded-xl border shadow-medium overflow-hidden"
+            className="relative w-full aspect-video bg-card rounded-2xl border shadow-stone overflow-hidden"
           >
             <iframe
               className="absolute inset-0 w-full h-full"
@@ -83,7 +77,7 @@ const IntroVideo: React.FC = () => {
             <Button
               onClick={handleContinue}
               size="lg"
-              className="gap-2 w-full h-12 text-base"
+              className="gap-2 w-full h-12 text-base rounded-full"
             >
               {isRTL ? (
                 <>
@@ -100,7 +94,7 @@ const IntroVideo: React.FC = () => {
             <Button
               variant="ghost"
               onClick={handleSkip}
-              className="text-muted-foreground w-full h-11"
+              className="text-muted-foreground w-full h-11 rounded-full"
             >
               {isRTL ? 'דלג בינתיים' : 'Skip for now'}
             </Button>
@@ -132,9 +126,7 @@ const IntroVideo: React.FC = () => {
         </div>
       </main>
 
-      <footer className="p-4 text-center text-sm text-muted-foreground">
-        &copy; 2026 Focus Tracker
-      </footer>
+      <Footer />
     </div>
   );
 };

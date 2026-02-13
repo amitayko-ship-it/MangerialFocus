@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Loader2, ChevronLeft, ArrowRight, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 import { loadWithExpiry, saveWithExpiry } from '@/lib/storageUtils';
 import { BigRock } from '@/types/focus';
 import Header from '@/components/management-compass/layout/Header';
@@ -86,6 +87,7 @@ function cleanMessageForDisplay(text: string): string {
 
 const BigRocksAgent: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -103,18 +105,10 @@ const BigRocksAgent: React.FC = () => {
   const [keystoneHabit, setKeystoneHabit] = useState<string>('');
 
   const getUserInfo = () => {
-    const raw = localStorage.getItem('management-compass-data');
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        const data = parsed.value || parsed;
-        return {
-          userName: data.userInfo?.name || '',
-          userGender: data.userInfo?.gender || 'male'
-        };
-      } catch {}
-    }
-    return { userName: '', userGender: 'male' };
+    return {
+      userName: user?.full_name || '',
+      userGender: (user?.gender as string) || 'male'
+    };
   };
 
   useEffect(() => {

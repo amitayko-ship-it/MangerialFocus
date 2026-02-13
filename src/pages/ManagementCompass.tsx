@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/management-compass/layout/Header';
 import Footer from '@/components/management-compass/layout/Footer';
 import WelcomeScreen from '@/components/management-compass/WelcomeScreen';
-import IntroductionStep from '@/components/management-compass/IntroductionStep';
 import QuestionnaireIntroStep from '@/components/management-compass/QuestionnaireIntroStep';
 import CardGameStep from '@/components/management-compass/CardGameStep';
 import CardGameSummaryScreen from '@/components/management-compass/CardGameSummaryScreen';
@@ -15,7 +15,7 @@ import TeamHealthStep from '@/components/management-compass/TeamHealthStep';
 import ManagementCompassDashboard from '@/components/management-compass/ManagementCompassDashboard';
 import { Button } from '@/components/ui/button';
 import { LayoutDashboard, ArrowRight } from 'lucide-react';
-import { QuestionnaireData, initialQuestionnaireData, InterfaceJourneyData, CoachingData, TeamHealthData, CardGameData, UserInfo } from '@/types/managementCompass';
+import { QuestionnaireData, initialQuestionnaireData, InterfaceJourneyData, CoachingData, TeamHealthData, CardGameData } from '@/types/managementCompass';
 import { saveWithExpiry, loadWithExpiry } from '@/lib/storageUtils';
 
 const STORAGE_KEY = 'management-compass-data';
@@ -23,7 +23,6 @@ const STEP_STORAGE_KEY = 'management-compass-step';
 
 type Step = 
   | 'welcome'
-  | 'introduction'
   | 'questionnaireIntro'
   | 'cardGame'
   | 'cardGameSummary'
@@ -35,22 +34,36 @@ type Step =
   | 'dashboard';
 
 const STEP_ORDER: Step[] = [
-  'welcome', 'introduction', 'questionnaireIntro', 'cardGame', 'cardGameSummary',
+  'welcome', 'questionnaireIntro', 'cardGame', 'cardGameSummary',
   'focusControl', 'decisionsPrice', 'interfacesMap', 'coaching', 'teamHealth',
   'dashboard'
 ];
 
 const ManagementCompass: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState<Step>(() => {
     const saved = loadWithExpiry<string>(STEP_STORAGE_KEY);
     if (saved === 'moduleSelection') return 'dashboard';
+    if (saved === 'introduction') return 'questionnaireIntro';
     return (saved as Step) || 'welcome';
   });
   const [data, setData] = useState<QuestionnaireData>(() => {
     const saved = loadWithExpiry<QuestionnaireData>(STORAGE_KEY);
     return saved || initialQuestionnaireData;
   });
+
+  useEffect(() => {
+    if (user) {
+      setData(prev => ({
+        ...prev,
+        userInfo: {
+          name: user.full_name || '',
+          gender: (user.gender as 'male' | 'female') || 'male'
+        }
+      }));
+    }
+  }, [user]);
   const [previousStep, setPreviousStep] = useState<Step | null>(null);
 
   useEffect(() => {
@@ -86,29 +99,19 @@ const ManagementCompass: React.FC = () => {
     }
   };
 
-  const showDashboardButton = !['welcome', 'introduction', 'dashboard'].includes(currentStep);
+  const showDashboardButton = !['welcome', 'dashboard'].includes(currentStep);
 
   const renderStep = () => {
     switch (currentStep) {
       case 'welcome':
-        return <WelcomeScreen onStart={() => setCurrentStep('introduction')} />;
-      
-      case 'introduction':
-        return (
-          <IntroductionStep
-            userInfo={data.userInfo}
-            onUserInfoChange={(userInfo: UserInfo) => updateData({ userInfo })}
-            onNext={() => setCurrentStep('questionnaireIntro')}
-            onBack={() => setCurrentStep('welcome')}
-          />
-        );
+        return <WelcomeScreen onStart={() => setCurrentStep('questionnaireIntro')} />;
       
       case 'questionnaireIntro':
         return (
           <QuestionnaireIntroStep
-            userName={data.userInfo?.name || ''}
+            userName={user?.full_name || ''}
             onNext={() => setCurrentStep('cardGame')}
-            onBack={() => setCurrentStep('introduction')}
+            onBack={() => setCurrentStep('welcome')}
           />
         );
       

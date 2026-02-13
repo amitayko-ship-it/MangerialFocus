@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { StreakWidget, ProgressWidget } from '@/components/motivation/MotivationWidgets';
 import { MorningRitual } from '@/components/morning-ritual/MorningRitual';
+import { StoneCairn } from '@/components/dashboard/StoneCairn';
 
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 const TIME_WINDOW_LABEL: Record<TimeWindow, string> = {
@@ -248,84 +249,25 @@ const Dashboard: React.FC = () => {
         )}
 
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">הדשבורד שלי</h1>
-              <p className="text-muted-foreground text-sm mt-1">תוכנית 30 יום</p>
-            </div>
-            <div className={`text-3xl font-bold ${progressColor}`}>
-              {overallStats.percentage}%
-            </div>
-          </div>
+          <Card className="overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-lg font-bold">האבנים הגדולות שלי</h2>
+                <div className={`text-2xl font-bold ${progressColor}`}>
+                  {overallStats.percentage}%
+                </div>
+              </div>
+              <p className="text-muted-foreground text-xs mb-2">תוכנית 30 יום</p>
+              <StoneCairn
+                rocks={bigRocks.length > 0 ? bigRocks : [{ id: 'main', title: executionPlan.rockTitle, order: 0, practices: [] }]}
+                keystoneTitle={executionPlan.rockTitle}
+              />
+            </CardContent>
+          </Card>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">האבנים הגדולות שלי</h2>
-                </div>
-                <div className="grid gap-3">
-                  {bigRocks.length > 0 ? (
-                    bigRocks.map((rock, idx) => {
-                      const isKeystone = rock.title === executionPlan.rockTitle;
-                      return (
-                        <Card key={idx} className={`transition-all ${isKeystone ? 'border-primary/40 bg-primary/5 shadow-md ring-1 ring-primary/20' : 'bg-card'}`}>
-                          <CardContent className="p-4">
-                            <div className="flex items-start gap-3">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                                isKeystone ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
-                              }`}>
-                                <Target className="w-5 h-5" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <p className={`font-bold text-lg truncate ${isKeystone ? 'text-primary' : 'text-foreground'}`}>
-                                    {rock.title}
-                                  </p>
-                                  {isKeystone && (
-                                    <span className="bg-primary text-primary-foreground text-[10px] px-2 py-0.5 rounded-full font-bold">
-                                      אבן מפתח
-                                    </span>
-                                  )}
-                                </div>
-                                {isKeystone ? (
-                                  <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                                    <Clock className="w-3.5 h-3.5" />
-                                    <span>{(executionPlan.totalWeeklyMinutes / 60).toFixed(1)} שעות בשבוע</span>
-                                  </div>
-                                ) : (
-                                  <p className="text-xs text-muted-foreground mt-1">ממתין להגדרת פרקטיקות</p>
-                                )}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })
-                  ) : (
-                    <Card className="border-primary/20 bg-primary/5">
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            <Target className="w-5 h-5 text-primary" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs text-muted-foreground">האבן הגדולה</p>
-                            <p className="font-semibold text-lg">{executionPlan.rockTitle}</p>
-                            <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                              <Clock className="w-3.5 h-3.5" />
-                              <span>{(executionPlan.totalWeeklyMinutes / 60).toFixed(1)} שעות בשבוע</span>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </div>
-            </motion.div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                <StreakWidget currentStreak={progress.currentStreak} longestStreak={progress.longestStreak} />

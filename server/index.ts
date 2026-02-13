@@ -1,9 +1,14 @@
 import express from 'express';
 import cors from 'cors';
 import OpenAI from 'openai';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { initDatabase } from './db.js';
 import { setupAuth } from './auth.js';
 import { setupMotivation } from './motivation.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
@@ -462,21 +467,16 @@ Your mindset: Dream like an artist, Analyze like a consultant, Execute like an e
   }
 });
 
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const isProduction = process.env.NODE_ENV === 'production';
 
 if (isProduction) {
   const distPath = path.resolve(__dirname, '../dist');
   app.use(express.static(distPath));
-  app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(distPath, 'index.html'));
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
     }
+    res.sendFile(path.join(distPath, 'index.html'));
   });
 }
 

@@ -3,12 +3,18 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import { AxesData, bigStones, AxisDefinition } from '@/types/managementCompass';
 
+type Gender = 'male' | 'female';
+
 interface SelfAssessmentStepProps {
   axes: AxesData;
   onAxesChange: (axes: AxesData) => void;
   onNext: () => void;
   onBack: () => void;
+  gender: Gender;
 }
+
+const g = (gender: Gender, male: string, female: string) =>
+  gender === 'female' ? female : male;
 
 const colorClasses: Record<string, { border: string; bg: string; badge: string; selected: string; hover: string }> = {
   blue: {
@@ -100,6 +106,7 @@ const SelfAssessmentStep: React.FC<SelfAssessmentStepProps> = ({
   onAxesChange,
   onNext,
   onBack,
+  gender,
 }) => {
   const [currentStoneIndex, setCurrentStoneIndex] = useState(0);
 
@@ -109,10 +116,6 @@ const SelfAssessmentStep: React.FC<SelfAssessmentStepProps> = ({
 
   const stoneAxesComplete = currentStone.axes.every(
     (ax) => axes[ax.key] > 0
-  );
-
-  const allComplete = bigStones.every((stone) =>
-    stone.axes.every((ax) => axes[ax.key] > 0)
   );
 
   const handleAxisChange = (key: keyof AxesData, val: number) => {
@@ -181,7 +184,10 @@ const SelfAssessmentStep: React.FC<SelfAssessmentStepProps> = ({
             {currentStone.title}
           </h2>
           <p className="text-muted-foreground text-sm">
-            בחר/י את הרמה שמשקפת באופן המיטבי את המציאות שלך – ציר אחד בכל פעם.
+            {g(gender,
+              'בחר את הרמה שמשקפת באופן המיטבי את המציאות שלך – ציר אחד בכל פעם.',
+              'בחרי את הרמה שמשקפת באופן המיטבי את המציאות שלך – ציר אחד בכל פעם.'
+            )}
           </p>
         </div>
 
@@ -218,7 +224,10 @@ const SelfAssessmentStep: React.FC<SelfAssessmentStepProps> = ({
 
         {!stoneAxesComplete && (
           <p className="text-center text-sm text-muted-foreground mt-3">
-            יש לבחור רמה בכל ציר לפני המעבר לאבן הבאה
+            {g(gender,
+              'יש לבחור רמה בכל ציר לפני המעבר לאבן הבאה',
+              'יש לבחור רמה בכל ציר לפני המעבר לאבן הבאה'
+            )}
           </p>
         )}
       </div>

@@ -3,11 +3,17 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { PersonalDevelopmentData, developmentLeaps } from '@/types/managementCompass';
 
+type Gender = 'male' | 'female';
+
+const g = (gender: Gender, male: string, female: string) =>
+  gender === 'female' ? female : male;
+
 interface PersonalDevelopmentStepProps {
   data: PersonalDevelopmentData;
   onChange: (data: PersonalDevelopmentData) => void;
   onNext: () => void;
   onBack: () => void;
+  gender: Gender;
 }
 
 const PersonalDevelopmentStep: React.FC<PersonalDevelopmentStepProps> = ({
@@ -15,6 +21,7 @@ const PersonalDevelopmentStep: React.FC<PersonalDevelopmentStepProps> = ({
   onChange,
   onNext,
   onBack,
+  gender,
 }) => {
   const update = (updates: Partial<PersonalDevelopmentData>) => {
     onChange({ ...data, ...updates });
@@ -29,7 +36,10 @@ const PersonalDevelopmentStep: React.FC<PersonalDevelopmentStepProps> = ({
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-foreground mb-2">תוכנית התפתחות אישית</h2>
           <p className="text-muted-foreground text-sm">
-            זהו השלב האחרון. נקה/י ממך את השאלון ובחר/י את כיוון קפיצת המדרגה שלך.
+            {g(gender,
+              'זהו השלב האחרון. נקה ממך את השאלון ובחר את כיוון קפיצת המדרגה שלך.',
+              'זהו השלב האחרון. נקי ממך את השאלון ובחרי את כיוון קפיצת המדרגה שלך.'
+            )}
           </p>
         </div>
 
@@ -42,7 +52,10 @@ const PersonalDevelopmentStep: React.FC<PersonalDevelopmentStepProps> = ({
             </h3>
           </div>
           <p className="text-muted-foreground text-sm mb-4 pr-9">
-            סמן/י היכן את/ה מזהה את קפיצת המדרגה המשמעותית ביותר עבורך כרגע:
+            {g(gender,
+              'סמן היכן אתה מזהה את קפיצת המדרגה המשמעותית ביותר עבורך כרגע:',
+              'סמני היכן את מזהה את קפיצת המדרגה המשמעותית ביותר עבורך כרגע:'
+            )}
           </p>
           <div className="space-y-3">
             {developmentLeaps.map((leap) => {
@@ -90,17 +103,23 @@ const PersonalDevelopmentStep: React.FC<PersonalDevelopmentStepProps> = ({
             <h3 className="text-lg font-semibold text-foreground">דיוק קפיצת המדרגה</h3>
           </div>
           <p className="text-muted-foreground text-sm mb-5 pr-9">
-            ענה/י על השאלות הבאות בכנות. אין תשובות נכונות – זה לשימושך בלבד.
+            {g(gender,
+              'ענה על השאלות הבאות בכנות. אין תשובות נכונות – זה לשימושך בלבד.',
+              'עני על השאלות הבאות בכנות. אין תשובות נכונות – זה לשימושך בלבד.'
+            )}
           </p>
           <div className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
-                אם בעוד 6 חודשים יגידו עליי: "קרה כאן שינוי משמעותי בניהול שלו" – מה בדיוק יגידו?
+                {g(gender,
+                  'אם בעוד 6 חודשים יגידו עליי: "קרה כאן שינוי משמעותי בניהול שלו" – מה בדיוק יגידו?',
+                  'אם בעוד 6 חודשים יגידו עליי: "קרה כאן שינוי משמעותי בניהול שלה" – מה בדיוק יגידו?'
+                )}
               </label>
               <textarea
                 value={data.sixMonthChange}
                 onChange={(e) => update({ sixMonthChange: e.target.value })}
-                placeholder="כתוב/י כאן..."
+                placeholder={g(gender, 'כתוב כאן...', 'כתבי כאן...')}
                 rows={3}
                 className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
               />
@@ -112,31 +131,37 @@ const PersonalDevelopmentStep: React.FC<PersonalDevelopmentStepProps> = ({
               <textarea
                 value={data.behaviorChange}
                 onChange={(e) => update({ behaviorChange: e.target.value })}
-                placeholder="כתוב/י כאן..."
+                placeholder={g(gender, 'כתוב כאן...', 'כתבי כאן...')}
                 rows={2}
                 className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
-                איזה מחיר אני משלם היום אם לא אעשה את השינוי הזה?
+                {g(gender,
+                  'איזה מחיר אני משלם היום אם לא אעשה את השינוי הזה?',
+                  'איזה מחיר אני משלמת היום אם לא אעשה את השינוי הזה?'
+                )}
               </label>
               <textarea
                 value={data.priceOfNoChange}
                 onChange={(e) => update({ priceOfNoChange: e.target.value })}
-                placeholder="כתוב/י כאן..."
+                placeholder={g(gender, 'כתוב כאן...', 'כתבי כאן...')}
                 rows={2}
                 className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
-                מה אני מוכן לעשות אחרת כבר בשבוע הקרוב?
+                {g(gender,
+                  'מה אני מוכן לעשות אחרת כבר בשבוע הקרוב?',
+                  'מה אני מוכנה לעשות אחרת כבר בשבוע הקרוב?'
+                )}
               </label>
               <textarea
                 value={data.weeklyCommitment}
                 onChange={(e) => update({ weeklyCommitment: e.target.value })}
-                placeholder="כתוב/י כאן..."
+                placeholder={g(gender, 'כתוב כאן...', 'כתבי כאן...')}
                 rows={2}
                 className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
               />
@@ -151,7 +176,9 @@ const PersonalDevelopmentStep: React.FC<PersonalDevelopmentStepProps> = ({
             <h3 className="text-lg font-semibold text-foreground">ניסוח אזור קפיצה</h3>
           </div>
           <div className="bg-card border border-border rounded-xl p-5">
-            <p className="text-sm text-muted-foreground mb-4">השלם/י את המשפט:</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              {g(gender, 'השלם את המשפט:', 'השלימי את המשפט:')}
+            </p>
             <div className="space-y-4 text-sm text-foreground leading-relaxed">
               <div className="flex flex-wrap items-center gap-2">
                 <span>השנה אני רוצה לייצר קפיצת מדרגה ב –</span>
@@ -204,7 +231,10 @@ const PersonalDevelopmentStep: React.FC<PersonalDevelopmentStepProps> = ({
         </div>
         {!canProceed && (
           <p className="text-center text-sm text-muted-foreground mt-3">
-            יש לבחור קפיצת מדרגה (חלק ב') לפני המעבר לתוצאות
+            {g(gender,
+              'יש לבחור קפיצת מדרגה (חלק ב\') לפני המעבר לתוצאות',
+              'יש לבחור קפיצת מדרגה (חלק ב\') לפני המעבר לתוצאות'
+            )}
           </p>
         )}
       </div>

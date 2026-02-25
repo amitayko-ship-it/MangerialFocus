@@ -99,6 +99,7 @@ const ManagementCompass: React.FC = () => {
             onAxesChange={updateAxes}
             onNext={() => setCurrentStep('personalDevelopment')}
             onBack={() => setCurrentStep('questionnaireIntro')}
+            gender={(user?.gender as 'male' | 'female') || 'male'}
           />
         );
 
@@ -109,6 +110,7 @@ const ManagementCompass: React.FC = () => {
             onChange={updatePersonalDevelopment}
             onNext={() => setCurrentStep('dashboard')}
             onBack={() => setCurrentStep('selfAssessment')}
+            gender={(user?.gender as 'male' | 'female') || 'male'}
           />
         );
 

@@ -11,6 +11,21 @@ import ManagementCompassDashboard from '@/components/management-compass/Manageme
 import { QuestionnaireData, initialQuestionnaireData, AxesData, PersonalDevelopmentData, bigStones } from '@/types/managementCompass';
 import { saveWithExpiry, loadWithExpiry } from '@/lib/storageUtils';
 
+async function reportProgress(currentStep: string, data: QuestionnaireData) {
+  try {
+    const axesCompleted = bigStones.every((s) => s.axes.every((ax) => data.axes[ax.key] > 0));
+    const personalDevelopmentCompleted = data.personalDevelopment.developmentLeap !== null;
+    await fetch('/api/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ currentStep, axesCompleted, personalDevelopmentCompleted }),
+    });
+  } catch {
+    // fail silently – progress tracking is non-critical
+  }
+}
+
 const STORAGE_KEY = 'management-compass-data';
 const STEP_STORAGE_KEY = 'management-compass-step';
 
@@ -51,6 +66,9 @@ const ManagementCompass: React.FC = () => {
 
   useEffect(() => {
     saveWithExpiry(STEP_STORAGE_KEY, currentStep);
+    if (['selfAssessment', 'personalDevelopment', 'dashboard'].includes(currentStep)) {
+      reportProgress(currentStep, data);
+    }
   }, [currentStep]);
 
   const updateAxes = (axes: AxesData) => {

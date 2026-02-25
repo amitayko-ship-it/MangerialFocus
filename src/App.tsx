@@ -21,6 +21,7 @@ import OnboardingSummary from '@/pages/setup/OnboardingSummary';
 import Dashboard from '@/pages/Dashboard';
 import WeeklyCheckIn from '@/pages/WeeklyCheckIn';
 import FeedbackPage from '@/pages/FeedbackPage';
+import AdminPage from '@/pages/AdminPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -73,6 +74,8 @@ function AppRoutes() {
 
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/weekly-check" element={<ProtectedRoute><WeeklyCheckIn /></ProtectedRoute>} />
+
+      <Route path="/admin" element={<AdminPage />} />
 
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />

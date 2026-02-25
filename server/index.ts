@@ -3,7 +3,7 @@ import cors from 'cors';
 import OpenAI from 'openai';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { initDatabase } from './db.js';
+import { initDatabase, pool } from './db.js';
 import { setupAuth } from './auth.js';
 import { setupMotivation } from './motivation.js';
 
@@ -466,6 +466,65 @@ Your mindset: Dream like an artist, Analyze like a consultant, Execute like an e
     res.status(500).json({ error: 'Failed to get AI response' });
   }
 });
+
+// ── Progress tracking ─────────────────────────────────────────────────────────
+
+app.post('/api/progress', async (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: 'לא מחובר' });
+  }
+  const { currentStep, axesCompleted, personalDevelopmentCompleted } = req.body;
+  try {
+    await pool.query(
+      `INSERT INTO user_progress (user_id, current_step, axes_completed, personal_development_completed, updated_at)
+       VALUES ($1, $2, $3, $4, NOW())
+       ON CONFLICT (user_id) DO UPDATE
+         SET current_step = EXCLUDED.current_step,
+             axes_completed = EXCLUDED.axes_completed,
+             personal_development_completed = EXCLUDED.personal_development_completed,
+             updated_at = NOW()`,
+      [req.session.userId, currentStep, !!axesCompleted, !!personalDevelopmentCompleted]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Progress update error:', err);
+    res.status(500).json({ error: 'שגיאה בשמירת התקדמות' });
+  }
+});
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+
+app.get('/api/admin/users', async (req, res) => {
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  const provided = req.headers['x-admin-password'];
+  if (!adminPassword || provided !== adminPassword) {
+    return res.status(403).json({ error: 'גישה נדחתה' });
+  }
+  try {
+    const result = await pool.query(`
+      SELECT
+        u.id,
+        u.full_name,
+        u.email,
+        u.gender,
+        u.created_at,
+        u.last_login_at,
+        COALESCE(p.current_step, 'not_started') AS current_step,
+        COALESCE(p.axes_completed, false) AS axes_completed,
+        COALESCE(p.personal_development_completed, false) AS personal_development_completed,
+        p.updated_at AS progress_updated_at
+      FROM users u
+      LEFT JOIN user_progress p ON p.user_id = u.id
+      ORDER BY u.created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Admin users error:', err);
+    res.status(500).json({ error: 'שגיאה בשליפת נתונים' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 const isProduction = process.env.NODE_ENV === 'production';
 

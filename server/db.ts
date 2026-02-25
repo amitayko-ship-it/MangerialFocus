@@ -40,6 +40,21 @@ const { Pool } = pg;
         await client.query(`
           CREATE INDEX IF NOT EXISTS idx_session_expire ON user_sessions(expire)
         `);
+
+        await client.query(`
+          ALTER TABLE users
+          ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP
+        `);
+
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS user_progress (
+            user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+            current_step VARCHAR(50) DEFAULT 'not_started',
+            axes_completed BOOLEAN DEFAULT FALSE,
+            personal_development_completed BOOLEAN DEFAULT FALSE,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+        `);
         
         console.log('Database tables verified/created');
       } finally {

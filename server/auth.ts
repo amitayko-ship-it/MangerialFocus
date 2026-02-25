@@ -110,6 +110,11 @@ export function setupAuth(app: Express) {
 
       req.session.userId = user.id;
 
+      await pool.query(
+        'UPDATE users SET last_login_at = NOW() WHERE id = $1',
+        [user.id]
+      );
+
       res.json({
         id: user.id,
         email: user.email,

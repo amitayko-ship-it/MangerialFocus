@@ -55,6 +55,14 @@ const { Pool } = pg;
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           )
         `);
+
+        await client.query(`
+          ALTER TABLE user_progress
+          ADD COLUMN IF NOT EXISTS current_step VARCHAR(50) DEFAULT 'not_started',
+          ADD COLUMN IF NOT EXISTS axes_completed BOOLEAN DEFAULT FALSE,
+          ADD COLUMN IF NOT EXISTS personal_development_completed BOOLEAN DEFAULT FALSE,
+          ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        `);
         
         console.log('Database tables verified/created');
       } finally {

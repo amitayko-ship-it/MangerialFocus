@@ -8,7 +8,7 @@ import QuestionnaireIntroStep from '@/components/management-compass/Questionnair
 import SelfAssessmentStep from '@/components/management-compass/SelfAssessmentStep';
 import PersonalDevelopmentStep from '@/components/management-compass/PersonalDevelopmentStep';
 import ManagementCompassDashboard from '@/components/management-compass/ManagementCompassDashboard';
-import { QuestionnaireData, initialQuestionnaireData, AxesData, PersonalDevelopmentData } from '@/types/managementCompass';
+import { QuestionnaireData, initialQuestionnaireData, AxesData, PersonalDevelopmentData, bigStones } from '@/types/managementCompass';
 import { saveWithExpiry, loadWithExpiry } from '@/lib/storageUtils';
 
 const STORAGE_KEY = 'management-compass-data';
@@ -24,6 +24,12 @@ const STEP_ORDER: Step[] = [
   'dashboard',
 ];
 
+const isAssessmentComplete = (data: QuestionnaireData) =>
+  bigStones.every((stone) => stone.axes.every((ax) => data.axes[ax.key] > 0));
+
+const isPersonalDevelopmentComplete = (data: QuestionnaireData) =>
+  data.personalDevelopment.developmentLeap !== null;
+
 const ManagementCompass: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -38,8 +44,6 @@ const ManagementCompass: React.FC = () => {
     const saved = loadWithExpiry<QuestionnaireData>(STORAGE_KEY);
     return saved || initialQuestionnaireData;
   });
-
-  const [previousStep, setPreviousStep] = useState<Step | null>(null);
 
   useEffect(() => {
     saveWithExpiry(STORAGE_KEY, data);
@@ -66,17 +70,34 @@ const ManagementCompass: React.FC = () => {
     setCurrentStep('welcome');
   };
 
-  const goToDashboard = () => {
-    setPreviousStep(currentStep);
-    setCurrentStep('dashboard');
-  };
+  const showOnWelcome = currentStep === 'welcome' || currentStep === 'questionnaireIntro';
+  const assessmentDone = isAssessmentComplete(data);
+  const personalDone = isPersonalDevelopmentComplete(data);
 
-  const goBackFromDashboard = () => {
-    if (previousStep && previousStep !== 'dashboard') {
-      setCurrentStep(previousStep);
-      setPreviousStep(null);
-    }
-  };
+  const navTabs: { key: Step; label: string; enabled: boolean }[] = [
+    {
+      key: 'selfAssessment',
+      label: 'שאלון אבחון',
+      enabled: true,
+    },
+    {
+      key: 'personalDevelopment',
+      label: 'תוכנית התפתחות אישית',
+      enabled: assessmentDone,
+    },
+    {
+      key: 'dashboard',
+      label: 'תוצאות',
+      enabled: personalDone,
+    },
+  ];
+
+  const activeNavKey: Step | null = (() => {
+    if (currentStep === 'selfAssessment' || currentStep === 'questionnaireIntro') return 'selfAssessment';
+    if (currentStep === 'personalDevelopment') return 'personalDevelopment';
+    if (currentStep === 'dashboard') return 'dashboard';
+    return null;
+  })();
 
   const renderStep = () => {
     switch (currentStep) {
@@ -120,7 +141,7 @@ const ManagementCompass: React.FC = () => {
             data={data}
             onRestart={handleRestart}
             onContinue={handleComplete}
-            onBack={previousStep ? goBackFromDashboard : undefined}
+            onBack={() => setCurrentStep('personalDevelopment')}
           />
         );
 
@@ -129,18 +150,36 @@ const ManagementCompass: React.FC = () => {
     }
   };
 
-  const stepIndex = STEP_ORDER.indexOf(currentStep);
-
   return (
     <div className="min-h-screen flex flex-col" dir="rtl">
       <Header />
-      {currentStep !== 'welcome' && currentStep !== 'dashboard' && (
-        <div className="bg-card/80 backdrop-blur-sm border-b border-border px-4 py-2 flex justify-end items-center">
-          <span className="text-xs text-muted-foreground">
-            שלב {stepIndex} מתוך {STEP_ORDER.length - 2}
-          </span>
-        </div>
+
+      {!showOnWelcome && (
+        <nav className="bg-card border-b border-border px-4">
+          <div className="max-w-2xl mx-auto flex">
+            {navTabs.map((tab) => {
+              const isActive = activeNavKey === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => tab.enabled && setCurrentStep(tab.key)}
+                  disabled={!tab.enabled}
+                  className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                    isActive
+                      ? 'border-primary text-primary'
+                      : tab.enabled
+                      ? 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                      : 'border-transparent text-muted-foreground/40 cursor-not-allowed'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
       )}
+
       <main className="flex-1">{renderStep()}</main>
       <Footer />
     </div>

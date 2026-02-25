@@ -1,10 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { QuestionnaireData } from '@/types/managementCompass';
-import { CardGameData } from '@/types/managementCompass';
-import { getModuleResults, getFullModules, ModuleResult } from '@/lib/moduleSelection';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Compass, Eye, ChevronLeft, Sparkles, Lightbulb, ArrowRight } from 'lucide-react';
+import { Compass, ArrowRight, Target, TrendingUp } from 'lucide-react';
+import { QuestionnaireData, bigStones, developmentLeaps } from '@/types/managementCompass';
 
 interface ManagementCompassDashboardProps {
   data: QuestionnaireData;
@@ -13,267 +10,211 @@ interface ManagementCompassDashboardProps {
   onBack?: () => void;
 }
 
-// Card data for getting labels
-const cardLabels: Record<string, string> = {
-  day_fills_itself: 'היום שלי מתמלא מעצמו',
-  important_slow: 'דברים חשובים זזים לאט',
-  holding_a_lot: 'מחזיק הרבה על הראש',
-  choose_focus: 'בוחר במה להתעסק',
-  clear_direction: 'הזמן שלי משרת כיוון ברור',
-  no_routine: 'אין שגרה קבועה',
-  meetings_unclear: 'פגישות לא תמיד ברורות',
-  trying_order: 'מנסה לייצר סדר',
-  routines_help: 'השגרות עוזרות לי',
-  routines_advance: 'שגרות מקדמות אנשים ותוצאות',
-  do_alone: 'קל לי יותר לעשות לבד',
-  delegate_close: 'משחרר אבל בודק מקרוב',
-  selective_release: 'משחרר בררנית לפי האדם',
-  define_goal: 'מגדיר יעד ונותן חופש פעולה',
-  people_grow: 'אנשים גדלים סביבי',
-  need_presence: 'בלי הנוכחות שלי דברים נתקעים',
-  close_circle: 'משפיע בעיקר במעגל הקרוב',
-  pressure_driven: 'מגייס דרך משימות ולחץ',
-  clear_direction_leadership: 'אנשים מבינים לאן אני מכוון',
-  things_move: 'דברים זזים גם כשאני לא בחדר',
-  task_driven: 'מתקדמים דרך משימות',
-  problem_talk: 'מדברים רק כשיש בעיה',
-  inconsistent_dialogue: 'יש שיח אבל לא תמיד עקבי',
-  space_to_talk: 'יש מקום לדבר וללמוד',
-  team_safe: 'הצוות מרגיש בטוח להעלות דברים'
+const colorBar: Record<string, string> = {
+  blue: 'bg-blue-500',
+  green: 'bg-emerald-500',
+  purple: 'bg-purple-500',
+  orange: 'bg-orange-500',
+  red: 'bg-rose-500',
 };
 
-// Module drill-down content
-const moduleDeepDive: Record<string, { description: string; impact: string[]; question: string }> = {
-  coaching: {
-    description: 'בחודש האחרון אתה נוטה לנהל כך שיותר אחריות נשארת אצלך, ופחות עוברת דרך אנשים אחרים.',
-    impact: ['עומס וזמינות גבוהה שלך', 'פחות מרחב לצמיחה של אחרים'],
-    question: 'מה המחיר של הדפוס הזה עבורך, כשהוא חוזר שוב ושוב?'
-  },
-  interfaces: {
-    description: 'בחודש האחרון הנוכחות שלך היא קריטית להתקדמות דברים, וההשפעה שלך מורגשת בעיקר במעגל הקרוב.',
-    impact: ['תלות גבוהה בזמינות שלך', 'פחות השפעה על מעגלים רחוקים יותר'],
-    question: 'מה יקרה אם ההשפעה שלך תגיע גם למקומות שאתה לא נמצא בהם פיזית?'
-  },
-  focus: {
-    description: 'בחודש האחרון הזמן שלך מתמלא מבלי שבחרת בזה, או שאתה מחזיק יותר מדי על הראש במקביל.',
-    impact: ['קושי להתמקד בעיקר', 'תחושת עומס מתמדת'],
-    question: 'מה הדבר האחד שאם תשחרר אותו - ישתחררו עוד דברים מאחוריו?'
-  },
-  team: {
-    description: 'זוהתה דיספונקציה בולטת באחד המימדים של הצוות לפי מודל לנציוני.',
-    impact: ['פגיעה בביצועי הצוות', 'אנרגיה שנשפכת לכיוונים לא יעילים'],
-    question: 'מה יקרה אם הדיספונקציה הזו תטופל לפני כל דבר אחר?'
-  }
+const colorText: Record<string, string> = {
+  blue: 'text-blue-700',
+  green: 'text-emerald-700',
+  purple: 'text-purple-700',
+  orange: 'text-orange-700',
+  red: 'text-rose-700',
 };
 
-// Observation suggestions based on patterns
-const getObservation = (cardGameData: CardGameData): string => {
-  const coachingDescribes = cardGameData.coachingDelegation.describes || [];
-  
-  if (coachingDescribes.includes('do_alone') || coachingDescribes.includes('delegate_close')) {
-    return 'שים לב מתי אתה נכנס לפתור משהו שיכול היה להיות הזדמנות למישהו אחר להתמודד.';
-  }
-  if ((cardGameData.focusPrioritization.describes || []).includes('day_fills_itself')) {
-    return 'שים לב מתי אתה אומר "כן" למשהו שלא באמת משרת את הכיוון שלך.';
-  }
-  if ((cardGameData.influenceLeadership.describes || []).includes('need_presence')) {
-    return 'שים לב לרגעים שבהם אתה מרגיש שחייבים אותך - ושאל אם באמת חייבים.';
-  }
-  return 'שים לב לרגעים שבהם דפוס מוכר חוזר על עצמו - ונסה לתפוס אותו בזמן אמת.';
+const colorBg: Record<string, string> = {
+  blue: 'bg-blue-50 border-blue-200',
+  green: 'bg-emerald-50 border-emerald-200',
+  purple: 'bg-purple-50 border-purple-200',
+  orange: 'bg-orange-50 border-orange-200',
+  red: 'bg-rose-50 border-rose-200',
 };
 
-const ManagementCompassDashboard: React.FC<ManagementCompassDashboardProps> = ({ data, onRestart, onContinue, onBack }) => {
-  const [selectedModule, setSelectedModule] = useState<ModuleResult | null>(null);
-  
-  const moduleResults = getModuleResults(data.cardGameData, data.teamHealthData);
-  const fullModules = getFullModules(data.cardGameData, data.teamHealthData);
-  const lightModules = moduleResults.filter(m => m.depth === 'light');
+const ManagementCompassDashboard: React.FC<ManagementCompassDashboardProps> = ({
+  data,
+  onRestart,
+  onContinue,
+  onBack,
+}) => {
+  const axes = data.axes;
+  const pd = data.personalDevelopment;
+  const selectedLeap = developmentLeaps.find((l) => l.id === pd.developmentLeap);
 
-  // Get card labels for the overview
-  const getCardLabel = (cardId: string): string => {
-    return cardLabels[cardId] || cardId;
-  };
+  const stoneAverages = bigStones.map((stone) => {
+    const vals = stone.axes.map((ax) => axes[ax.key] || 0);
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    return { stone, avg };
+  });
 
-  // Find the dominant patterns from card game
-  const getDominantPattern = () => {
-    const categories = [
-      { key: 'coachingDelegation', name: 'חניכה והאצלה' },
-      { key: 'influenceLeadership', name: 'השפעה והובלה' },
-      { key: 'focusPrioritization', name: 'מיקוד ותיעדוף' },
-      { key: 'timeRoutines', name: 'זמן ושגרות' },
-      { key: 'teamLearning', name: 'צוות ולמידה' }
-    ];
+  const overallAvg =
+    stoneAverages.reduce((a, b) => a + b.avg, 0) / stoneAverages.length;
 
-    return categories.map(cat => {
-      const catData = data.cardGameData[cat.key as keyof CardGameData];
-      const describes = catData?.describes || [];
-      const doesNotDescribe = catData?.doesNotDescribe || [];
-      return {
-        name: cat.name,
-        describes,
-        doesNotDescribe,
-        describesLabels: describes.map(id => getCardLabel(id)),
-        doesNotDescribeLabels: doesNotDescribe.map(id => getCardLabel(id))
-      };
-    });
-  };
-
-  const patterns = getDominantPattern();
-  const observation = getObservation(data.cardGameData);
+  const weakestStones = [...stoneAverages]
+    .filter((s) => s.avg > 0)
+    .sort((a, b) => a.avg - b.avg)
+    .slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-background py-8 px-4">
+      <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-accent flex items-center justify-center shadow-glow">
               <Compass className="w-8 h-8 text-primary" />
             </div>
           </div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-            כך נראית ההתנהלות הניהולית שלך בחודש האחרון
+            תוצאות האבחון העצמי
           </h1>
-        </div>
-
-        {/* General Picture */}
-        <div className="bg-card rounded-2xl p-6 border border-border mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Eye className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-bold text-foreground">התמונה הכללית</h2>
-          </div>
-          
-          <p className="text-muted-foreground mb-4 text-right leading-relaxed">
-            הנה הדפוסים שמאפיינים את הניהול שלך עכשיו:
-          </p>
-
-          <div className="bg-accent/30 rounded-xl p-4 text-right mb-4">
-            <p className="text-foreground leading-relaxed">
-              {patterns[0]?.describesLabels.length > 0 && (
-                <>
-                  מה שמאפיין אותך: <span className="font-bold text-primary">"{patterns[0]?.describesLabels[0]}"</span>
-                  {patterns[0]?.describesLabels.length > 1 && (
-                    <>, "{patterns[0]?.describesLabels[1]}"</>
-                  )}
-                </>
-              )}
-            </p>
-          </div>
-
-          <p className="text-sm text-muted-foreground text-right">
-            אין כאן טוב או רע.
-            <br />
-            זו תמונת מצב של איך הדברים קורים עכשיו.
+          <p className="text-muted-foreground text-sm">
+            כך נראית התמונה הניהולית שלך על פי הצירים שדירגת
           </p>
         </div>
 
-        {/* Big Stones - Cards View */}
+        {/* Overall score */}
+        <div className="bg-card border border-border rounded-2xl p-6 mb-6 text-center">
+          <p className="text-sm text-muted-foreground mb-1">ממוצע כללי</p>
+          <p className="text-5xl font-bold text-primary mb-1">
+            {overallAvg > 0 ? overallAvg.toFixed(1) : '–'}
+          </p>
+          <p className="text-xs text-muted-foreground">מתוך 5</p>
+          <div className="mt-4 h-2 bg-muted rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-500"
+              style={{ width: overallAvg > 0 ? `${(overallAvg / 5) * 100}%` : '0%' }}
+            />
+          </div>
+        </div>
+
+        {/* Per-stone results */}
         <div className="mb-6">
           <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-            <span>🪨</span>
-            האבנים הגדולות – מבט לפי תחומים
+            <TrendingUp className="w-5 h-5 text-primary" />
+            ציוני האבנים הגדולות
           </h2>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            {patterns.map((pattern, index) => (
-              <div
-                key={index}
-                className="bg-card rounded-xl p-5 border border-border hover:border-primary/50 transition-colors cursor-pointer"
-                onClick={() => {
-                  const module = moduleResults.find(m => 
-                    (pattern.name.includes('חניכה') && m.key === 'coaching') ||
-                    (pattern.name.includes('השפעה') && m.key === 'interfaces') ||
-                    (pattern.name.includes('מיקוד') && m.key === 'focus') ||
-                    (pattern.name.includes('זמן') && m.key === 'focus') ||
-                    (pattern.name.includes('שליטה') && m.key === 'focus')
-                  );
-                  if (module) setSelectedModule(module);
-                }}
-              >
-                <h3 className="font-bold text-foreground mb-3">{pattern.name}</h3>
-                
-                <div className="space-y-2 text-right text-sm">
-                  <div className="flex items-start gap-2">
-                    <span className="text-green-500 font-bold">מאפיין:</span>
-                    <span className="text-muted-foreground">
-                      {pattern.describesLabels.length > 0 
-                        ? pattern.describesLabels.slice(0, 2).join(', ') 
-                        : 'לא נבחר'}
+          <div className="space-y-4">
+            {stoneAverages.map(({ stone, avg }) => {
+              const c = stone.color;
+              return (
+                <div
+                  key={stone.id}
+                  className={`rounded-xl border p-4 ${colorBg[c]}`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`text-sm font-bold ${colorText[c]}`}>
+                      {avg > 0 ? avg.toFixed(1) : '–'} / 5
                     </span>
+                    <h3 className="font-semibold text-foreground text-sm">{stone.title}</h3>
                   </div>
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-500 font-bold">לא מאפיין:</span>
-                    <span className="text-muted-foreground">
-                      {pattern.doesNotDescribeLabels.length > 0 
-                        ? pattern.doesNotDescribeLabels.slice(0, 2).join(', ') 
-                        : 'לא נבחר'}
-                    </span>
+                  <div className="h-2 bg-white/70 rounded-full overflow-hidden mb-3">
+                    <div
+                      className={`h-full ${colorBar[c]} rounded-full transition-all duration-500`}
+                      style={{ width: avg > 0 ? `${(avg / 5) * 100}%` : '0%' }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    {stone.axes.map((ax) => {
+                      const val = axes[ax.key];
+                      return (
+                        <div key={ax.key} className="flex items-start justify-between gap-3">
+                          <span className={`text-xs font-semibold flex-shrink-0 ${colorText[c]}`}>
+                            {val > 0 ? val : '–'}
+                          </span>
+                          <div className="flex-1 text-right">
+                            <p className="text-xs font-medium text-foreground mb-0.5">{ax.title}</p>
+                            {val > 0 && (
+                              <p className="text-xs text-muted-foreground leading-relaxed">
+                                {ax.levels[val - 1]}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-
-                <Button variant="ghost" size="sm" className="mt-3 gap-1 text-primary">
-                  <ChevronLeft className="w-4 h-4" />
-                  להעמקה
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Where to Focus */}
-        <div className="bg-card rounded-2xl p-6 border border-primary/30 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Sparkles className="w-5 h-5 text-secondary" />
-            <h2 className="text-lg font-bold text-foreground">איפה נכון להתעכב בהמשך הדרך</h2>
-          </div>
-
-          <p className="text-sm text-muted-foreground mb-4 text-right">
-            לא בכל נושא צריך לעבוד באותה עוצמה.
-            <br />
-            כאן יש תחומים שבהם העמקה יכולה לייצר עבורך ערך אמיתי.
-          </p>
-
-          <div className="space-y-3">
-            {fullModules.map((module, index) => (
-              <div key={index} className="bg-accent/50 rounded-lg p-4 text-right border-r-4 border-primary">
-                <div className="flex items-center gap-2 mb-1">
-                  <span>🪨</span>
-                  <span className="font-bold text-foreground">{module.name}</span>
-                </div>
-                <p className="text-sm text-muted-foreground">{module.reason}</p>
-              </div>
-            ))}
-          </div>
-
-          {lightModules.length > 0 && (
-            <p className="text-xs text-muted-foreground mt-4 text-right">
-              שאר המודולות ({lightModules.map(m => m.name).join(', ')}) יופיעו בנגיעה קלה כחלק מהתהליך הקבוצתי.
+        {/* Focus areas */}
+        {weakestStones.length > 0 && (
+          <div className="bg-card border border-primary/30 rounded-2xl p-5 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Target className="w-5 h-5 text-primary" />
+              <h2 className="text-base font-bold text-foreground">איפה כדאי להתמקד</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">
+              על פי הציונים שלך, האזורים עם מרחב הגדול ביותר לצמיחה:
             </p>
-          )}
-        </div>
-
-        {/* Observation Point */}
-        <div className="bg-muted/30 rounded-xl p-5 border border-border mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Lightbulb className="w-5 h-5 text-secondary" />
-            <h3 className="font-medium text-foreground">נקודת תשומת לב לדרך</h3>
+            <div className="space-y-2">
+              {weakestStones.map(({ stone, avg }) => (
+                <div key={stone.id} className="flex items-center justify-between bg-accent/40 rounded-lg px-4 py-2">
+                  <span className="text-sm font-semibold text-primary">{avg.toFixed(1)}</span>
+                  <span className="text-sm text-foreground">{stone.title}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <p className="text-muted-foreground text-right text-sm">
-            משהו קטן לשים לב אליו בזמן הקרוב:
-          </p>
-          <p className="text-foreground mt-2 text-right font-medium">
-            {observation}
-          </p>
-        </div>
+        )}
+
+        {/* Personal development summary */}
+        {selectedLeap && (
+          <div className="bg-card border border-border rounded-2xl p-5 mb-6">
+            <h2 className="text-base font-bold text-foreground mb-2">קפיצת המדרגה שבחרת</h2>
+            <div className="bg-primary/5 border border-primary/20 rounded-lg px-4 py-3 mb-4">
+              <p className="text-sm font-semibold text-primary">{selectedLeap.title}</p>
+            </div>
+            {(pd.sixMonthChange || pd.behaviorChange || pd.priceOfNoChange || pd.weeklyCommitment) && (
+              <div className="space-y-3">
+                {pd.sixMonthChange && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">שינוי תוך 6 חודשים:</p>
+                    <p className="text-sm text-foreground">{pd.sixMonthChange}</p>
+                  </div>
+                )}
+                {pd.behaviorChange && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">התנהגות שתשתנה:</p>
+                    <p className="text-sm text-foreground">{pd.behaviorChange}</p>
+                  </div>
+                )}
+                {pd.priceOfNoChange && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">מחיר אי-שינוי:</p>
+                    <p className="text-sm text-foreground">{pd.priceOfNoChange}</p>
+                  </div>
+                )}
+                {pd.weeklyCommitment && (
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1">מחויבות לשבוע הקרוב:</p>
+                    <p className="text-sm text-foreground">{pd.weeklyCommitment}</p>
+                  </div>
+                )}
+              </div>
+            )}
+            {(pd.leapArea || pd.leapCurrentState || pd.leapPrice) && (
+              <div className="mt-4 bg-muted/30 rounded-lg px-4 py-3 text-sm text-foreground leading-relaxed">
+                {pd.leapArea && <span>השנה אני רוצה לייצר קפיצת מדרגה ב – <strong>{pd.leapArea}</strong>. </span>}
+                {pd.leapCurrentState && <span>כי כרגע אני – <strong>{pd.leapCurrentState}</strong>. </span>}
+                {pd.leapPrice && <span>והמחיר של זה הוא – <strong>{pd.leapPrice}</strong>.</span>}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Footer */}
         <div className="text-center border-t border-border pt-6">
-          <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-            פיתוח ניהולי לא מתחיל מכלים.
+          <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+            פיתוח ניהולי מתחיל בהבנה מדויקת של המציאות.
             <br />
-            הוא מתחיל בהבנה איך אתה פועל בפועל,
-            <br />
-            ומה שווה להזיז עכשיו.
+            זה מה שעשית עכשיו.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             {onBack && (
@@ -283,7 +224,7 @@ const ManagementCompassDashboard: React.FC<ManagementCompassDashboardProps> = ({
               </Button>
             )}
             <Button variant="outline" onClick={onRestart}>
-              מילוי שאלון חדש
+              מילוי שאלון מחדש
             </Button>
             {onContinue && (
               <Button onClick={onContinue}>
@@ -292,53 +233,6 @@ const ManagementCompassDashboard: React.FC<ManagementCompassDashboardProps> = ({
             )}
           </div>
         </div>
-
-        {/* Drill-down Sheet */}
-        <Sheet open={!!selectedModule} onOpenChange={() => setSelectedModule(null)}>
-          <SheetContent side="left" className="w-full sm:max-w-lg">
-            {selectedModule && moduleDeepDive[selectedModule.key] && (
-              <>
-                <SheetHeader>
-                  <SheetTitle className="text-right flex items-center gap-2 justify-end">
-                    <span>{selectedModule.name}</span>
-                    <span>🪨</span>
-                  </SheetTitle>
-                </SheetHeader>
-                
-                <div className="mt-6 space-y-6 text-right">
-                  <div>
-                    <h4 className="font-medium text-foreground mb-2">מה קורה בפועל:</h4>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {moduleDeepDive[selectedModule.key].description}
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium text-foreground mb-2">מה זה מייצר בדרך כלל:</h4>
-                    <ul className="space-y-1">
-                      {moduleDeepDive[selectedModule.key].impact.map((item, i) => (
-                        <li key={i} className="text-muted-foreground flex items-center gap-2 justify-end">
-                          <span>{item}</span>
-                          <span>•</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="bg-accent/30 rounded-xl p-4 border border-primary/20">
-                    <h4 className="font-medium text-foreground mb-2">שאלה שכדאי לעצור עליה:</h4>
-                    <p className="text-primary font-medium">
-                      {moduleDeepDive[selectedModule.key].question}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      (אין המלצה, אין פתרון. רק עצירה.)
-                    </p>
-                  </div>
-                </div>
-              </>
-            )}
-          </SheetContent>
-        </Sheet>
       </div>
     </div>
   );

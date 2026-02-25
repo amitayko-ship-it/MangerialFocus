@@ -1,313 +1,266 @@
-// Card Game data - 5 big stones, sort all cards into describes/doesn't describe
-export interface CardGameSelection {
-  describes: string[];      // קלפים שמאפיינים אותי
-  doesNotDescribe: string[]; // קלפים שלא מאפיינים אותי
+// New self-assessment questionnaire data types
+
+export interface AxesData {
+  // Stone 5: Focus & Prioritization
+  urgentImportantBalance: number; // 1-5
+  effectiveRoutines: number; // 1-5
+
+  // Stone 4: Coaching & Delegation
+  professionalCoaching: number; // 1-5
+  authorityDelegation: number; // 1-5
+
+  // Stone 3: Motivation & Influence
+  internalMotivation: number; // 1-5
+  lateralInfluence: number; // 1-5
+
+  // Stone 2: Learning & Psychological Safety
+  learningImprovement: number; // 1-5
+  psychologicalSafety: number; // 1-5
+
+  // Stone 1: Team Building
+  teamSpirit: number; // 1-5
+  networkManagement: number; // 1-5
 }
 
-export interface CardGameData {
-  focusPrioritization: CardGameSelection;
-  timeRoutines: CardGameSelection;
-  coachingDelegation: CardGameSelection;
-  influenceLeadership: CardGameSelection;
-  teamLearning: CardGameSelection;
+export interface PersonalDevelopmentData {
+  // Part B: Which leap is most significant
+  developmentLeap: 1 | 2 | 3 | null;
+
+  // Part C: Open questions
+  sixMonthChange: string;
+  behaviorChange: string;
+  priceOfNoChange: string;
+  weeklyCommitment: string;
+
+  // Part D: Leap zone fill-in-the-blanks
+  leapArea: string;
+  leapCurrentState: string;
+  leapPrice: string;
 }
 
-export const initialCardGameSelection: CardGameSelection = {
-  describes: [],
-  doesNotDescribe: [],
-};
-
-export const initialCardGameData: CardGameData = {
-  focusPrioritization: { ...initialCardGameSelection },
-  timeRoutines: { ...initialCardGameSelection },
-  coachingDelegation: { ...initialCardGameSelection },
-  influenceLeadership: { ...initialCardGameSelection },
-  teamLearning: { ...initialCardGameSelection },
-};
-
-// Interface journey data - 9 steps
-export interface InterfaceJourneyData {
-  // Step 0: General perception (anchor)
-  generalInfluence: number;
-  
-  // Step 1: Choose specific case
-  interfaceRole: string;
-  
-  // Step 2: Perception of influence in situation
-  situationInfluence: number;
-  
-  // Step 3: Main reason for friction
-  frictionReason: string;
-  
-  // Step 4: Initiative
-  initiativeScore: number;
-  
-  // Step 5: Nature of action
-  actionNature: string;
-  
-  // Step 6: Change in practice
-  changeScore: number;
-  
-  // Step 7: Moment of influence
-  influenceMoment: string;
-  influenceMomentText: string;
-  
-  // Step 8: Future leverage
-  futureLeverage: string;
-  
-  // Step 9: Managerial price
-  priceScore: number;
-  priceTypes: string[];
-}
-
-// Legacy interface entry (keeping for backwards compatibility)
-export interface InterfaceEntry {
-  id: string;
-  name: string;
-  status: 'green' | 'yellow' | 'red';
-  criticality: number;
-}
-
-// Module prioritization ratings
-export interface ModulePriority {
-  value: number;
-  feasibility: number;
-  readiness: number;
-}
-
-// Team Health - Lencioni 5 Dysfunctions (indirect behavioral questions)
-export interface TeamHealthData {
-  // 5 layers - each with 'a', 'b', 'c', 'd', or 'e'
-  trust: string;
-  conflict: string;
-  commitment: string;
-  accountability: string;
-  results: string;
-  // Gold question - open text
-  goldAction: string;
-}
-
-// Coaching data - 7 layers
-export interface CoachingData {
-  // Layer 1: Self-perception - managerial identity (1-5)
-  identityScore: number;
-  
-  // Layer 2: Actual behavior - time investment
-  timeInvestment: string;
-  
-  // Layer 3: Coaching quality - dominant style
-  coachingStyle: string;
-  
-  // Layer 4: Effectiveness - behavioral outcome (1-5)
-  effectivenessScore: number;
-  
-  // Layer 5: Duplication test - recurring issues (1-5)
-  recurrenceScore: number;
-  
-  // Layer 6: Internal control - blocker
-  internalBlocker: string;
-  
-  // Layer 7: Personal price - impact score and type
-  personalPriceScore: number;
-  personalPriceType: string;
-  
-  // Gold question - one small thing
-  oneSmallThing: string;
-}
-
-// User info collected at intro
-export interface UserInfo {
-  name: string;
-  gender: 'male' | 'female' | '';
-}
-
-export const initialUserInfo: UserInfo = {
-  name: '',
-  gender: '',
-};
-
-// All questionnaire data
 export interface QuestionnaireData {
-  // User info
-  userInfo: UserInfo;
-  
-  // Screen 0: Card Game
-  cardGameData: CardGameData;
-  
-  // Screen 1: Focus & Control
-  anchorScore: number;
-  timeDrain: string;
-  timeDrainOther: string;
-  
-  // Screen 2: Time & Energy (4 Quadrants)
-  quadrants: {
-    urgentImportant: number;
-    importantNotUrgent: number;
-    urgentNotImportant: number;
-    notUrgentNotImportant: number;
-  };
-  breathingSpace: number;
-  
-  // Screen 3: Decisions & Price
-  immediatePrice: string;
-  longTermPrice: string;
-  retrospective: string;
-  
-  // Screen 4: Interfaces Journey
-  interfaceJourney: InterfaceJourneyData;
-  interfaces: InterfaceEntry[]; // Legacy
-  
-  // Screen 5: Coaching & Development (7 Layers)
-  coaching: CoachingData;
-  
-  // Screen 6: Team Health (Lencioni)
-  teamHealthData: TeamHealthData;
-  teamHealth: string; // Legacy
-  
-  // Screen 7: Engagement & Energy
-  energyLevel: number;
-  meaningScore: number;
-  pressurePattern: string;
-  
-  // Screen 8: Module Prioritization
-  modulePriorities: {
-    teamDevelopment: ModulePriority;
-    interfaceManagement: ModulePriority;
-    coachingDevelopment: ModulePriority;
-    managerialFocus: ModulePriority;
-  };
+  axes: AxesData;
+  personalDevelopment: PersonalDevelopmentData;
 }
 
-export const initialCoachingData: CoachingData = {
-  identityScore: 3,
-  timeInvestment: '',
-  coachingStyle: '',
-  effectivenessScore: 3,
-  recurrenceScore: 3,
-  internalBlocker: '',
-  personalPriceScore: 3,
-  personalPriceType: '',
-  oneSmallThing: '',
+export const initialAxesData: AxesData = {
+  urgentImportantBalance: 0,
+  effectiveRoutines: 0,
+  professionalCoaching: 0,
+  authorityDelegation: 0,
+  internalMotivation: 0,
+  lateralInfluence: 0,
+  learningImprovement: 0,
+  psychologicalSafety: 0,
+  teamSpirit: 0,
+  networkManagement: 0,
 };
 
-export const initialInterfaceJourneyData: InterfaceJourneyData = {
-  generalInfluence: 3,
-  interfaceRole: '',
-  situationInfluence: 3,
-  frictionReason: '',
-  initiativeScore: 3,
-  actionNature: '',
-  changeScore: 3,
-  influenceMoment: '',
-  influenceMomentText: '',
-  futureLeverage: '',
-  priceScore: 3,
-  priceTypes: [],
-};
-
-export const initialTeamHealthData: TeamHealthData = {
-  trust: '',
-  conflict: '',
-  commitment: '',
-  accountability: '',
-  results: '',
-  goldAction: '',
+export const initialPersonalDevelopmentData: PersonalDevelopmentData = {
+  developmentLeap: null,
+  sixMonthChange: '',
+  behaviorChange: '',
+  priceOfNoChange: '',
+  weeklyCommitment: '',
+  leapArea: '',
+  leapCurrentState: '',
+  leapPrice: '',
 };
 
 export const initialQuestionnaireData: QuestionnaireData = {
-  // User info
-  userInfo: initialUserInfo,
-  
-  // Screen 0
-  cardGameData: initialCardGameData,
-  
-  // Screen 1
-  anchorScore: 3,
-  timeDrain: '',
-  timeDrainOther: '',
-  
-  // Screen 2
-  quadrants: {
-    urgentImportant: 25,
-    importantNotUrgent: 25,
-    urgentNotImportant: 25,
-    notUrgentNotImportant: 25,
+  axes: initialAxesData,
+  personalDevelopment: initialPersonalDevelopmentData,
+};
+
+export interface BigStone {
+  id: string;
+  title: string;
+  color: string;
+  axes: AxisDefinition[];
+}
+
+export interface AxisDefinition {
+  key: keyof AxesData;
+  title: string;
+  levels: string[]; // index 0 = level 1 (lowest), index 4 = level 5 (highest)
+}
+
+export const bigStones: BigStone[] = [
+  {
+    id: 'stone5',
+    title: 'מיקוד ותיעדוף – איזון בין הדחוף לחשוב',
+    color: 'blue',
+    axes: [
+      {
+        key: 'urgentImportantBalance',
+        title: 'איזון בין הדחוף לחשוב',
+        levels: [
+          'מכבה שריפות, מרבית היום מגיב לבקשות מיידיות, אין פניות לחשיבה על הטווח הארוך.',
+          'ברור לי במה חשוב להשקיע בטווח הארוך, אך לא מגיע לקדם בשל עומס העבודה.',
+          'מצליח להגיע לעיתים לקדם משימות של הטווח הארוך במקביל לשוטף, אבל במחיר של עומס גבוה מדי ו/או פגיעה בשוטף.',
+          'התיעדוף ברור, יודע להגיד "לא" ולבחור את ההזדמנויות הנכונות במרבית המקרים.',
+          'עיסוק בדברים החשובים והדחופים ביחס רצוי. מייצר ערך ארוך טווח ליחידה ולארגון.',
+        ],
+      },
+      {
+        key: 'effectiveRoutines',
+        title: 'שגרות אפקטיביות',
+        levels: [
+          'מנהל בפגישות אד-הוק, נפגש מתי שצריך ועם מי שצריך, אין הקפדה על קיום שגרות קבועות אפילו אם הן מופיעות ביומן.',
+          'ישנן מעט שגרות שמתקיימות, רובן מוכתבות מלמעלה ואינן אפקטיביות.',
+          'מקיים שגרות, חלקן לא אפקטיביות. חלקן מקדמות את המשימות, אבל אין עקביות מלאה.',
+          'מקיים שגרות באופן קבוע, רובן מקדמות את המשימות.',
+          'מקיים שגרות אפקטיביות לקידום המשימות ולפיתוח האנשים והיחידה – יש תחושת יציבות והתקדמות.',
+        ],
+      },
+    ],
   },
-  breathingSpace: 3,
-  
-  // Screen 3
-  immediatePrice: '',
-  longTermPrice: '',
-  retrospective: '',
-  
-  // Screen 4
-  interfaceJourney: initialInterfaceJourneyData,
-  interfaces: [],
-  
-  // Screen 5
-  coaching: initialCoachingData,
-  
-  // Screen 6
-  teamHealthData: initialTeamHealthData,
-  teamHealth: '',
-  
-  // Screen 7
-  energyLevel: 3,
-  meaningScore: 3,
-  pressurePattern: '',
-  
-  // Screen 8
-  modulePriorities: {
-    teamDevelopment: { value: 3, feasibility: 3, readiness: 3 },
-    interfaceManagement: { value: 3, feasibility: 3, readiness: 3 },
-    coachingDevelopment: { value: 3, feasibility: 3, readiness: 3 },
-    managerialFocus: { value: 3, feasibility: 3, readiness: 3 },
+  {
+    id: 'stone4',
+    title: 'חניכה וביזור סמכויות',
+    color: 'green',
+    axes: [
+      {
+        key: 'professionalCoaching',
+        title: 'חניכה מקצועית והתפתחותית',
+        levels: [
+          'אין זמן לחניכה – העובדים נדרשים ללמוד בעצמם.',
+          'מקיים חניכה מקצועית עפ"י צורך מידי בלבד. מלמד את האנשים ברמה המקצועית הנדרשת.',
+          'מקיים חניכה מקצועית בלבד, תוך מתן כלים ומיומנויות לטווח ארוך. יודע לקחת את האנשים מעבר למה שציפו.',
+          'מקיים תהליכי חניכה קבועים, מקפיד לתת משוב באופן קבוע תוך התייחסות למיומנויות בינאישיות והתנהגותיות.',
+          'מעצים ומגדל את האנשים. מעבר לחניכה מקצועית, יש לעובדים תכנית התפתחות אישית וחניכה לאורה.',
+        ],
+      },
+      {
+        key: 'authorityDelegation',
+        title: 'ריכוזיות מול ביזור סמכויות',
+        levels: [
+          'עושה בעצמי את רוב העבודה, עמוס מאוד, משחרר משימות טכניות ופשוטות בלבד.',
+          'משחרר משימות למעטים שסומך עליהם, מבקר תוך כדי ובתום המשימה.',
+          'מעביר משימות, אבל עושה בקרה מדוקדקת ומתעקש שהדברים יהיו בדרכי – Micro managing.',
+          'מאציל אחריות (ולא רק משימות). קובע את היעד ומאפשר לאנשים לקבוע את הדרך.',
+          'מעביר לאנשים הנכונים את האחריות הנכונה להם, מאפשר עצמאות מלאה ועושה בקרות בנקודות הנכונות. משחרר ונשאר עדיין בשליטה!',
+        ],
+      },
+    ],
   },
-};
+  {
+    id: 'stone3',
+    title: 'הנעה פנימית והשפעה רוחבית',
+    color: 'purple',
+    axes: [
+      {
+        key: 'internalMotivation',
+        title: 'מהנעה חיצונית להנעה פנימית',
+        levels: [
+          'מתקשה להניע אנשים, משתמש בסמכות הפורמלית לעיתים קרובות.',
+          'מצליח להניע בעיקר את אלה שמתחבר אליהם / דומים לי, ושיש לי שפה משותפת איתם.',
+          'מצליח להניע אנשים במעגל הקרוב אלי מתוך הבנת הצרכים הפנימיים שלהם.',
+          'מצליח להניע מגוון רחב של אנשים בתמורה לתגמול חיצוני.',
+          'מתאים את דרכי ההנעה שלי לפי מושא ההשפעה. מצליח להניע אנשים מתוך הדברים שחשובים להם.',
+        ],
+      },
+      {
+        key: 'lateralInfluence',
+        title: 'מהשפעה כלפי מטה – להשפעה רוחבית',
+        levels: [
+          'משפיע על חלק מחברי הצוות שאני מנהל באופן ישיר. חושב ופועל הרבה ב-1:1.',
+          'משפיע על כלל הצוות כמכלול. ממוקד "כלפי מטה" – בצוות ובתוצאותיו.',
+          'משפיע על הממשקים הישירים של הצוות, ולא רק על הצוות עצמו. מייצר הצלחה בביצוע המשימות בטווח הקצר.',
+          'משפיע על הצוות והממשקים הישירים בנושאים שמעבר לביצוע המשימות המיידיות, מתוך הבנה של המפה הארגונית הרחבה.',
+          'משקיע זמן בהבנה והשפעה על המערכת הרחבה יותר. רותם ממשקים לרוחב הארגון ומקדם אג\'נדה ארגונית.',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'stone2',
+    title: 'למידה, שיפור ובטחון פסיכולוגי',
+    color: 'orange',
+    axes: [
+      {
+        key: 'learningImprovement',
+        title: 'למידה ושיפור ביצועים',
+        levels: [
+          'משקיע זמן מינימלי בהפקת לקחים כתוצאה מטעויות.',
+          'מקיים הפקת לקחים כשיש אירוע חריג של כשלון, בדגש על מציאת האחראי ומציאת הפתרון לאירוע המסוים.',
+          'מקיים למידה כשיש אירוע חריג של כשלון. מופקים לקחים תוך התייחסות לבעיית השורש, אבל אין מעקב על הביצוע. חלק מהלקחים נרשמים מספר פעמים ללא יישום.',
+          'מקיים למידה מאירועים חריגים של הצלחות וכישלונות – יש תפיסה ברורה של איך מפיקים לקחים ואיך מיישמים אותם.',
+          'מקיים תהליכי למידה ושיפור ביצועים כחלק מהשגרה, יש מעקב על יישום הלקחים, ותחושת התקדמות והתפתחות קבועה.',
+        ],
+      },
+      {
+        key: 'psychologicalSafety',
+        title: 'יצירת ביטחון פסיכולוגי',
+        levels: [
+          'לרוב אני מתווה את הכיוון, הרעיון או המשימה בצורה ברורה, עם מינימום זמן לצוות לשתף את המחשבות, החששות או הצרכים של חברי הצוות.',
+          'יוצר אווירה שאם יש צורך חזק, זה בסדר לחלוק מחשבות וצרכים, אבל יחד עם זאת ברור לצוות שהתוצרים והמשימות נמצאים בראש סדר העדיפויות.',
+          'מעודד חברי הצוות לחלוק מחשבות וצרכים, אך רק בדיונים ספציפיים.',
+          'מייצר אווירה שבה כל אחד יכול להגיד הכל ויכול לחלוק את מחשבותיו וצרכיו כל הזמן.',
+          'גורם לחברי הצוות להרגיש שרואים אותם ושומעים אותם. מאפשר לאנשים להיות פגיעים, לבקש ולקבל תמיכה אחד מהשני ולשתף במחשבות ובצרכים שלהם.',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'stone1',
+    title: 'בניית צוות חזק ורשתי',
+    color: 'red',
+    axes: [
+      {
+        key: 'teamSpirit',
+        title: 'רוח צוות וגאוות יחידה',
+        levels: [
+          'אין תחושת צוותיות חזקה, אוסף של אנשים ש"רק במקרה" נמצאים תחת אותו מנהל.',
+          'ברור מי בצוות ומי לא. לכל חבר צוות או תת-צוות ברור מה המשימות שבאחריותו.',
+          'נותנים מענה לנושאים מסוימים כצוות. מטפל במשברים צוותיים כשהם צפים.',
+          'יוצר זהות צוותית חזקה, משקיע אנרגיה ומשאבים ביצירת החיבור הבין-אישי והלכידות הצוותית.',
+          'בונה צוות עם גאוות יחידה, תחושת צוותיות חזקה, ייחודיות, שייכות ולכידות גבוהה מאוד. אחרים שואפים להצטרף לצוות הזה.',
+        ],
+      },
+      {
+        key: 'networkManagement',
+        title: 'מניהול "כוכבי" לניהול "רשתי"',
+        levels: [
+          'רוב התקשורת מנוהלת דרך המנהל – כ"כוכב".',
+          'עובד ב"כוכב" מול הצוות, מפעיל אותם 1:1.',
+          'יוזם ומייצר קשרים של שיתוף פעולה בין חברי הצוות. חלקם מתנהלים באופן עצמאי וחלקם מצריכים מעורבות גבוהה של המנהל. מנהל את הצוות בחלוקה לתתי-צוותים מובחנים.',
+          'מפתח תקשורת בין כל חברי הצוות שכוללת משימות חניכה. מעורב בבקרה על שיתופי הפעולה בכדי להשיג את התוצאות הרצויות.',
+          'מעצים את הצוות כמכלול – צוות חזק שעובד ברמה גבוהה, מייצר סינרגיה וחדשנות, תלות נמוכה במנהל להשגת תוצאות.',
+        ],
+      },
+    ],
+  },
+];
 
-// Calculate priority score for a module
-export const calculateModuleScore = (priority: ModulePriority): number => {
-  return (priority.value * 0.4) + (priority.feasibility * 0.35) + (priority.readiness * 0.25);
-};
-
-// Get the top priority module
-export const getTopModule = (data: QuestionnaireData): string => {
-  const scores = {
-    teamDevelopment: calculateModuleScore(data.modulePriorities.teamDevelopment),
-    interfaceManagement: calculateModuleScore(data.modulePriorities.interfaceManagement),
-    coachingDevelopment: calculateModuleScore(data.modulePriorities.coachingDevelopment),
-    managerialFocus: calculateModuleScore(data.modulePriorities.managerialFocus),
-  };
-  
-  const moduleNames: Record<string, string> = {
-    teamDevelopment: 'פיתוח צוות',
-    interfaceManagement: 'ניהול ממשקים',
-    coachingDevelopment: 'חניכה ופיתוח עובדים',
-    managerialFocus: 'מיקוד ניהולי / זמן',
-  };
-  
-  const topModule = Object.entries(scores).reduce((a, b) => a[1] > b[1] ? a : b)[0];
-  return moduleNames[topModule];
-};
-
-// Generate coaching insight based on data
-export const getCoachingInsight = (coaching: CoachingData): string => {
-  const highIdentity = coaching.identityScore >= 4;
-  const lowTime = ['less30', 'unknown'].includes(coaching.timeInvestment);
-  const lowEffectiveness = coaching.effectivenessScore <= 2;
-  const highRecurrence = coaching.recurrenceScore >= 4;
-  
-  if (highIdentity && lowTime) {
-    return 'אתה רואה חניכה כחלק חשוב מהתפקיד, אך בפועל היא כמעט לא מקבלת זמן ביומן.';
-  }
-  
-  if (!lowTime && lowEffectiveness) {
-    return 'אתה משקיע מאמץ בחניכה, אך זה עדיין לא מתורגם לעצמאות גבוהה יותר של העובדים.';
-  }
-  
-  if (highRecurrence) {
-    return 'נראה שאתה מוצא את עצמך מטפל שוב ושוב באותם נושאים - ייתכן שצריך לשנות את אופן החניכה.';
-  }
-  
-  return 'יש לך בסיס טוב בחניכה - המשך לחפש דרכים להעמיק את ההשפעה.';
-};
+export const developmentLeaps = [
+  {
+    id: 1,
+    title: 'מעבר מביצוע לניהול עצמי ותיעדוף',
+    bullets: [
+      'מתקשה לשחרר ביצוע ולעבור לחשיבה קדימה',
+      'רוב הזמן מגיב ולא יוזם',
+      'אין לי שגרה ניהולית ברורה',
+    ],
+  },
+  {
+    id: 2,
+    title: 'ניהול אנשים ולא משימות',
+    bullets: [
+      'מתקשה לתת משוב',
+      'נמנע משיחות מורכבות',
+      'לא בטוח איך מייצרים מוטיבציה',
+      'מתקשה להציב גבולות',
+    ],
+  },
+  {
+    id: 3,
+    title: 'סמכות וביטחון עצמי',
+    bullets: [
+      'רוצה שיאהבו אותי',
+      'מתקשה לקבל החלטות לא פופולריות',
+      'מרגיש שאני "מתחזה" למנהל',
+      'בודק את עצמי יותר מדי',
+    ],
+  },
+];

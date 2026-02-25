@@ -25,6 +25,11 @@ src/
 │   ├── clarity/       # Big rocks and focus components
 │   ├── dashboard/     # Dashboard components
 │   ├── management-compass/  # Management Compass assessment components
+│   │   ├── SelfAssessmentStep.tsx  # 10-axis self-assessment (5 big stones x 2 axes each, levels 1-5)
+│   │   ├── PersonalDevelopmentStep.tsx  # Development leap selection + open questions (parts B/C/D)
+│   │   ├── ManagementCompassDashboard.tsx  # Results dashboard with scores per stone
+│   │   ├── WelcomeScreen.tsx
+│   │   ├── QuestionnaireIntroStep.tsx
 │   │   └── layout/    # Header/Footer for compass section
 │   └── vision/        # Vision board components
 ├── contexts/          # React contexts (Auth, Language)

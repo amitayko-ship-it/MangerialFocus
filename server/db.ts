@@ -63,6 +63,10 @@ const { Pool } = pg;
           ADD COLUMN IF NOT EXISTS personal_development_completed BOOLEAN DEFAULT FALSE,
           ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         `);
+
+        await client.query(`
+          CREATE UNIQUE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id)
+        `);
         
         console.log('Database tables verified/created');
       } finally {

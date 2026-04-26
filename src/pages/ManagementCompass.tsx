@@ -19,7 +19,12 @@ async function reportProgress(currentStep: string, data: QuestionnaireData) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ currentStep, axesCompleted, personalDevelopmentCompleted }),
+      body: JSON.stringify({
+        currentStep,
+        axesCompleted,
+        personalDevelopmentCompleted,
+        questionnaireData: data,
+      }),
     });
   } catch {
     // fail silently – progress tracking is non-critical

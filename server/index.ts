@@ -473,17 +473,24 @@ app.post('/api/progress', async (req, res) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'לא מחובר' });
   }
-  const { currentStep, axesCompleted, personalDevelopmentCompleted } = req.body;
+  const { currentStep, axesCompleted, personalDevelopmentCompleted, questionnaireData } = req.body;
   try {
     await pool.query(
-      `INSERT INTO user_progress (user_id, current_step, axes_completed, personal_development_completed, updated_at)
-       VALUES ($1, $2, $3, $4, NOW())
+      `INSERT INTO user_progress (user_id, current_step, axes_completed, personal_development_completed, questionnaire_data, updated_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())
        ON CONFLICT (user_id) DO UPDATE
          SET current_step = EXCLUDED.current_step,
              axes_completed = EXCLUDED.axes_completed,
              personal_development_completed = EXCLUDED.personal_development_completed,
+             questionnaire_data = COALESCE(EXCLUDED.questionnaire_data, user_progress.questionnaire_data),
              updated_at = NOW()`,
-      [req.session.userId, currentStep, !!axesCompleted, !!personalDevelopmentCompleted]
+      [
+        req.session.userId,
+        currentStep,
+        !!axesCompleted,
+        !!personalDevelopmentCompleted,
+        questionnaireData ? JSON.stringify(questionnaireData) : null,
+      ]
     );
     res.json({ ok: true });
   } catch (err) {
@@ -494,12 +501,18 @@ app.post('/api/progress', async (req, res) => {
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
 
-app.get('/api/admin/users', async (req, res) => {
+function checkAdmin(req: any, res: any): boolean {
   const adminPassword = process.env.ADMIN_PASSWORD;
   const provided = req.headers['x-admin-password'];
   if (!adminPassword || provided !== adminPassword) {
-    return res.status(403).json({ error: 'גישה נדחתה' });
+    res.status(403).json({ error: 'גישה נדחתה' });
+    return false;
   }
+  return true;
+}
+
+app.get('/api/admin/users', async (req, res) => {
+  if (!checkAdmin(req, res)) return;
   try {
     const result = await pool.query(`
       SELECT
@@ -512,7 +525,30 @@ app.get('/api/admin/users', async (req, res) => {
         COALESCE(p.current_step, 'not_started') AS current_step,
         COALESCE(p.axes_completed, false) AS axes_completed,
         COALESCE(p.personal_development_completed, false) AS personal_development_completed,
-        p.updated_at AS progress_updated_at
+        p.updated_at AS progress_updated_at,
+        (
+          p.questionnaire_data IS NOT NULL
+          AND (
+            COALESCE((p.questionnaire_data->'personalDevelopment'->>'developmentLeap')::int, 0) > 0
+            OR COALESCE((p.questionnaire_data->'axes'->>'urgentImportantBalance')::int, 0) > 0
+            OR COALESCE((p.questionnaire_data->'axes'->>'effectiveRoutines')::int, 0) > 0
+            OR COALESCE((p.questionnaire_data->'axes'->>'professionalCoaching')::int, 0) > 0
+            OR COALESCE((p.questionnaire_data->'axes'->>'authorityDelegation')::int, 0) > 0
+            OR COALESCE((p.questionnaire_data->'axes'->>'internalMotivation')::int, 0) > 0
+            OR COALESCE((p.questionnaire_data->'axes'->>'lateralInfluence')::int, 0) > 0
+            OR COALESCE((p.questionnaire_data->'axes'->>'learningImprovement')::int, 0) > 0
+            OR COALESCE((p.questionnaire_data->'axes'->>'psychologicalSafety')::int, 0) > 0
+            OR COALESCE((p.questionnaire_data->'axes'->>'teamSpirit')::int, 0) > 0
+            OR COALESCE((p.questionnaire_data->'axes'->>'networkManagement')::int, 0) > 0
+            OR length(trim(COALESCE(p.questionnaire_data->'personalDevelopment'->>'sixMonthChange', ''))) > 0
+            OR length(trim(COALESCE(p.questionnaire_data->'personalDevelopment'->>'behaviorChange', ''))) > 0
+            OR length(trim(COALESCE(p.questionnaire_data->'personalDevelopment'->>'priceOfNoChange', ''))) > 0
+            OR length(trim(COALESCE(p.questionnaire_data->'personalDevelopment'->>'weeklyCommitment', ''))) > 0
+            OR length(trim(COALESCE(p.questionnaire_data->'personalDevelopment'->>'leapArea', ''))) > 0
+            OR length(trim(COALESCE(p.questionnaire_data->'personalDevelopment'->>'leapCurrentState', ''))) > 0
+            OR length(trim(COALESCE(p.questionnaire_data->'personalDevelopment'->>'leapPrice', ''))) > 0
+          )
+        ) AS has_responses
       FROM users u
       LEFT JOIN user_progress p ON p.user_id = u.id
       ORDER BY u.created_at DESC
@@ -521,6 +557,34 @@ app.get('/api/admin/users', async (req, res) => {
   } catch (err) {
     console.error('Admin users error:', err);
     res.status(500).json({ error: 'שגיאה בשליפת נתונים' });
+  }
+});
+
+app.get('/api/admin/users/:userId/responses', async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  const userId = Number(req.params.userId);
+  if (!Number.isFinite(userId)) {
+    return res.status(400).json({ error: 'מזהה משתמש לא תקין' });
+  }
+  try {
+    const result = await pool.query(
+      `SELECT
+         u.id, u.full_name, u.email, u.gender,
+         p.questionnaire_data,
+         p.updated_at,
+         p.current_step
+       FROM users u
+       LEFT JOIN user_progress p ON p.user_id = u.id
+       WHERE u.id = $1`,
+      [userId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'משתמש לא נמצא' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Admin user responses error:', err);
+    res.status(500).json({ error: 'שגיאה בשליפת תשובות' });
   }
 });
 

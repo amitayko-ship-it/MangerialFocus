@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { Users, RefreshCw, LogOut, CheckCircle2, Circle, Clock, AlertCircle } from 'lucide-react';
+import { Users, RefreshCw, LogOut, CheckCircle2, Circle, Clock, AlertCircle, Eye, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { bigStones, developmentLeaps, QuestionnaireData } from '@/types/managementCompass';
 
 interface UserRow {
   id: number;
@@ -13,6 +14,17 @@ interface UserRow {
   axes_completed: boolean;
   personal_development_completed: boolean;
   progress_updated_at: string | null;
+  has_responses: boolean;
+}
+
+interface UserResponses {
+  id: number;
+  full_name: string | null;
+  email: string;
+  gender: string | null;
+  questionnaire_data: QuestionnaireData | null;
+  updated_at: string | null;
+  current_step: string;
 }
 
 const STEP_LABELS: Record<string, string> = {
@@ -110,6 +122,188 @@ function LoginScreen({ onLogin }: { onLogin: (pw: string) => void }) {
   );
 }
 
+function ResponsesModal({
+  user,
+  onClose,
+}: {
+  user: UserResponses | null;
+  onClose: () => void;
+}) {
+  if (!user) return null;
+
+  const data = user.questionnaire_data;
+  const axes = data?.axes;
+  const pd = data?.personalDevelopment;
+  const selectedLeap = pd?.developmentLeap
+    ? developmentLeaps.find((l) => l.id === pd.developmentLeap)
+    : null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+      dir="rtl"
+      onClick={onClose}
+    >
+      <div
+        className="bg-card border border-border rounded-2xl shadow-large w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/30">
+          <div>
+            <h2 className="text-lg font-bold text-foreground">
+              תשובות של {user.full_name || user.email}
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              {user.email}
+              {user.updated_at && <> · עודכן: {fmt(user.updated_at)}</>}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted"
+            aria-label="סגור"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="overflow-y-auto p-6 space-y-6">
+          {!data ? (
+            <div className="text-center text-muted-foreground py-12">
+              משתמש זה לא מילא עדיין את השאלון
+            </div>
+          ) : (
+            <>
+              {/* Axes scores */}
+              <section>
+                <h3 className="text-base font-bold text-foreground mb-3">
+                  ציוני שאלון אבחון (1–5)
+                </h3>
+                <div className="space-y-4">
+                  {bigStones.map((stone) => (
+                    <div key={stone.id} className="border border-border rounded-xl p-4 bg-muted/20">
+                      <h4 className="font-semibold text-foreground mb-3 text-sm">{stone.title}</h4>
+                      <div className="space-y-2">
+                        {stone.axes.map((ax) => {
+                          const score = axes?.[ax.key] ?? 0;
+                          return (
+                            <div key={ax.key} className="flex items-start gap-3">
+                              <div className="flex-1">
+                                <div className="text-sm text-foreground font-medium">{ax.title}</div>
+                                {score > 0 && (
+                                  <div className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                                    {ax.levels[score - 1]}
+                                  </div>
+                                )}
+                              </div>
+                              <div
+                                className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+                                  score === 0
+                                    ? 'bg-muted text-muted-foreground'
+                                    : score <= 2
+                                    ? 'bg-red-100 text-red-700'
+                                    : score === 3
+                                    ? 'bg-yellow-100 text-yellow-700'
+                                    : 'bg-emerald-100 text-emerald-700'
+                                }`}
+                              >
+                                {score === 0 ? '–' : score}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Personal development */}
+              <section>
+                <h3 className="text-base font-bold text-foreground mb-3">
+                  תוכנית התפתחות אישית
+                </h3>
+                <div className="space-y-4">
+                  {/* Selected leap */}
+                  <div className="border border-border rounded-xl p-4 bg-muted/20">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">
+                      קפיצת מדרגה שנבחרה
+                    </div>
+                    {selectedLeap ? (
+                      <div>
+                        <div className="font-semibold text-foreground text-sm">
+                          {selectedLeap.id}. {selectedLeap.title}
+                        </div>
+                        <ul className="mt-2 text-xs text-muted-foreground space-y-1 list-disc pr-5">
+                          {selectedLeap.bullets.map((b, i) => (
+                            <li key={i}>{b}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-muted-foreground italic">לא נבחר</div>
+                    )}
+                  </div>
+
+                  {/* Open questions */}
+                  <OpenAnswer label="מה ישתנה אצלי בעוד 6 חודשים?" value={pd?.sixMonthChange} />
+                  <OpenAnswer label="איזו התנהגות צריכה להשתנות?" value={pd?.behaviorChange} />
+                  <OpenAnswer label="מה המחיר אם לא אשנה?" value={pd?.priceOfNoChange} />
+                  <OpenAnswer label="מה המחויבות השבועית שלי?" value={pd?.weeklyCommitment} />
+
+                  {/* Leap zone */}
+                  <div className="border border-border rounded-xl p-4 bg-muted/20 space-y-2">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">
+                      אזור הקפיצה
+                    </div>
+                    <FillIn label="תחום הקפיצה" value={pd?.leapArea} />
+                    <FillIn label="המצב הנוכחי" value={pd?.leapCurrentState} />
+                    <FillIn label="המחיר היום" value={pd?.leapPrice} />
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+        </div>
+
+        <div className="px-6 py-3 border-t border-border bg-muted/30 flex justify-end">
+          <Button variant="outline" size="sm" onClick={onClose}>
+            סגור
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OpenAnswer({ label, value }: { label: string; value: string | undefined }) {
+  return (
+    <div className="border border-border rounded-xl p-4 bg-muted/20">
+      <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">{label}</div>
+      {value && value.trim() ? (
+        <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{value}</p>
+      ) : (
+        <p className="text-sm text-muted-foreground italic">לא ענה</p>
+      )}
+    </div>
+  );
+}
+
+function FillIn({ label, value }: { label: string; value: string | undefined }) {
+  return (
+    <div className="text-sm">
+      <span className="text-muted-foreground">{label}: </span>
+      {value && value.trim() ? (
+        <span className="text-foreground font-medium">{value}</span>
+      ) : (
+        <span className="text-muted-foreground italic">–</span>
+      )}
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const [password, setPassword] = useState<string | null>(() =>
     sessionStorage.getItem('admin_pw')
@@ -118,6 +312,9 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
+
+  const [responsesUser, setResponsesUser] = useState<UserResponses | null>(null);
+  const [responsesLoading, setResponsesLoading] = useState<number | null>(null);
 
   const fetchUsers = useCallback(async (pw: string) => {
     setLoading(true);
@@ -143,6 +340,24 @@ export default function AdminPage() {
       setLoading(false);
     }
   }, []);
+
+  const viewResponses = async (userId: number) => {
+    if (!password) return;
+    setResponsesLoading(userId);
+    setError('');
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/responses`, {
+        headers: { 'x-admin-password': password },
+      });
+      if (!res.ok) throw new Error('שגיאה בטעינת תשובות');
+      const data: UserResponses = await res.json();
+      setResponsesUser(data);
+    } catch (e: any) {
+      setError(e.message ?? 'שגיאה');
+    } finally {
+      setResponsesLoading(null);
+    }
+  };
 
   const handleLogin = (pw: string) => {
     setPassword(pw);
@@ -238,19 +453,20 @@ export default function AdminPage() {
                   <th className="px-4 py-3 font-semibold text-foreground">שאלון</th>
                   <th className="px-4 py-3 font-semibold text-foreground">תוכנית</th>
                   <th className="px-4 py-3 font-semibold text-foreground">עדכון אחרון</th>
+                  <th className="px-4 py-3 font-semibold text-foreground">תשובות</th>
                 </tr>
               </thead>
               <tbody>
                 {loading && users.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-4 py-12 text-center text-muted-foreground">
+                    <td colSpan={10} className="px-4 py-12 text-center text-muted-foreground">
                       <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2" />
                       טוען נתונים...
                     </td>
                   </tr>
                 ) : users.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-4 py-12 text-center text-muted-foreground">
+                    <td colSpan={10} className="px-4 py-12 text-center text-muted-foreground">
                       אין משתמשים עדיין
                     </td>
                   </tr>
@@ -283,6 +499,26 @@ export default function AdminPage() {
                           : <Circle className="w-4 h-4 text-muted-foreground/40" />}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">{fmt(u.progress_updated_at)}</td>
+                      <td className="px-4 py-3">
+                        {u.has_responses ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1 h-8 text-xs"
+                            onClick={() => viewResponses(u.id)}
+                            disabled={responsesLoading === u.id}
+                          >
+                            {responsesLoading === u.id ? (
+                              <RefreshCw className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Eye className="w-3 h-3" />
+                            )}
+                            צפייה
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground/60">–</span>
+                        )}
+                      </td>
                     </tr>
                   ))
                 )}
@@ -291,6 +527,8 @@ export default function AdminPage() {
           </div>
         </div>
       </main>
+
+      <ResponsesModal user={responsesUser} onClose={() => setResponsesUser(null)} />
     </div>
   );
 }

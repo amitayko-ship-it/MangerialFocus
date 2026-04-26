@@ -61,7 +61,8 @@ const { Pool } = pg;
           ADD COLUMN IF NOT EXISTS current_step VARCHAR(50) DEFAULT 'not_started',
           ADD COLUMN IF NOT EXISTS axes_completed BOOLEAN DEFAULT FALSE,
           ADD COLUMN IF NOT EXISTS personal_development_completed BOOLEAN DEFAULT FALSE,
-          ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          ADD COLUMN IF NOT EXISTS questionnaire_data JSONB
         `);
 
         await client.query(`

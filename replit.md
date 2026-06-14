@@ -89,6 +89,13 @@ The app uses Replit's built-in PostgreSQL database. Environment variables are au
   - GPT-powered reflection on user's success vision
   - GPT-powered clarifier for Big Rocks wording check
 - Vision board creation
+- **Weekly Reminder Emails** (via Resend):
+  - In the 30 Day Plan step, users pick a weekday + time window for a weekly email
+  - Schedule + keystone habit persisted server-side in `email_reminders` table
+  - Each email has a rotating reflective question about the keystone habit + an inspiration YouTube link (content in `server/reminderContent.ts`)
+  - Idempotent per ISO week (Asia/Jerusalem); sent by standalone `server/sendReminders.ts`
+  - Run as a separate Replit **Scheduled Deployment** (run: `npx tsx server/sendReminders.ts`, hourly)
+  - Resend sender defaults to `onboarding@resend.dev` (test only); set `RESEND_SENDER_EMAIL` after verifying a domain in Resend for real delivery
 - Focus area selection and tracking
 - Weekly check-ins
 - 360° feedback requests

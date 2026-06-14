@@ -68,7 +68,21 @@ const { Pool } = pg;
         await client.query(`
           CREATE UNIQUE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id)
         `);
-        
+
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS email_reminders (
+            user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+            reminder_weekday INTEGER NOT NULL,
+            reminder_time_window VARCHAR(20) NOT NULL DEFAULT 'morning',
+            keystone_trigger TEXT,
+            keystone_action TEXT,
+            start_date DATE DEFAULT CURRENT_DATE,
+            last_sent_week VARCHAR(10),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+        `);
+
         console.log('Database tables verified/created');
       } finally {
         client.release();

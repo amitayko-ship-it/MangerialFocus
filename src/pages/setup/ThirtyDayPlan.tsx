@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, ChevronLeft, ChevronRight, Clock, Download } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Clock, Download, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Header from '@/components/management-compass/layout/Header';
@@ -105,6 +105,38 @@ export default function ThirtyDayPlan() {
   const [schedules, setSchedules] = useState<PracticeSchedule[]>([]);
   const [showCalendar, setShowCalendar] = useState(false);
   const [scheduledEvents, setScheduledEvents] = useState<ScheduledEvent[]>([]);
+  const [reminderWeekday, setReminderWeekday] = useState<number>(0);
+  const [reminderTimeWindow, setReminderTimeWindow] = useState<TimeWindow>('morning');
+
+  useEffect(() => {
+    fetch('/api/reminders', { credentials: 'include' })
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        if (data) {
+          if (typeof data.weekday === 'number') setReminderWeekday(data.weekday);
+          if (data.timeWindow) setReminderTimeWindow(data.timeWindow);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const saveReminder = async () => {
+    try {
+      await fetch('/api/reminders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          weekday: reminderWeekday,
+          timeWindow: reminderTimeWindow,
+          keystoneTrigger: keystoneData?.keystone?.trigger || null,
+          keystoneAction: keystoneData?.keystone?.action || null,
+        }),
+      });
+    } catch {
+      // best-effort; localStorage plan still saved
+    }
+  };
 
   useEffect(() => {
     const saved = loadWithExpiry<{ schedules: PracticeSchedule[]; events: ScheduledEvent[] }>('execution-plan');
@@ -187,6 +219,7 @@ export default function ThirtyDayPlan() {
       events: scheduledEvents,
       totalWeeklyMinutes,
     });
+    saveReminder();
     toast.success('התוכנית נשמרה!');
     navigate('/dashboard');
   };
@@ -377,6 +410,62 @@ export default function ThirtyDayPlan() {
               </Card>
             </motion.div>
           )}
+
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <Card>
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-5 h-5 text-primary" />
+                  <h2 className="font-semibold text-lg">תזכורות במייל</h2>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  נשלח לך מייל שבועי עם שאלה לחיזוק הרגל המפתח ותוכן להשראה. בחר מתי לקבל אותו.
+                </p>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">יום בשבוע</label>
+                  <div className="flex flex-wrap gap-1">
+                    {DAY_NAMES.map((day, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setReminderWeekday(i)}
+                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          reminderWeekday === i
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted hover:bg-muted/80'
+                        }`}
+                      >
+                        {day}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">חלון זמן</label>
+                  <div className="flex gap-2">
+                    {TIME_WINDOW_OPTIONS.map(tw => (
+                      <button
+                        key={tw.value}
+                        onClick={() => setReminderTimeWindow(tw.value)}
+                        className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          reminderTimeWindow === tw.value
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted hover:bg-muted/80'
+                        }`}
+                      >
+                        {tw.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-muted-foreground">
+                  התזכורת תישלח בכל {DAY_NAMES[reminderWeekday]} ב{TIME_WINDOW_OPTIONS.find(t => t.value === reminderTimeWindow)?.label}.
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           <div className="flex gap-3 pt-4">
             <Button variant="outline" onClick={handleBack} className="flex-1">

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { initDatabase, pool } from './db.js';
 import { setupAuth } from './auth.js';
 import { setupMotivation } from './motivation.js';
+import { setupReminders } from './reminders.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +18,7 @@ app.use(express.json());
 initDatabase().catch(console.error);
 setupAuth(app);
 setupMotivation(app);
+setupReminders(app);
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,

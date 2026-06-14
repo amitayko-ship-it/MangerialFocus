@@ -1,0 +1,2 @@
+- [Resend email on Replit](resend-email-replit.md) — sender domain must be verified; `onboarding@resend.dev` only delivers to account owner in test mode.
+- [Scheduled jobs on Replit](scheduled-jobs-replit.md) — recurring jobs need a SEPARATE Scheduled Deployment; never overwrite the main app's autoscale config with deployConfig.

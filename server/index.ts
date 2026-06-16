@@ -592,7 +592,7 @@ app.get('/api/admin/users/:userId/responses', async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production' || !!process.env.REPLIT_DEPLOYMENT;
 
 if (isProduction) {
   const distPath = path.resolve(__dirname, '../dist');
